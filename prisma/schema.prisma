@@ -1,0 +1,483 @@
+// Prisma Schema for Credit-Gated Live Streaming Platform
+// Database: PostgreSQL
+// ORM: Prisma
+// Streaming: LiveKit
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  VIEWER
+  CREATOR
+  MODERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum StreamStatus {
+  SCHEDULED
+  LIVE
+  PAUSED
+  ENDED
+}
+
+enum LedgerEntryType {
+  DEPOSIT
+  DEBIT
+  REFUND
+  ADJUSTMENT
+}
+
+enum PaymentProvider {
+  STRIPE
+  COINBASE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum ModerationActionType {
+  MUTE
+  BAN
+  DELETE_MESSAGE
+  DELETE_STREAM
+  WARN
+}
+
+enum TargetType {
+  USER
+  STREAM
+  MESSAGE
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  passwordHash  String?    @map("password_hash")
+  role          UserRole   @default(VIEWER)
+  status        UserStatus @default(PENDING_VERIFICATION)
+  emailVerified Boolean    @default(false) @map("email_verified")
+
+  // OAuth fields
+  googleId String? @unique @map("google_id")
+  appleId  String? @unique @map("apple_id")
+
+  // Email Verification
+  verificationToken        String?   @unique @map("verification_token")
+  verificationTokenExpires DateTime? @map("verification_token_expires")
+
+  // Password Reset
+  passwordResetToken   String?   @unique @map("password_reset_token")
+  passwordResetExpires DateTime? @map("password_reset_expires")
+
+  // Ban/Suspension fields
+  banExpiresAt     DateTime? @map("ban_expires_at")
+  suspendExpiresAt DateTime? @map("suspend_expires_at")
+  banReason        String?   @map("ban_reason")
+  suspendReason    String?   @map("suspend_reason")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  lastLoginAt DateTime? @map("last_login_at")
+
+  // Relations
+  profile                 Profile?
+  wallet                  Wallet?
+  ledgerEntries           LedgerEntry[]
+  payments                Payment[]
+  streams                 Stream[]
+  follows                 Follow[]           @relation("UserFollows")
+  followers               Follow[]           @relation("CreatorFollowers")
+  chatMessages            ChatMessage[]
+  sentPrivateMessages     PrivateMessage[]   @relation("SentPrivateMessages")
+  receivedPrivateMessages PrivateMessage[]   @relation("ReceivedPrivateMessages")
+  moderationActions       ModerationAction[] @relation("ModeratorActions")
+  // moderationTargets       ModerationAction[] @relation("TargetUser")
+  streamSessions          StreamSession[]
+  meterEvents             MeterEvent[]
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+model Profile {
+  id          String  @id @default(cuid())
+  userId      String  @unique @map("user_id")
+  displayName String? @map("display_name")
+  avatarUrl   String? @map("avatar_url")
+  bio         String? @db.Text
+  isCreator   Boolean @default(false) @map("is_creator")
+
+  // Creator-specific fields
+  category String?
+  language String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("profiles")
+}
+
+// ============================================
+// STREAMING
+// ============================================
+
+model Stream {
+  id           String   @id @default(cuid())
+  creatorId    String   @map("creator_id")
+  title        String
+  description  String?  @db.Text
+  category     String?
+  tags         String[] @default([])
+  thumbnailUrl String?  @map("thumbnail_url")
+
+  // LiveKit specific
+  livekitRoomName String? @unique @map("livekit_room_name")
+  ingestUrl       String? @map("ingest_url")
+  playbackUrl     String? @map("playback_url")
+
+  status StreamStatus @default(SCHEDULED)
+
+  // Recording & VOD (Phase 2)
+  recordingEnabled Boolean @default(false) @map("recording_enabled")
+  recordingUrl     String? @map("recording_url")
+
+  scheduledAt DateTime? @map("scheduled_at")
+  startedAt   DateTime? @map("started_at")
+  endedAt     DateTime? @map("ended_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  creator         User             @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  sessions        StreamSession[]
+  chatMessages    ChatMessage[]
+  privateMessages PrivateMessage[]
+  // moderationActions ModerationAction[] @relation("TargetStream")
+
+  @@index([creatorId])
+  @@index([status, startedAt])
+  @@index([category])
+  @@map("streams")
+}
+
+model StreamSession {
+  id       String @id @default(cuid())
+  streamId String @map("stream_id")
+  userId   String @map("user_id")
+  status   String @default("active")
+
+  // Playback tracking
+  sessionToken  String?   @unique @map("session_token")
+  lastHeartbeat DateTime? @map("last_heartbeat")
+  totalWatchMs  Int       @default(0) @map("total_watch_ms")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  endedAt   DateTime? @map("ended_at")
+
+  // Relations
+  stream      Stream       @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meterEvents MeterEvent[]
+
+  @@index([streamId])
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("stream_sessions")
+}
+
+model MeterEvent {
+  id             String  @id @default(cuid())
+  sessionId      String  @map("session_id")
+  userId         String  @map("user_id")
+  intervalIndex  Int     @map("interval_index")
+  playbackMs     Int     @map("playback_ms")
+  creditsDebited Decimal @map("credits_debited") @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  session StreamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, intervalIndex])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("meter_events")
+}
+
+// ============================================
+// WALLET & CREDITS
+// ============================================
+
+model Wallet {
+  id       String  @id @default(cuid())
+  userId   String  @unique @map("user_id")
+  balance  Decimal @default(0) @db.Decimal(10, 2)
+  currency String  @default("USD")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("wallets")
+}
+
+model LedgerEntry {
+  id           String          @id @default(cuid())
+  userId       String          @map("user_id")
+  type         LedgerEntryType
+  amount       Decimal         @db.Decimal(10, 2)
+  currency     String          @default("USD")
+  balanceAfter Decimal         @map("balance_after") @db.Decimal(10, 2)
+
+  // Reference to source transaction
+  referenceType String? @map("reference_type")
+  referenceId   String? @map("reference_id")
+
+  description String? @db.Text
+  metadata    Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
+  @@map("ledger_entries")
+}
+
+// ============================================
+// PAYMENTS
+// ============================================
+
+model Payment {
+  id          String          @id @default(cuid())
+  userId      String          @map("user_id")
+  provider    PaymentProvider
+  providerRef String          @unique @map("provider_ref")
+  status      PaymentStatus   @default(PENDING)
+
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("USD")
+  credits  Decimal @db.Decimal(10, 2)
+
+  priceId String? @map("price_id")
+
+  // Webhook data
+  webhookData Json? @map("webhook_data")
+
+  failureReason String? @map("failure_reason") @db.Text
+
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  price Price? @relation(fields: [priceId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([provider])
+  @@map("payments")
+}
+
+model Price {
+  id          String  @id @default(cuid())
+  productCode String  @map("product_code")
+  name        String
+  credits     Decimal @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2)
+  currency    String  @default("USD")
+  active      Boolean @default(true)
+
+  // Provider-specific IDs
+  stripePriceId   String? @map("stripe_price_id")
+  coinbasePriceId String? @map("coinbase_price_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  payments Payment[]
+
+  @@index([active])
+  @@map("prices")
+}
+
+// ============================================
+// SOCIAL & FOLLOWS
+// ============================================
+
+model Follow {
+  id        String @id @default(cuid())
+  userId    String @map("user_id")
+  creatorId String @map("creator_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user    User @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
+  creator User @relation("CreatorFollowers", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorId])
+  @@index([userId])
+  @@index([creatorId])
+  @@map("follows")
+}
+
+// ============================================
+// CHAT
+// ============================================
+
+model ChatMessage {
+  id       String @id @default(cuid())
+  streamId String @map("stream_id")
+  userId   String @map("user_id")
+  message  String @db.Text
+
+  isDeleted Boolean @default(false) @map("is_deleted")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  stream Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // moderationActions ModerationAction[] @relation("TargetMessage")
+
+  @@index([streamId, createdAt])
+  @@index([userId])
+  @@map("chat_messages")
+}
+
+model PrivateMessage {
+  id         String @id @default(cuid())
+  senderId   String @map("sender_id")
+  receiverId String @map("receiver_id")
+  streamId   String @map("stream_id")
+  message    String @db.Text
+
+  isRead    Boolean @default(false) @map("is_read")
+  isDeleted Boolean @default(false) @map("is_deleted")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  // Relations
+  sender   User   @relation("SentPrivateMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedPrivateMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, isRead])
+  @@index([streamId, createdAt])
+  @@map("private_messages")
+}
+
+// ============================================
+// MODERATION
+// ============================================
+
+model ModerationAction {
+  id         String               @id @default(cuid())
+  targetType TargetType           @map("target_type")
+  targetId   String               @map("target_id")
+  action     ModerationActionType
+  reason     String?              @db.Text
+
+  actorId String @map("actor_id")
+
+  // For mute/ban duration
+  expiresAt DateTime? @map("expires_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  actor User @relation("ModeratorActions", fields: [actorId], references: [id], onDelete: Cascade)
+  // Note: These relations are intentionally commented out to avoid foreign key constraint issues
+  // when targetId references different entity types. The targetId field is used polymorphically.
+  // targetUser    User?        @relation("TargetUser", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_user_fkey")
+  // targetStream  Stream?      @relation("TargetStream", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_stream_fkey")
+  // targetMessage ChatMessage? @relation("TargetMessage", fields: [targetId], references: [id], onDelete: Cascade, map: "moderation_actions_target_message_fkey")
+
+  @@index([targetType, targetId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("moderation_actions")
+}
+
+// ============================================
+// ANALYTICS & METRICS
+// ============================================
+
+model StreamAnalytics {
+  id       String @id @default(cuid())
+  streamId String @map("stream_id")
+
+  peakConcurrent Int    @default(0) @map("peak_concurrent")
+  totalViews     Int    @default(0) @map("total_views")
+  totalWatchMs   BigInt @default(0) @map("total_watch_ms")
+  avgWatchMs     Int    @default(0) @map("avg_watch_ms")
+
+  chatMessages  Int @default(0) @map("chat_messages")
+  uniqueViewers Int @default(0) @map("unique_viewers")
+
+  creditsEarned Decimal @default(0) @map("credits_earned") @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([streamId])
+  @@map("stream_analytics")
+}
+
+// ============================================
+// CONFIGURATION
+// ============================================
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_config")
+}
