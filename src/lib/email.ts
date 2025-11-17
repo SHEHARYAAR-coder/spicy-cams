@@ -7,9 +7,15 @@ const EMAIL_CONFIG = {
   secure: process.env.EMAIL_SECURE === "true",
   user: process.env.EMAIL_USER,
   pass: process.env.EMAIL_PASS,
-  fromName: process.env.EMAIL_FROM_NAME || "CryptoForex",
+  fromName: process.env.EMAIL_FROM_NAME || "SpicyCams",
   fromEmail: process.env.EMAIL_FROM_EMAIL,
 };
+
+const APP_BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  process.env.APP_BASE_URL;
+  // "http://localhost:3000";
 
 // Create a transporter object
 let transporter: nodemailer.Transporter | null = null;
@@ -108,8 +114,7 @@ export async function sendVerificationEmail(
   token: string,
   baseUrl?: string
 ) {
-  const appBaseUrl =
-    baseUrl || process.env.APP_BASE_URL || "http://localhost:3000";
+  const appBaseUrl = baseUrl || APP_BASE_URL;
   const verificationUrl = `${appBaseUrl}/verify?token=${token}`;
   const appName = process.env.APP_NAME || "CryptoForex";
 
@@ -139,8 +144,7 @@ export async function sendPasswordResetEmail(
   token: string,
   baseUrl?: string
 ) {
-  const appBaseUrl =
-    baseUrl || process.env.APP_BASE_URL || "http://localhost:3000";
+  const appBaseUrl = baseUrl || APP_BASE_URL;
   const resetUrl = `${appBaseUrl}/reset-password/${token}`;
 
   return sendEmail({

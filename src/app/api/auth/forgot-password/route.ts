@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { sendPasswordResetEmail } from "@/lib/email";
 
+const appBaseUrl =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  process.env.APP_BASE_URL;
+  // "http://localhost:3000";
+
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
@@ -31,13 +37,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In a real application, you would send an email with the reset link.
-    // For this example, we'll just log the token to the console.
-    const resetURL = 'http://localhost:3000/reset-password/' + resetToken
+    const resetURL = `${appBaseUrl}/reset-password/${resetToken}`;
     console.log(`Password reset token for ${email}: ${resetURL}`);
 
     try {
-      const response = await sendPasswordResetEmail(email, resetToken, 'http://localhost:3000')
+      const response = await sendPasswordResetEmail(
+        email,
+        resetToken,
+        appBaseUrl
+      );
       if (response.success) {
         return NextResponse.json({
           message: "Password reset link has been sent to your email.",
