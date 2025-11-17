@@ -74,6 +74,7 @@ export async function PUT(req: NextRequest) {
   }
   
   try {
+    const userId = session.user.id;
     const body = await req.json();
     const { displayName, bio, category, language, isCreator, targetRole } = body;
 
@@ -93,7 +94,7 @@ export async function PUT(req: NextRequest) {
     if (targetRole === 'CREATOR') profileUpdateData.isCreator = true;
 
     const profileCreateData = {
-      userId: session.user.id,
+      userId,
       displayName:
         typeof displayName === 'string' && displayName.length > 0
           ? displayName
@@ -111,20 +112,20 @@ export async function PUT(req: NextRequest) {
 
     await prisma.$transaction(async (tx) => {
       await tx.profile.upsert({
-        where: { userId: session.user.id },
+        where: { userId },
         update: profileUpdateData,
         create: profileCreateData,
       });
 
       if (targetRole === 'CREATOR') {
         const currentRole = await tx.user.findUnique({
-          where: { id: session.user.id },
+          where: { id: userId },
           select: { role: true },
         });
 
         if (currentRole?.role !== 'CREATOR') {
           await tx.user.update({
-            where: { id: session.user.id },
+            where: { id: userId },
             data: { role: 'CREATOR' },
           });
         }
@@ -133,7 +134,7 @@ export async function PUT(req: NextRequest) {
     
     // Return updated user data with profile
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       include: {
         profile: true,
         wallet: true,

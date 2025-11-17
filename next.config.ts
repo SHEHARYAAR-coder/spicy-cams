@@ -18,9 +18,6 @@ const nextConfig: NextConfig = {
 
   // Enable strict mode for better debugging
   reactStrictMode: true,
-
-  // Optimize for production
-  swcMinify: true,
 };
 
 export default nextConfig;

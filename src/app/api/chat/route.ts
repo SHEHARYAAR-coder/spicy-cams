@@ -3,63 +3,19 @@ import jwt from "jsonwebtoken";
 import { validateMessage, RateLimiter, canUserChat } from "@/lib/chat-server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import {
+  broadcastMessage,
+  registerConnection,
+  unregisterConnection,
+} from "@/lib/chat-realtime";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-secret-key";
-
-// Message batching for high-throughput scenarios
-const messageBatchQueue = new Map<string, Array<unknown>>();
-const batchTimers = new Map<string, NodeJS.Timeout>();
-const BATCH_DELAY = 50; // milliseconds
-const BATCH_SIZE = 10; // max messages per batch
-
-function broadcastMessage(streamId: string, event: unknown) {
-  const streamConnections = connections.get(streamId);
-  if (!streamConnections) return;
-
-  const eventStr = `data: ${JSON.stringify(event)}\n\n`;
-
-  streamConnections.forEach((conn) => {
-    try {
-      conn.controller.enqueue(eventStr);
-      // Update last activity on successful send
-      conn.lastActivity = Date.now();
-    } catch {
-      // Client disconnected, will be cleaned up
-    }
-  });
-}
-
-// Store active connections by streamId
-const connections = new Map<string, Set<{ userId: string; controller: ReadableStreamDefaultController; lastActivity: number }>>();
 
 // Global rate limiter
 const rateLimiter = new RateLimiter(10, 30);
 
 // Cleanup rate limiter every 5 minutes
 setInterval(() => rateLimiter.cleanup(), 5 * 60 * 1000);
-
-// Cleanup stale connections every minute
-setInterval(() => {
-  const now = Date.now();
-  const STALE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-  
-  connections.forEach((streamConnections, streamId) => {
-    streamConnections.forEach((connection) => {
-      if (now - connection.lastActivity > STALE_TIMEOUT) {
-        try {
-          connection.controller.close();
-        } catch (err) {
-          // Already closed
-        }
-        streamConnections.delete(connection);
-      }
-    });
-    
-    if (streamConnections.size === 0) {
-      connections.delete(streamId);
-    }
-  });
-}, 60 * 1000);
 
 /**
  * SSE endpoint for real-time chat
@@ -89,11 +45,8 @@ export async function GET(request: NextRequest) {
     const stream = new ReadableStream({
       start(controller) {
         // Register connection
-        if (!connections.has(streamId)) {
-          connections.set(streamId, new Set());
-        }
         const connection = { userId, controller, lastActivity: Date.now() };
-        connections.get(streamId)!.add(connection);
+        registerConnection(streamId, connection);
 
         // Send initial connection event
         const data = JSON.stringify({
@@ -117,10 +70,7 @@ export async function GET(request: NextRequest) {
         // Cleanup on close
         request.signal.addEventListener("abort", () => {
           clearInterval(heartbeat);
-          connections.get(streamId)?.delete(connection);
-          if (connections.get(streamId)?.size === 0) {
-            connections.delete(streamId);
-          }
+          unregisterConnection(streamId, connection);
         });
       },
     });
@@ -327,25 +277,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-/**
- * Broadcast moderation event to stream (called by moderation API)
- */
-export function broadcastModerationEvent(
-  streamId: string,
-  event: {
-    type: "delete" | "mute" | "ban";
-    targetUserId?: string;
-    messageId?: string;
-    duration?: number;
-  }
-) {
-  const moderationEvent = {
-    type: "moderation",
-    data: event,
-    timestamp: new Date().toISOString(),
-  };
-
-  broadcastMessage(streamId, moderationEvent);
 }
