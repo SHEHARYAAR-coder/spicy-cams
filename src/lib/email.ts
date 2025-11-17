@@ -14,8 +14,8 @@ const EMAIL_CONFIG = {
 const APP_BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   process.env.NEXTAUTH_URL ||
-  process.env.APP_BASE_URL;
-  // "http://localhost:3000";
+  process.env.APP_BASE_URL ||
+  "http://localhost:3000";
 
 // Create a transporter object
 let transporter: nodemailer.Transporter | null = null;
