@@ -137,6 +137,21 @@ model Profile {
   // Creator-specific fields
   category String?
   language String?
+  
+  // Extended Creator Profile Fields
+  hairColor         String?   @map("hair_color")        // Blonde, Brunette, Red, Black, etc.
+  physique          String?                             // Athletic, Slim, Average, Curvy, etc.
+  breastSize        String?   @map("breast_size")       // A, B, C, D, Double D, etc.
+  pubicHair         String?   @map("pubic_hair")        // Shaved, Trimmed, Natural, etc.
+  displayedAge      Int?      @map("displayed_age")     // Must be 18+
+  spokenLanguages   String[]  @default([]) @map("spoken_languages") // [English, German, Spanish, etc.]
+  relationship      String?                             // No, Single, Taken, Married, etc.
+  ethnicity         String?                             // White, Black, Asian, Latina, etc.
+  piercings         String?                             // No, Yes, Multiple, etc.
+  tattoos           String?                             // No, Small, Medium, Large, etc.
+  displayedCity     String?   @map("displayed_city")    // City name
+  myShows           String[]  @default([]) @map("my_shows") // Category selections
+  profileDescription String? @db.Text @map("profile_description") // 350 character limit
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

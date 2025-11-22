@@ -76,10 +76,41 @@ export async function PUT(req: NextRequest) {
   try {
     const userId = session.user.id;
     const body = await req.json();
-    const { displayName, bio, category, language, isCreator, targetRole } = body;
+    const { 
+      displayName, 
+      bio, 
+      category, 
+      language, 
+      isCreator, 
+      targetRole,
+      // New creator profile fields
+      hairColor,
+      physique,
+      breastSize,
+      pubicHair,
+      displayedAge,
+      spokenLanguages,
+      relationship,
+      ethnicity,
+      piercings,
+      tattoos,
+      displayedCity,
+      myShows,
+      profileDescription
+    } = body;
 
     if (targetRole && targetRole !== 'CREATOR') {
       return NextResponse.json({ error: 'Unsupported role change' }, { status: 400 });
+    }
+
+    // Validate displayedAge if provided
+    if (typeof displayedAge === 'number' && displayedAge < 18) {
+      return NextResponse.json({ error: 'Displayed age must be 18 or older' }, { status: 400 });
+    }
+
+    // Validate profileDescription length if provided
+    if (typeof profileDescription === 'string' && profileDescription.length > 350) {
+      return NextResponse.json({ error: 'Profile description must be 350 characters or less' }, { status: 400 });
     }
 
     const profileUpdateData: Record<string, unknown> = {
@@ -92,6 +123,21 @@ export async function PUT(req: NextRequest) {
     if (typeof language !== 'undefined') profileUpdateData.language = language;
     if (typeof isCreator === 'boolean') profileUpdateData.isCreator = isCreator;
     if (targetRole === 'CREATOR') profileUpdateData.isCreator = true;
+    
+    // Add new creator profile fields
+    if (typeof hairColor !== 'undefined') profileUpdateData.hairColor = hairColor;
+    if (typeof physique !== 'undefined') profileUpdateData.physique = physique;
+    if (typeof breastSize !== 'undefined') profileUpdateData.breastSize = breastSize;
+    if (typeof pubicHair !== 'undefined') profileUpdateData.pubicHair = pubicHair;
+    if (typeof displayedAge !== 'undefined') profileUpdateData.displayedAge = displayedAge;
+    if (Array.isArray(spokenLanguages)) profileUpdateData.spokenLanguages = spokenLanguages;
+    if (typeof relationship !== 'undefined') profileUpdateData.relationship = relationship;
+    if (typeof ethnicity !== 'undefined') profileUpdateData.ethnicity = ethnicity;
+    if (typeof piercings !== 'undefined') profileUpdateData.piercings = piercings;
+    if (typeof tattoos !== 'undefined') profileUpdateData.tattoos = tattoos;
+    if (typeof displayedCity !== 'undefined') profileUpdateData.displayedCity = displayedCity;
+    if (Array.isArray(myShows)) profileUpdateData.myShows = myShows;
+    if (typeof profileDescription !== 'undefined') profileUpdateData.profileDescription = profileDescription;
 
     const profileCreateData = {
       userId,
@@ -108,29 +154,39 @@ export async function PUT(req: NextRequest) {
           : typeof isCreator === 'boolean'
           ? isCreator
           : false,
+      // New creator profile fields
+      hairColor: typeof hairColor === 'string' && hairColor.length > 0 ? hairColor : null,
+      physique: typeof physique === 'string' && physique.length > 0 ? physique : null,
+      breastSize: typeof breastSize === 'string' && breastSize.length > 0 ? breastSize : null,
+      pubicHair: typeof pubicHair === 'string' && pubicHair.length > 0 ? pubicHair : null,
+      displayedAge: typeof displayedAge === 'number' ? displayedAge : null,
+      spokenLanguages: Array.isArray(spokenLanguages) ? spokenLanguages : [],
+      relationship: typeof relationship === 'string' && relationship.length > 0 ? relationship : null,
+      ethnicity: typeof ethnicity === 'string' && ethnicity.length > 0 ? ethnicity : null,
+      piercings: typeof piercings === 'string' && piercings.length > 0 ? piercings : null,
+      tattoos: typeof tattoos === 'string' && tattoos.length > 0 ? tattoos : null,
+      displayedCity: typeof displayedCity === 'string' && displayedCity.length > 0 ? displayedCity : null,
+      myShows: Array.isArray(myShows) ? myShows : [],
+      profileDescription: typeof profileDescription === 'string' && profileDescription.length > 0 ? profileDescription : null,
     };
 
-    await prisma.$transaction(async (tx) => {
-      await tx.profile.upsert({
-        where: { userId },
-        update: profileUpdateData,
-        create: profileCreateData,
-      });
-
-      if (targetRole === 'CREATOR') {
-        const currentRole = await tx.user.findUnique({
-          where: { id: userId },
-          select: { role: true },
-        });
-
-        if (currentRole?.role !== 'CREATOR') {
-          await tx.user.update({
-            where: { id: userId },
-            data: { role: 'CREATOR' },
-          });
-        }
-      }
+    // Update profile
+    await prisma.profile.upsert({
+      where: { userId },
+      update: profileUpdateData,
+      create: profileCreateData,
     });
+
+    // Update role if needed
+    if (targetRole === 'CREATOR') {
+      await prisma.user.updateMany({
+        where: { 
+          id: userId,
+          role: { not: 'CREATOR' }
+        },
+        data: { role: 'CREATOR' },
+      });
+    }
     
     // Return updated user data with profile
     const user = await prisma.user.findUnique({

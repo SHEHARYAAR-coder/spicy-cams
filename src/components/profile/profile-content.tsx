@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import CreatorProfileEditDialog from "./creator-profile-edit-dialog";
 
 export default function ProfileContent() {
   const { data: session } = useSession();
@@ -297,6 +298,7 @@ export default function ProfileContent() {
   const [editBio, setEditBio] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editLoading, setEditLoading] = useState(false);
+  const [creatorEditDialogOpen, setCreatorEditDialogOpen] = useState(false);
 
   const handleEditOpen = () => {
     setEditDisplayName(userData?.profile?.displayName || "");
@@ -324,6 +326,24 @@ export default function ProfileContent() {
       alert("Failed to update profile");
     }
     setEditLoading(false);
+  };
+
+  const handleCreatorProfileSave = async (creatorData: any) => {
+    const res = await fetch("/api/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        displayName: userData?.profile?.displayName,
+        bio: userData?.profile?.bio,
+        category: userData?.profile?.category,
+        language: userData?.profile?.language,
+        isCreator: userData?.profile?.isCreator,
+        ...creatorData,
+      }),
+    });
+    if (!res.ok) throw new Error("Failed to update creator profile");
+    const updated = await res.json();
+    setUserData(updated);
   };
 
   const personalInfo = useMemo(() => {
@@ -501,7 +521,9 @@ export default function ProfileContent() {
           <h3 className="text-xl font-semibold text-white">
             Creator Information
           </h3>
-          <button className="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-lg border border-gray-600 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors">
+          <button 
+            onClick={() => setCreatorEditDialogOpen(true)}
+            className="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-lg border border-gray-600 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors">
             <Edit2 size={16} />
             Edit
           </button>
@@ -527,7 +549,116 @@ export default function ProfileContent() {
               {userData._count?.streams || 0}
             </p>
           </div>
+          
+          {/* New Creator Fields */}
+          {userData.profile.hairColor && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Hair Color</label>
+              <p className="text-gray-200 font-medium">{userData.profile.hairColor}</p>
+            </div>
+          )}
+          
+          {userData.profile.physique && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Physique</label>
+              <p className="text-gray-200 font-medium">{userData.profile.physique}</p>
+            </div>
+          )}
+          
+          {userData.profile.breastSize && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Breast Size</label>
+              <p className="text-gray-200 font-medium">{userData.profile.breastSize}</p>
+            </div>
+          )}
+          
+          {userData.profile.pubicHair && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Pubic Hair</label>
+              <p className="text-gray-200 font-medium">{userData.profile.pubicHair}</p>
+            </div>
+          )}
+          
+          {userData.profile.displayedAge && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Age</label>
+              <p className="text-gray-200 font-medium">{userData.profile.displayedAge}</p>
+            </div>
+          )}
+          
+          {userData.profile.relationship && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Relationship</label>
+              <p className="text-gray-200 font-medium">{userData.profile.relationship}</p>
+            </div>
+          )}
+          
+          {userData.profile.ethnicity && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Ethnicity</label>
+              <p className="text-gray-200 font-medium">{userData.profile.ethnicity}</p>
+            </div>
+          )}
+          
+          {userData.profile.piercings && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Piercings</label>
+              <p className="text-gray-200 font-medium">{userData.profile.piercings}</p>
+            </div>
+          )}
+          
+          {userData.profile.tattoos && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">Tattoos</label>
+              <p className="text-gray-200 font-medium">{userData.profile.tattoos}</p>
+            </div>
+          )}
+          
+          {userData.profile.displayedCity && (
+            <div>
+              <label className="text-sm text-gray-400 mb-1 block">City</label>
+              <p className="text-gray-200 font-medium">{userData.profile.displayedCity}</p>
+            </div>
+          )}
         </div>
+        
+        {/* Spoken Languages */}
+        {userData.profile.spokenLanguages && userData.profile.spokenLanguages.length > 0 && (
+          <div className="mt-6">
+            <label className="text-sm text-gray-400 mb-2 block">Spoken Languages</label>
+            <div className="flex flex-wrap gap-2">
+              {userData.profile.spokenLanguages.map((lang: string) => (
+                <span key={lang} className="bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full text-sm">
+                  {lang}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* My Shows */}
+        {userData.profile.myShows && userData.profile.myShows.length > 0 && (
+          <div className="mt-6">
+            <label className="text-sm text-gray-400 mb-2 block">My Shows</label>
+            <div className="flex flex-wrap gap-2">
+              {userData.profile.myShows.map((show: string) => (
+                <span key={show} className="bg-purple-600/20 text-purple-300 px-3 py-1 rounded-full text-sm">
+                  {show}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Profile Description */}
+        {userData.profile.profileDescription && (
+          <div className="mt-6">
+            <label className="text-sm text-gray-400 mb-2 block">About Me</label>
+            <p className="text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-lg">
+              {userData.profile.profileDescription}
+            </p>
+          </div>
+        )}
       </div>
     );
   }, [userData]);
@@ -624,6 +755,16 @@ export default function ProfileContent() {
           {creatorInfo}
           {walletActivity}
           {accountSettings}
+          
+          {/* Creator Profile Edit Dialog */}
+          {userData?.profile?.isCreator && (
+            <CreatorProfileEditDialog
+              open={creatorEditDialogOpen}
+              onOpenChange={setCreatorEditDialogOpen}
+              profileData={userData.profile}
+              onSave={handleCreatorProfileSave}
+            />
+          )}
         </>
       ) : (
         <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 text-center">
