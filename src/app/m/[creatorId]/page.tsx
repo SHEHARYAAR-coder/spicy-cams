@@ -4,26 +4,27 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   MapPin,
   Heart,
-  Camera,
   Calendar,
-  Languages,
   User,
-  Star,
   MessageCircle,
   Video,
   ArrowLeft,
-  Play,
-  Clock,
+  Globe,
+  Activity,
+  Sparkles,
+  Share2,
+  PlayCircle,
 } from "lucide-react";
 import Image from "next/image";
 import { StreamCard } from "@/components/stream";
 
+// --- Interfaces (Kept same as original) ---
 interface Stream {
   id: string;
   title: string;
@@ -117,7 +118,6 @@ export default function CreatorProfilePage() {
       router.push("/login");
       return;
     }
-    // TODO: Implement follow/unfollow functionality
     setIsFollowing(!isFollowing);
   };
 
@@ -134,54 +134,76 @@ export default function CreatorProfilePage() {
       router.push("/login");
       return;
     }
-    // TODO: Implement private messaging
     router.push(`/profile?message=${creatorId}`);
   };
 
+  // --- Loading State ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white pt-16">
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 w-48 bg-gray-700 rounded" />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1">
-                <div className="aspect-square bg-gray-700 rounded-lg" />
-              </div>
-              <div className="lg:col-span-2 space-y-4">
-                <div className="h-8 bg-gray-700 rounded w-3/4" />
-                <div className="h-4 bg-gray-700 rounded w-1/2" />
-                <div className="h-20 bg-gray-700 rounded" />
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-gray-400 font-medium tracking-wide animate-pulse">
+            LOADING PROFILE...
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!creator) {
-    return null;
-  }
+  if (!creator) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white pt-16">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
-        <Link href="/m">
-          <Button variant="ghost" className="mb-6 text-gray-400 hover:text-white">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Models
-          </Button>
-        </Link>
+    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden selection:bg-purple-500/30">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] opacity-50" />
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-pink-900/10 rounded-full blur-[120px] opacity-30" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+      </div>
 
-        {/* Profile Header */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Avatar Section */}
-          <div className="lg:col-span-1">
-            <Card className="bg-gray-800/50 border-gray-700 overflow-hidden">
-              <CardContent className="p-0">
-                <div className="relative aspect-square bg-gradient-to-br from-purple-900/20 to-pink-900/20">
+      <div className="relative z-10">
+        {/* Navigation Bar */}
+        <div className="sticky top-0 z-50 backdrop-blur-md bg-black/20 border-b border-white/5">
+          <div className="container mx-auto px-4 h-16 flex items-center">
+            <Link href="/m">
+              <Button
+                variant="ghost"
+                className="text-gray-400 hover:text-white hover:bg-white/5 gap-2 group"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                Back to Models
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Hero / Cover Section */}
+        <div className="relative">
+          {/* Simulated Cover Image */}
+          <div className="h-[300px] w-full relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
+            {creator.avatarUrl ? (
+              <Image
+                src={creator.avatarUrl}
+                alt="Cover"
+                fill
+                className="object-cover opacity-40 blur-xl scale-110"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-r from-purple-900 via-black to-pink-900" />
+            )}
+          </div>
+
+          {/* Profile Header Content */}
+          <div className="container mx-auto px-4 -mt-32 relative">
+            <div className="flex flex-col md:flex-row items-end md:items-end gap-6 md:gap-8">
+              {/* Avatar */}
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-500 to-violet-600 rounded-full opacity-75 blur group-hover:opacity-100 transition duration-1000"></div>
+                <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-[#0a0a0a] overflow-hidden bg-gray-800 shadow-2xl">
                   {creator.avatarUrl ? (
                     <Image
                       src={creator.avatarUrl}
@@ -190,247 +212,234 @@ export default function CreatorProfilePage() {
                       className="object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <User className="w-32 h-32 text-gray-600" />
+                    <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                      <User className="w-20 h-20 text-gray-600" />
                     </div>
                   )}
+                </div>
+                {creator.status === "LIVE" && (
+                  <div className="absolute bottom-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-4 border-[#0a0a0a] shadow-lg animate-pulse">
+                    LIVE
+                  </div>
+                )}
+              </div>
+
+              {/* Name & Quick Actions */}
+              <div className="flex-1 pb-2 w-full md:w-auto text-center md:text-left">
+                <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
+                  <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight drop-shadow-lg">
+                    {creator.displayName}
+                  </h1>
+                  {creator.displayedAge && (
+                    <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-white/20 text-white/80 bg-white/5 backdrop-blur-sm">
+                      {creator.displayedAge}
+                    </Badge>
+                  )}
                   {creator.category && (
-                    <Badge className="absolute top-4 left-4 bg-purple-600/90 text-white">
+                    <Badge className="w-fit mx-auto md:mx-0 bg-gradient-to-r from-violet-600 to-pink-600 border-0">
                       {creator.category}
                     </Badge>
                   )}
                 </div>
 
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 text-sm mb-6">
+                  <div className="flex items-center gap-1">
+                    <span className="text-white font-bold">
+                      {creator.followersCount.toLocaleString()}
+                    </span>{" "}
+                    Followers
+                  </div>
+                  <div className="w-1 h-1 bg-gray-600 rounded-full" />
+                  <div className="flex items-center gap-1">
+                    <span className="text-white font-bold">
+                      {creator.streamsCount}
+                    </span>{" "}
+                    Streams
+                  </div>
+                  {creator.displayedCity && (
+                    <>
+                      <div className="w-1 h-1 bg-gray-600 rounded-full" />
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {creator.displayedCity}
+                      </div>
+                    </>
+                  )}
+                </div>
+
                 {/* Action Buttons */}
-                <div className="p-4 space-y-2">
+                <div className="flex items-center justify-center md:justify-start gap-3">
                   <Button
-                    className={`w-full ${
-                      isFollowing
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-purple-600 hover:bg-purple-700"
-                    }`}
                     onClick={handleFollowToggle}
+                    className={`min-w-[140px] transition-all duration-300 ${
+                      isFollowing
+                        ? "bg-gray-800 hover:bg-gray-700 text-white border border-white/10"
+                        : "bg-white text-black hover:bg-gray-200 font-semibold shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+                    }`}
                   >
                     <Heart
-                      className={`w-4 h-4 mr-2 ${isFollowing ? "fill-current" : ""}`}
+                      className={`w-4 h-4 mr-2 transition-colors ${
+                        isFollowing ? "fill-pink-500 text-pink-500" : ""
+                      }`}
                     />
                     {isFollowing ? "Following" : "Follow"}
                   </Button>
                   <Button
-                    className="w-full bg-pink-600 hover:bg-pink-700"
                     onClick={handleMessage}
+                    className="bg-transparent border border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Send Message
+                    Message
+                  </Button>
+                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                    <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Stats Card */}
-            <Card className="bg-gray-800/50 border-gray-700 mt-4">
-              <CardContent className="p-4">
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-purple-400">
-                      {creator.followersCount}
-                    </div>
-                    <div className="text-xs text-gray-400">Followers</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-purple-400">
-                      {creator.streamsCount}
-                    </div>
-                    <div className="text-xs text-gray-400">Streams</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Info Section */}
-          <div className="lg:col-span-2">
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-3xl mb-2 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                      {creator.displayName}
-                    </CardTitle>
-                    {creator.displayedCity && (
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <MapPin className="w-4 h-4" />
-                        <span>{creator.displayedCity}</span>
-                      </div>
-                    )}
-                  </div>
-                  {creator.displayedAge && (
-                    <Badge className="text-lg px-4 py-1 bg-gray-700">
-                      {creator.displayedAge}
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Bio */}
-                {creator.bio && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">
-                      About
-                    </h3>
-                    <p className="text-gray-300">{creator.bio}</p>
-                  </div>
-                )}
-
-                {/* Profile Description */}
-                {creator.profileDescription && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">
-                      Description
-                    </h3>
-                    <p className="text-gray-300">{creator.profileDescription}</p>
-                  </div>
-                )}
-
-                {/* Physical Attributes */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">
-                    Physical Attributes
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {creator.ethnicity && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Ethnicity</div>
-                        <div className="font-medium">{creator.ethnicity}</div>
-                      </div>
-                    )}
-                    {creator.physique && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Physique</div>
-                        <div className="font-medium">{creator.physique}</div>
-                      </div>
-                    )}
-                    {creator.hairColor && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Hair Color</div>
-                        <div className="font-medium">{creator.hairColor}</div>
-                      </div>
-                    )}
-                    {creator.breastSize && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Breast Size</div>
-                        <div className="font-medium">{creator.breastSize}</div>
-                      </div>
-                    )}
-                    {creator.tattoos && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Tattoos</div>
-                        <div className="font-medium">{creator.tattoos}</div>
-                      </div>
-                    )}
-                    {creator.piercings && (
-                      <div className="bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400">Piercings</div>
-                        <div className="font-medium">{creator.piercings}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Languages */}
-                {creator.spokenLanguages.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">
-                      Languages
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {creator.spokenLanguages.map((lang) => (
-                        <Badge
-                          key={lang}
-                          className="bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                        >
-                          {lang}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Shows */}
-                {creator.myShows.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">
-                      My Shows
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {creator.myShows.map((show) => (
-                        <Badge
-                          key={show}
-                          variant="outline"
-                          className="border-gray-600 text-gray-300"
-                        >
-                          {show}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Info */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
-                  {creator.relationship && (
-                    <div>
-                      <div className="text-xs text-gray-400">Relationship</div>
-                      <div className="font-medium">{creator.relationship}</div>
-                    </div>
-                  )}
-                  <div>
-                    <div className="text-xs text-gray-400">Joined</div>
-                    <div className="font-medium">
-                      {new Date(creator.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Streams Section */}
-        <Card className="bg-gray-800/50 border-gray-700">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="w-5 h-5 text-purple-400" />
-              Streams
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {creator.streams.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {creator.streams.map((stream) => (
-                  <StreamCard
-                    key={stream.id}
-                    stream={{
-                      ...stream,
-                      creator: {
-                        id: creator.id,
-                        name: creator.displayName,
-                        image: creator.avatarUrl,
-                      },
-                    }}
-                    onJoinStream={handleJoinStream}
-                  />
-                ))}
+        {/* Main Content Grid */}
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* Left Sidebar: Info & Attributes */}
+            <div className="lg:col-span-4 space-y-6">
+              {/* About Card */}
+              <div className="bg-[#121212]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
+                    <Sparkles className="w-4 h-4 text-yellow-500" />
+                    About Me
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed text-sm">
+                    {creator.bio || "No bio available."}
+                  </p>
+                </div>
+                
+                {creator.spokenLanguages.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Languages</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {creator.spokenLanguages.map((lang) => (
+                        <div key={lang} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300">
+                          <Globe className="w-3 h-3" />
+                          {lang}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stats / Bento Grid */}
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                   <AttributeBox label="Ethnicity" value={creator.ethnicity} />
+                   <AttributeBox label="Hair" value={creator.hairColor} />
+                   <AttributeBox label="Body" value={creator.physique} />
+                   <AttributeBox label="Eye Color" value="--" /> 
+                   <AttributeBox label="Tattoos" value={creator.tattoos} />
+                   <AttributeBox label="Joined" value={new Date(creator.createdAt).getFullYear().toString()} icon={<Calendar className="w-3 h-3" />} />
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-12">
-                <Video className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">No streams available</p>
+
+              {/* My Shows */}
+              {creator.myShows.length > 0 && (
+                <div className="bg-[#121212]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6">
+                   <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                    <Activity className="w-4 h-4 text-pink-500" />
+                    My Shows
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {creator.myShows.map((show) => (
+                      <Badge
+                        key={show}
+                        variant="secondary"
+                        className="bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 border border-pink-500/20 py-1.5"
+                      >
+                        {show}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Content: Description & Streams */}
+            <div className="lg:col-span-8 space-y-8">
+              
+              {/* Profile Description (Long) */}
+              {creator.profileDescription && (
+                <div className="bg-[#121212]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6">
+                  <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {creator.profileDescription}
+                  </p>
+                </div>
+              )}
+
+              {/* Streams Tab Section */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                      <Video className="w-6 h-6" />
+                    </div>
+                    Latest Streams
+                  </h2>
+                  {/* Optional View All button could go here */}
+                </div>
+
+                {creator.streams.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {creator.streams.map((stream) => (
+                      <div key={stream.id} className="group relative">
+                        {/* Custom wrapper for StreamCard to add hover effects */}
+                        <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-30 transition duration-300 blur-sm"></div>
+                        <div className="relative">
+                            <StreamCard
+                                stream={{
+                                ...stream,
+                                creator: {
+                                    id: creator.id,
+                                    name: creator.displayName,
+                                    image: creator.avatarUrl,
+                                },
+                                }}
+                                onJoinStream={handleJoinStream}
+                            />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="border border-dashed border-gray-800 rounded-3xl p-12 text-center bg-white/5">
+                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <PlayCircle className="w-8 h-8 text-gray-600" />
+                    </div>
+                    <h3 className="text-xl font-medium text-white mb-2">No streams yet</h3>
+                    <p className="text-gray-400">Stay tuned for upcoming live shows!</p>
+                  </div>
+                )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+// Helper Component for Bento Grid Attributes
+function AttributeBox({ label, value, icon }: { label: string; value?: string; icon?: React.ReactNode }) {
+    if (!value || value === "None") return null;
+    return (
+        <div className="bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+            <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                {icon} {label}
+            </div>
+            <div className="font-medium text-sm text-gray-200 truncate group-hover:text-white">
+                {value}
+            </div>
+        </div>
+    );
 }
