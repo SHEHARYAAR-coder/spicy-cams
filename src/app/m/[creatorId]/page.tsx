@@ -160,13 +160,12 @@ export default function CreatorProfilePage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] opacity-50" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-pink-900/10 rounded-full blur-[120px] opacity-30" />
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
-        {/* Grid Pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
       </div>
 
       <div className="relative z-10">
         {/* Navigation Bar */}
-        <div className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/50 border-b border-gray-700">
+        {/* <div className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/50 border-b border-gray-700">
           <div className="container mx-auto px-4 h-16 flex items-center">
             <Link href="/m">
               <Button
@@ -178,7 +177,7 @@ export default function CreatorProfilePage() {
               </Button>
             </Link>
           </div>
-        </div>
+        </div> */}
 
         {/* Hero / Cover Section */}
         <div className="relative">
