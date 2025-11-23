@@ -200,7 +200,7 @@ export default function ProfileContent() {
                       </button>
                     </Link>
                   )}
-                  {userData.role === "VIEWER" && (
+                  {/* {userData.role === "VIEWER" && (
                     <Dialog
                       open={roleDialogOpen}
                       onOpenChange={(open) => {
@@ -245,7 +245,7 @@ export default function ProfileContent() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                  )}
+                  )} */}
                 </div>
               </div>
               {userData.profile?.bio && (
@@ -255,11 +255,11 @@ export default function ProfileContent() {
                   </p>
                 </div>
               )}
-              {userData.profile?.isCreator && (
+              {/* {userData.profile?.isCreator && (
                 <span className="inline-block bg-purple-100/10 text-purple-300 text-xs px-2 py-1 rounded-full mt-1">
                   Content Creator
                 </span>
-              )}
+              )} */}
               <p className="text-gray-400 text-sm">
                 Status:{" "}
                 <span className="capitalize">
@@ -651,14 +651,14 @@ export default function ProfileContent() {
         )}
         
         {/* Profile Description */}
-        {userData.profile.profileDescription && (
+        {/* {userData.profile.profileDescription && (
           <div className="mt-6">
             <label className="text-sm text-gray-400 mb-2 block">About Me</label>
             <p className="text-gray-300 leading-relaxed bg-gray-900/50 p-4 rounded-lg">
               {userData.profile.profileDescription}
             </p>
           </div>
-        )}
+        )} */}
       </div>
     );
   }, [userData]);

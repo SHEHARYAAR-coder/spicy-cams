@@ -113,12 +113,36 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Profile description must be 350 characters or less' }, { status: 400 });
     }
 
+    // Get current user to check role
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    });
+
+    const isUserCreator = currentUser?.role === 'CREATOR' || targetRole === 'CREATOR';
+
     const profileUpdateData: Record<string, unknown> = {
       updatedAt: new Date(),
     };
 
     if (typeof displayName !== 'undefined') profileUpdateData.displayName = displayName;
-    if (typeof bio !== 'undefined') profileUpdateData.bio = bio;
+    
+    // For CREATOR users, sync bio and profileDescription
+    if (isUserCreator) {
+      if (typeof bio !== 'undefined') {
+        profileUpdateData.bio = bio;
+        profileUpdateData.profileDescription = bio; // Sync profileDescription with bio
+      }
+      if (typeof profileDescription !== 'undefined') {
+        profileUpdateData.profileDescription = profileDescription;
+        profileUpdateData.bio = profileDescription; // Sync bio with profileDescription
+      }
+    } else {
+      // For non-creator users, update independently
+      if (typeof bio !== 'undefined') profileUpdateData.bio = bio;
+      if (typeof profileDescription !== 'undefined') profileUpdateData.profileDescription = profileDescription;
+    }
+    
     if (typeof category !== 'undefined') profileUpdateData.category = category;
     if (typeof language !== 'undefined') profileUpdateData.language = language;
     if (typeof isCreator === 'boolean') profileUpdateData.isCreator = isCreator;
@@ -137,7 +161,19 @@ export async function PUT(req: NextRequest) {
     if (typeof tattoos !== 'undefined') profileUpdateData.tattoos = tattoos;
     if (typeof displayedCity !== 'undefined') profileUpdateData.displayedCity = displayedCity;
     if (Array.isArray(myShows)) profileUpdateData.myShows = myShows;
-    if (typeof profileDescription !== 'undefined') profileUpdateData.profileDescription = profileDescription;
+
+    // Determine the bio/profileDescription values with syncing logic for creators
+    let bioValue = typeof bio === 'string' && bio.length > 0 ? bio : null;
+    let profileDescValue = typeof profileDescription === 'string' && profileDescription.length > 0 ? profileDescription : null;
+    
+    // For CREATOR users, sync bio and profileDescription on creation
+    if (isUserCreator) {
+      if (bioValue !== null) {
+        profileDescValue = bioValue; // Sync profileDescription with bio
+      } else if (profileDescValue !== null) {
+        bioValue = profileDescValue; // Sync bio with profileDescription
+      }
+    }
 
     const profileCreateData = {
       userId,
@@ -145,7 +181,7 @@ export async function PUT(req: NextRequest) {
         typeof displayName === 'string' && displayName.length > 0
           ? displayName
           : session.user.name || session.user.email || 'Creator',
-      bio: typeof bio === 'string' && bio.length > 0 ? bio : null,
+      bio: bioValue,
       category: typeof category === 'string' && category.length > 0 ? category : null,
       language: typeof language === 'string' && language.length > 0 ? language : null,
       isCreator:
@@ -167,7 +203,7 @@ export async function PUT(req: NextRequest) {
       tattoos: typeof tattoos === 'string' && tattoos.length > 0 ? tattoos : null,
       displayedCity: typeof displayedCity === 'string' && displayedCity.length > 0 ? displayedCity : null,
       myShows: Array.isArray(myShows) ? myShows : [],
-      profileDescription: typeof profileDescription === 'string' && profileDescription.length > 0 ? profileDescription : null,
+      profileDescription: profileDescValue,
     };
 
     // Update profile
