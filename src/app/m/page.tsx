@@ -49,6 +49,7 @@ export default function ModelsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const fetchCreators = async () => {
     setLoading(true);
@@ -150,112 +151,145 @@ export default function ModelsPage() {
             {filteredCreators.map((creator) => (
               <Card
                 key={creator.id}
-                className="group text-white bg-gray-800/50 border-gray-700 hover:border-purple-500 transition-all duration-300 cursor-pointer overflow-hidden hover:shadow-lg hover:shadow-purple-500/20"
+                className="p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden"
+                onMouseEnter={() => setHoveredCard(creator.id)}
+                onMouseLeave={() => setHoveredCard(null)}
                 onClick={() => handleCreatorClick(creator.id)}
               >
-                <CardContent className="p-0">
-                  {/* Avatar */}
-                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-purple-900/20 to-pink-900/20">
-                    {creator.avatarUrl ? (
-                      <Image
-                        src={creator.avatarUrl}
-                        alt={creator.displayName}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Users className="w-20 h-20 text-gray-600" />
+                {/* Avatar with fixed height */}
+                <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
+                  {creator.avatarUrl ? (
+                    <img
+                      src={creator.avatarUrl}
+                      alt={creator.displayName}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">
+                      <Users className="w-12 h-12 text-gray-500 mb-2" />
+                      <div className="text-xs text-gray-500 text-center px-4">
+                        <div className="font-medium truncate">{creator.displayName}</div>
+                        {creator.category && (
+                          <div className="text-purple-400 mt-1">{creator.category}</div>
+                        )}
                       </div>
-                    )}
-                    {/* Category Badge */}
-                    {creator.category && (
-                      <Badge className="absolute top-2 left-2 bg-purple-600/90 text-white">
+                    </div>
+                  )}
+
+                  {/* Category Badge */}
+                  {creator.category && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <div className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium">
                         {creator.category}
-                      </Badge>
-                    )}
-                    {/* Age Badge */}
-                    {creator.displayedAge && (
-                      <Badge className="absolute top-2 right-2 bg-gray-900/90 text-white">
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Star Rating */}
+                  <div className="absolute top-3 right-3 z-10">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-3 h-3 ${
+                            star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="absolute bottom-3 right-3 z-10">
+                    <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      {creator.followersCount}
+                    </div>
+                  </div>
+
+                  {/* Age Badge */}
+                  {creator.displayedAge && (
+                    <div className="absolute bottom-3 left-3 z-10">
+                      <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold">
                         {creator.displayedAge}
-                      </Badge>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hover Overlay */}
+                  <div
+                    className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
+                      hoveredCard === creator.id ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
+                      <MessageCircle className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <CardContent className="px-4 pb-4">
+                  <h3 className="font-semibold text-base mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
+                    {creator.displayName}
+                  </h3>
+
+                  <div className="flex items-center gap-2 mb-2">
+                    {creator.displayedCity && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-purple-400" />
+                        <span className="text-xs text-gray-400 truncate">{creator.displayedCity}</span>
+                      </div>
                     )}
                   </div>
 
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-1 truncate group-hover:text-purple-400 transition-colors">
-                      {creator.displayName}
-                    </h3>
+                  {/* Bio */}
+                  {creator.bio && (
+                    <p className="text-xs text-gray-400 line-clamp-2 mb-2">
+                      {creator.bio}
+                    </p>
+                  )}
 
-                    {/* Location */}
-                    {creator.displayedCity && (
-                      <div className="flex items-center gap-1 text-sm text-gray-400 mb-2">
-                        <MapPin className="w-3 h-3" />
-                        <span className="truncate">{creator.displayedCity}</span>
-                      </div>
-                    )}
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" />
-                        <span>{creator.followersCount}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Camera className="w-3 h-3" />
-                        <span>{creator.streamsCount}</span>
-                      </div>
-                    </div>
-
-                    {/* Bio Preview */}
-                    {creator.bio && (
-                      <p className="text-xs text-gray-400 line-clamp-2 mb-2">
-                        {creator.bio}
-                      </p>
-                    )}
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1">
+                  {/* Tags */}
+                  {(creator.ethnicity || creator.physique || creator.hairColor) && (
+                    <div className="flex flex-wrap gap-1 mb-2">
                       {creator.ethnicity && (
-                        <Badge
-                          variant="outline"
-                          className="text-xs border-gray-600 text-gray-300"
-                        >
+                        <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
                           {creator.ethnicity}
-                        </Badge>
+                        </span>
                       )}
                       {creator.physique && (
-                        <Badge
-                          variant="outline"
-                          className="text-xs border-gray-600 text-gray-300"
-                        >
+                        <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
                           {creator.physique}
-                        </Badge>
+                        </span>
                       )}
                       {creator.hairColor && (
-                        <Badge
-                          variant="outline"
-                          className="text-xs border-gray-600 text-gray-300"
-                        >
+                        <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
                           {creator.hairColor}
-                        </Badge>
+                        </span>
                       )}
                     </div>
+                  )}
 
-                    {/* Languages */}
-                    {creator.spokenLanguages.length > 0 && (
-                      <div className="mt-2 text-xs text-gray-500">
+                  {/* Languages */}
+                  {creator.spokenLanguages.length > 0 && (
+                    <div className="flex items-center gap-1 mb-2">
+                      <span className="text-xs font-medium text-purple-400 bg-purple-600/20 px-2 py-1 rounded-full border border-purple-500/30">
                         {creator.spokenLanguages.slice(0, 2).join(", ")}
                         {creator.spokenLanguages.length > 2 && "..."}
-                      </div>
-                    )}
+                      </span>
+                    </div>
+                  )}
 
-                    {/* View Profile Button */}
+                  <div className="flex justify-between items-center">
                     <Button
-                      className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-white"
                       size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCreatorClick(creator.id);
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
+                      <MessageCircle className="w-4 h-4 mr-1" />
                       View Profile
                     </Button>
                   </div>
