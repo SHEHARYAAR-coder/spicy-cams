@@ -140,7 +140,7 @@ export default function CreatorProfilePage() {
   // --- Loading State ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
           <p className="text-gray-400 font-medium tracking-wide animate-pulse">
@@ -154,7 +154,7 @@ export default function CreatorProfilePage() {
   if (!creator) return null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden selection:bg-purple-500/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white overflow-x-hidden selection:bg-purple-500/30">
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-purple-900/20 rounded-full blur-[120px] opacity-50" />
@@ -166,12 +166,12 @@ export default function CreatorProfilePage() {
 
       <div className="relative z-10">
         {/* Navigation Bar */}
-        <div className="sticky top-0 z-50 backdrop-blur-md bg-black/20 border-b border-white/5">
+        <div className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/50 border-b border-gray-700">
           <div className="container mx-auto px-4 h-16 flex items-center">
             <Link href="/m">
               <Button
                 variant="ghost"
-                className="text-gray-400 hover:text-white hover:bg-white/5 gap-2 group"
+                className="text-gray-400 hover:text-white hover:bg-gray-800/80 gap-2 group"
               >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 Back to Models
@@ -184,7 +184,7 @@ export default function CreatorProfilePage() {
         <div className="relative">
           {/* Simulated Cover Image */}
           <div className="h-[300px] w-full relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0a0a]/50 to-[#0a0a0a]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950" />
             {creator.avatarUrl ? (
               <Image
                 src={creator.avatarUrl}
@@ -203,7 +203,7 @@ export default function CreatorProfilePage() {
               {/* Avatar */}
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-500 to-violet-600 rounded-full opacity-75 blur group-hover:opacity-100 transition duration-1000"></div>
-                <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-[#0a0a0a] overflow-hidden bg-gray-800 shadow-2xl">
+                <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-800 shadow-2xl">
                   {creator.avatarUrl ? (
                     <Image
                       src={creator.avatarUrl}
@@ -218,7 +218,7 @@ export default function CreatorProfilePage() {
                   )}
                 </div>
                 {creator.status === "LIVE" && (
-                  <div className="absolute bottom-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-4 border-[#0a0a0a] shadow-lg animate-pulse">
+                  <div className="absolute bottom-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-4 border-gray-950 shadow-lg animate-pulse">
                     LIVE
                   </div>
                 )}
@@ -231,12 +231,12 @@ export default function CreatorProfilePage() {
                     {creator.displayName}
                   </h1>
                   {creator.displayedAge && (
-                    <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-white/20 text-white/80 bg-white/5 backdrop-blur-sm">
+                    <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-gray-600 text-gray-300 bg-gray-800/50">
                       {creator.displayedAge}
                     </Badge>
                   )}
                   {creator.category && (
-                    <Badge className="w-fit mx-auto md:mx-0 bg-gradient-to-r from-violet-600 to-pink-600 border-0">
+                    <Badge className="w-fit mx-auto md:mx-0 bg-purple-600 text-white border-0">
                       {creator.category}
                     </Badge>
                   )}
@@ -273,8 +273,8 @@ export default function CreatorProfilePage() {
                     onClick={handleFollowToggle}
                     className={`min-w-[140px] transition-all duration-300 ${
                       isFollowing
-                        ? "bg-gray-800 hover:bg-gray-700 text-white border border-white/10"
-                        : "bg-white text-black hover:bg-gray-200 font-semibold shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
+                        ? "bg-gray-700 hover:bg-gray-600 text-white"
+                        : "bg-purple-600 hover:bg-purple-700 text-white font-semibold"
                     }`}
                   >
                     <Heart
@@ -286,7 +286,7 @@ export default function CreatorProfilePage() {
                   </Button>
                   <Button
                     onClick={handleMessage}
-                    className="bg-transparent border border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Message
@@ -307,7 +307,7 @@ export default function CreatorProfilePage() {
             {/* Left Sidebar: Info & Attributes */}
             <div className="lg:col-span-4 space-y-6">
               {/* About Card */}
-              <div className="bg-[#121212]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6 space-y-6">
+              <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-3xl p-6 space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
                     <Sparkles className="w-4 h-4 text-yellow-500" />
@@ -323,7 +323,7 @@ export default function CreatorProfilePage() {
                     <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Languages</h4>
                     <div className="flex flex-wrap gap-2">
                       {creator.spokenLanguages.map((lang) => (
-                        <div key={lang} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300">
+                        <div key={lang} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600/20 border border-purple-500/30 text-xs text-purple-300">
                           <Globe className="w-3 h-3" />
                           {lang}
                         </div>
@@ -345,7 +345,7 @@ export default function CreatorProfilePage() {
 
               {/* My Shows */}
               {creator.myShows.length > 0 && (
-                <div className="bg-[#121212]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-6">
+                <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-3xl p-6">
                    <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                     <Activity className="w-4 h-4 text-pink-500" />
                     My Shows
@@ -354,8 +354,8 @@ export default function CreatorProfilePage() {
                     {creator.myShows.map((show) => (
                       <Badge
                         key={show}
-                        variant="secondary"
-                        className="bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 border border-pink-500/20 py-1.5"
+                        variant="outline"
+                        className="border-gray-600 text-gray-300 hover:bg-gray-700 py-1.5"
                       >
                         {show}
                       </Badge>
@@ -370,7 +370,7 @@ export default function CreatorProfilePage() {
               
               {/* Profile Description (Long) */}
               {creator.profileDescription && (
-                <div className="bg-[#121212]/50 backdrop-blur-sm border border-white/5 rounded-2xl p-6">
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
                   <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
                     {creator.profileDescription}
                   </p>
@@ -412,8 +412,8 @@ export default function CreatorProfilePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="border border-dashed border-gray-800 rounded-3xl p-12 text-center bg-white/5">
-                    <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="border border-dashed border-gray-700 rounded-3xl p-12 text-center bg-gray-800/50">
+                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                       <PlayCircle className="w-8 h-8 text-gray-600" />
                     </div>
                     <h3 className="text-xl font-medium text-white mb-2">No streams yet</h3>
@@ -433,7 +433,7 @@ export default function CreatorProfilePage() {
 function AttributeBox({ label, value, icon }: { label: string; value?: string; icon?: React.ReactNode }) {
     if (!value || value === "None") return null;
     return (
-        <div className="bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors group">
+        <div className="bg-gray-700/50 p-3 rounded-xl border border-gray-600/50 hover:bg-gray-700 transition-colors group">
             <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
                 {icon} {label}
             </div>
