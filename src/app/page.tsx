@@ -64,12 +64,16 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleCategoryClick = (categoryName: string) => {
+    if (categoryName === "All Models") {
+      router.push("/m");
+      return;
+    }
     setSelectedCategory(categoryName);
   };
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
-    // { name: "New Models", icon: Star, count: 0 },
+    { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
   ];
 
