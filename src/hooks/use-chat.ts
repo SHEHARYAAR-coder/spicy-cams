@@ -255,15 +255,8 @@ export function useChat({
                 
                 messageSeenRef.current.add(newMessage.id);
                 
-                // Remove pending message if it exists
-                if (pendingMessagesRef.current.has(newMessage.id)) {
-                  pendingMessagesRef.current.delete(newMessage.id);
-                }
-                
                 setMessages((prev) => {
-                  // Remove any pending version
-                  const filtered = prev.filter(msg => msg.id !== newMessage.id);
-                  const updated = [...filtered, newMessage];
+                  const updated = [...prev, newMessage];
                   
                   // Cache the updated messages
                   setCachedMessages(streamId, updated);
@@ -338,47 +331,15 @@ export function useChat({
     setConnected(false);
   }, []);
 
-  // Send message with optimistic updates
+  // Send message without optimistic updates to prevent duplicates
   const sendMessage = useCallback(
     async (message: string): Promise<boolean> => {
       return new Promise((resolve, reject) => {
-        // Generate temporary ID for optimistic update
-        const tempId = `temp-${Date.now()}-${Math.random()}`;
-        const optimisticMessage: ChatMessage = {
-          id: tempId,
-          message,
-          userId: "current-user", // This should be replaced with actual user ID
-          user: {
-            id: "current-user",
-            displayName: "You",
-            avatarUrl: null,
-            role: "VIEWER",
-          },
-          createdAt: new Date().toISOString(),
-          isPending: true,
-        };
-
-        // Add optimistic message
-        pendingMessagesRef.current.set(tempId, optimisticMessage);
-        setMessages((prev) => [...prev, optimisticMessage]);
-
         // Add to send queue
         sendQueueRef.current.push({
           message,
-          resolve: (success) => {
-            if (!success) {
-              // Remove optimistic message on failure
-              setMessages((prev) => prev.filter(msg => msg.id !== tempId));
-              pendingMessagesRef.current.delete(tempId);
-            }
-            resolve(success);
-          },
-          reject: (error) => {
-            // Remove optimistic message on error
-            setMessages((prev) => prev.filter(msg => msg.id !== tempId));
-            pendingMessagesRef.current.delete(tempId);
-            reject(error);
-          }
+          resolve,
+          reject
         });
 
         // Start processing queue

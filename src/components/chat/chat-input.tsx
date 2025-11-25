@@ -1,7 +1,7 @@
 import React, { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Send, Smile, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Send, Smile, Loader2, AlertCircle } from "lucide-react";
 
 interface ChatInputProps {
     onSend: (message: string) => Promise<boolean>;
@@ -31,7 +31,7 @@ export function ChatInput({
 
         setSending(true);
         setLastSendTime(now);
-        
+
         const success = await onSend(message.trim());
 
         if (success) {
@@ -41,7 +41,7 @@ export function ChatInput({
         setSending(false);
     };
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -53,78 +53,80 @@ export function ChatInput({
     const isOverLimit = characterCount > maxLength;
 
     return (
-        <div className="border-t border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm">
-            {/* Rate limit warning */}
-            {isApproachingLimit && remaining !== null && (
-                <div className="mb-3 text-sm text-orange-300 bg-orange-900/20 border border-orange-500/30 p-3 rounded-lg backdrop-blur-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
-                        <span>Rate limit warning: {remaining} messages remaining</span>
+        <div className="h-full flex flex-col">
+            {/* Warning area - fixed height */}
+            <div className="h-7 px-3 sm:px-4 flex items-center">
+                {isApproachingLimit && remaining !== null && (
+                    <div className="flex items-center gap-1.5 text-xs text-orange-300 animate-pulse">
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">Rate limit: {remaining} left</span>
                     </div>
-                </div>
-            )}
-
-            <div className="flex gap-3">
-                {/* Emoji Picker Button (placeholder) */}
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="flex-shrink-0 text-gray-400 hover:text-purple-400 hover:bg-gray-700/50 transition-colors"
-                    disabled={disabled}
-                    title="Emoji picker (coming soon)"
-                >
-                    <Smile className="h-5 w-5" />
-                </Button>
-
-                {/* Message Input */}
-                <div className="flex-1">
-                    <Textarea
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={
-                            disabled
-                                ? "Chat is disabled"
-                                : "Type a message... (Shift+Enter for new line)"
-                        }
-                        disabled={disabled || sending}
-                        className="min-h-[60px] max-h-[120px] resize-none bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 backdrop-blur-sm"
-                        maxLength={maxLength + 50} // Soft limit
-                    />
-
-                    {/* Character count */}
-                    <div className="text-xs text-right mt-2">
-                        <span className={`px-2 py-1 rounded ${isOverLimit
-                                ? "text-red-400 bg-red-900/20"
-                                : characterCount > maxLength * 0.8
-                                    ? "text-orange-400 bg-orange-900/20"
-                                    : "text-gray-400"
-                            }`}>
-                            {characterCount} / {maxLength}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Send Button */}
-                <Button
-                    onClick={handleSend}
-                    disabled={disabled || sending || !message.trim() || isOverLimit}
-                    className="flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg shadow-purple-600/25 transition-all duration-200 disabled:bg-gray-700 disabled:shadow-none"
-                    size="icon"
-                >
-                    {sending ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                        <Send className="h-5 w-5" />
-                    )}
-                </Button>
+                )}
             </div>
 
-            {/* Enter to send hint */}
-            <div className="text-xs text-gray-500 mt-2 flex items-center gap-2">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-gray-700 to-transparent"></div>
+            {/* Input area */}
+            <div className="flex-1 px-3 sm:px-4 pb-3">
+                <div className="flex items-center gap-2 h-full">
+                    {/* Emoji Button */}
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="hidden sm:flex h-9 w-9 flex-shrink-0 text-gray-400 hover:text-purple-400 hover:bg-gray-700/50"
+                        disabled={disabled}
+                        title="Emoji picker (coming soon)"
+                    >
+                        <Smile className="h-5 w-5" />
+                    </Button>
+
+                    {/* Message Input */}
+                    <div className="flex-1 relative">
+                        <Input
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder={
+                                disabled
+                                    ? "Chat is disabled"
+                                    : "Type a message... (Shift+Enter for new line)"
+                            }
+                            disabled={disabled || sending}
+                            className="h-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 pr-16"
+                            maxLength={maxLength}
+                        />
+
+                        {/* Character count */}
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs pointer-events-none">
+                            <span className={`${isOverLimit
+                                    ? "text-red-400"
+                                    : characterCount > maxLength * 0.8
+                                        ? "text-orange-400"
+                                        : "text-gray-500"
+                                }`}>
+                                {characterCount}/{maxLength}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Send Button */}
+                    <Button
+                        onClick={handleSend}
+                        disabled={disabled || sending || !message.trim() || isOverLimit}
+                        className="h-9 w-9 flex-shrink-0 bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-600/25 disabled:bg-gray-700 disabled:shadow-none p-0"
+                        size="icon"
+                    >
+                        {sending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Send className="h-4 w-4" />
+                        )}
+                    </Button>
+                </div>
+            </div>
+
+            {/* Helper text - fixed height */}
+            <div className="h-6 px-3 sm:px-4 pb-2 flex items-center">
+                <span className="text-xs text-gray-500">Press Enter to send, Shift+Enter for new line</span>
             </div>
         </div>
     );

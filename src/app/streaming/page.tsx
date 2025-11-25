@@ -630,27 +630,26 @@ export default function StreamingPage() {
               </div>
 
               {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-16rem)] min-h-[600px]">
                 {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 h-full">
                   <CreatorBroadcast
                     streamId={selectedStream}
                     token={streamToken}
                     serverUrl={LIVEKIT_SERVER_URL}
                     streamTitle={currentStreamData?.title || newStream.title}
                     onStreamEnd={handleStreamEnd}
+                    className="h-full"
                   />
                 </div>
 
                 {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1">
-                  <div className="h-[600px] lg:h-full">
-                    <TabbedChatContainer
-                      streamId={selectedStream}
-                      canModerate={true}
-                      className="h-full"
-                    />
-                  </div>
+                <div className="lg:col-span-1 h-full">
+                  <TabbedChatContainer
+                    streamId={selectedStream}
+                    canModerate={true}
+                    className="h-full"
+                  />
                 </div>
               </div>
             </div>
@@ -671,28 +670,26 @@ export default function StreamingPage() {
               </div>
 
               {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-16rem)] min-h-[600px]">
                 {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-2 h-full">
                   <ViewerPlayer
                     streamId={selectedStream}
                     token={streamToken}
                     serverUrl={LIVEKIT_SERVER_URL}
                     streamTitle={currentStreamData?.title}
                     creatorName={currentStreamData?.creator?.name}
-                    className="aspect-video w-full"
+                    className="h-full"
                   />
                 </div>
 
                 {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1">
-                  <div className="h-[600px] lg:h-full">
-                    <TabbedChatContainer
-                      streamId={selectedStream}
-                      canModerate={false}
-                      className="h-full"
-                    />
-                  </div>
+                <div className="lg:col-span-1 h-full">
+                  <TabbedChatContainer
+                    streamId={selectedStream}
+                    canModerate={false}
+                    className="h-full"
+                  />
                 </div>
               </div>
             </div>

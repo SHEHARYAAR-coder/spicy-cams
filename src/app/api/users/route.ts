@@ -284,6 +284,15 @@ export async function PATCH(req: NextRequest) {
           actorId: sessionUser.id,
         },
       });
+    } else if (action === "UNBAN" || action === "ACTIVATE") {
+      // Remove any active bans from ModerationAction table to ensure user is globally unbanned
+      await prisma.moderationAction.deleteMany({
+        where: {
+          targetId: userId,
+          targetType: "USER",
+          action: "BAN",
+        },
+      });
     }
 
     return NextResponse.json({

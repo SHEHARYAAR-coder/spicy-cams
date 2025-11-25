@@ -12,6 +12,16 @@ interface ChatGatePromptProps {
 export function ChatGatePrompt({ balance, reason }: ChatGatePromptProps) {
     const router = useRouter();
 
+    const isBanned = reason?.toLowerCase().includes("banned");
+    const isMuted = reason?.toLowerCase().includes("muted");
+    const isCreditIssue = !isBanned && !isMuted;
+
+    const heading = isBanned
+        ? "Chat Access Denied"
+        : isMuted
+            ? "You are Muted"
+            : "Chat Requires Credits";
+
     return (
         <Card className="p-6 m-4">
             <div className="flex flex-col items-center text-center space-y-4">
@@ -23,14 +33,14 @@ export function ChatGatePrompt({ balance, reason }: ChatGatePromptProps) {
                 {/* Heading */}
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Chat Requires Credits
+                        {heading}
                     </h3>
                     <p className="text-sm text-gray-600">
                         {reason || "You need credits in your wallet to participate in chat."}
                     </p>
                 </div>
 
-                {/* Balance Display */}
+                {/* Balance Display - Only show if relevant or if we want to show it regardless */}
                 <div className="bg-gray-50 rounded-lg p-4 w-full">
                     <div className="text-sm text-gray-600 mb-1">Current Balance</div>
                     <div className="text-2xl font-bold text-gray-900">
@@ -38,20 +48,24 @@ export function ChatGatePrompt({ balance, reason }: ChatGatePromptProps) {
                     </div>
                 </div>
 
-                {/* Minimum Requirement */}
-                <div className="text-xs text-gray-500">
-                    Minimum balance required: <strong>1 credit</strong>
-                </div>
+                {/* Minimum Requirement - Only show for credit issues */}
+                {isCreditIssue && (
+                    <div className="text-xs text-gray-500">
+                        Minimum balance required: <strong>1 credit</strong>
+                    </div>
+                )}
 
-                {/* Top Up Button */}
-                <Button
-                    onClick={() => router.push("/dashboard/wallet")}
-                    className="w-full"
-                    size="lg"
-                >
-                    <CreditCard className="h-5 w-5 mr-2" />
-                    Top Up Credits
-                </Button>
+                {/* Top Up Button - Only show for credit issues */}
+                {isCreditIssue && (
+                    <Button
+                        onClick={() => router.push("/dashboard/wallet")}
+                        className="w-full"
+                        size="lg"
+                    >
+                        <CreditCard className="h-5 w-5 mr-2" />
+                        Top Up Credits
+                    </Button>
+                )}
 
                 {/* Info */}
                 <p className="text-xs text-gray-500">

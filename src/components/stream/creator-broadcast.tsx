@@ -20,10 +20,19 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Radio,
@@ -44,7 +53,9 @@ import {
   Wifi,
   Play,
   MoreVertical,
-  Menu
+  Menu,
+  Camera,
+  SwitchCamera
 } from 'lucide-react';
 
 interface CreatorBroadcastProps {
@@ -126,6 +137,11 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [isMicEnabled, setIsMicEnabled] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [showEndDialog, setShowEndDialog] = useState(false);
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string>('');
+  const [availableMicrophones, setAvailableMicrophones] = useState<MediaDeviceInfo[]>([]);
+  const [selectedMicrophone, setSelectedMicrophone] = useState<string>('');
   const [streamStats, setStreamStats] = useState({
     viewers: 0,
     duration: 0,
@@ -245,10 +261,62 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     }
   };
 
-  const handleEndStream = async () => {
-    const confirmEnd = window.confirm('Are you sure you want to end the stream? This action cannot be undone.');
-    if (!confirmEnd) return;
+  // Get available cameras and microphones
+  useEffect(() => {
+    const getDevices = async () => {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
 
+        // Get cameras
+        const cameras = devices.filter(device => device.kind === 'videoinput');
+        setAvailableCameras(cameras);
+        if (cameras.length > 0 && !selectedCamera) {
+          setSelectedCamera(cameras[0].deviceId);
+        }
+
+        // Get microphones
+        const microphones = devices.filter(device => device.kind === 'audioinput');
+        setAvailableMicrophones(microphones);
+        if (microphones.length > 0 && !selectedMicrophone) {
+          setSelectedMicrophone(microphones[0].deviceId);
+        }
+
+        console.log('📹 Available cameras:', cameras.length);
+        console.log('🎤 Available microphones:', microphones.length);
+      } catch (error) {
+        console.error('Error getting devices:', error);
+      }
+    };
+    getDevices();
+  }, []);
+
+  const switchCamera = async (deviceId: string) => {
+    if (!localParticipant) return;
+    try {
+      setSelectedCamera(deviceId);
+      // Restart camera with new device
+      await localParticipant.setCameraEnabled(false);
+      await localParticipant.setCameraEnabled(true, { deviceId });
+      console.log('✅ Switched to camera:', deviceId);
+    } catch (error) {
+      console.error('Error switching camera:', error);
+    }
+  };
+
+  const switchMicrophone = async (deviceId: string) => {
+    if (!localParticipant) return;
+    try {
+      setSelectedMicrophone(deviceId);
+      // Restart microphone with new device
+      await localParticipant.setMicrophoneEnabled(false);
+      await localParticipant.setMicrophoneEnabled(true, { deviceId });
+      console.log('✅ Switched to microphone:', deviceId);
+    } catch (error) {
+      console.error('Error switching microphone:', error);
+    }
+  };
+
+  const handleEndStream = async () => {
     try {
       await fetch(`/api/streams/${streamId}`, {
         method: 'PATCH',
@@ -256,6 +324,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         body: JSON.stringify({ status: 'ENDED' })
       });
 
+      setShowEndDialog(false);
       onStreamEnd?.();
     } catch (error) {
       console.error('Error ending stream:', error);
@@ -283,55 +352,84 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
 
   return (
     <div
-      className={`relative ${isFullscreen ? 'h-screen' : 'h-[600px]'} bg-black overflow-hidden`}
+      className={`relative ${isFullscreen ? 'h-screen' : 'h-full'} bg-black overflow-hidden rounded-lg`}
     >
       {/* Top Stats Bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/60 to-transparent p-4">
+      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-4">
         <div className="flex justify-between items-center text-white">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gray-400'}`} />
-              <span className="font-semibold text-lg">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex items-center gap-2 bg-red-600/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-500/30">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="font-bold text-sm sm:text-base">
                 {isLive ? 'LIVE' : 'OFFLINE'}
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5" />
-              <span className="font-semibold">{streamStats.viewers}</span>
-              <span className="text-gray-300">viewers</span>
+            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <Eye className="w-4 h-4" />
+              <span className="font-semibold text-sm">{streamStats.viewers}</span>
+              <span className="text-gray-300 text-xs hidden sm:inline">viewers</span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Wifi className="w-5 h-5" />
-              <span className="text-sm bg-green-500 px-2 py-1 rounded">
+            <div className="hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
+              <Wifi className="w-4 h-4 text-green-400" />
+              <span className="text-xs font-medium text-green-400">
                 {connectionState === ConnectionState.Connected ? 'Connected' : 'Connecting...'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Button
               onClick={toggleFullscreen}
               variant="ghost"
               size="sm"
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 h-9 px-3 backdrop-blur-sm"
             >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </Button>
 
             <Button
-              onClick={handleEndStream}
+              onClick={() => setShowEndDialog(true)}
               variant="destructive"
               size="sm"
+              className="bg-red-600 hover:bg-red-700 h-9 px-3 sm:px-4"
+            >
+              <PhoneOff className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">End Stream</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* End Stream Confirmation Dialog */}
+      <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
+        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl">End Live Stream?</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Are you sure you want to end this stream? This action cannot be undone and all viewers will be disconnected.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowEndDialog(false)}
+              className="border-gray-600 text-white hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleEndStream}
               className="bg-red-600 hover:bg-red-700"
             >
               <PhoneOff className="w-4 h-4 mr-2" />
               End Stream
             </Button>
-          </div>
-        </div>
-      </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Main Video Display */}
       <div className="absolute inset-0">
@@ -343,20 +441,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                   trackRef={track}
                   className="w-full h-full object-cover"
                 />
-                {/* Track Type Indicator */}
-                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm">
-                  {track.source === Track.Source.Camera ? (
-                    <div className="flex items-center gap-2">
-                      <Video className="w-4 h-4" />
-                      Camera
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Monitor className="w-4 h-4" />
-                      Screen Share
-                    </div>
-                  )}
-                </div>
+               
               </div>
             ))}
           </div>
@@ -413,12 +498,12 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
             <Button
               variant="outline"
               size="icon"
-              className="bg-black/60 backdrop-blur-lg border-gray-600 text-white hover:bg-black/80 hover:text-white"
+              className="bg-black/60 backdrop-blur-lg border-gray-600 text-white hover:bg-black/80 hover:text-white h-10 w-10"
             >
               <Menu className="w-5 h-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white">
+          <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white w-56">
             <DropdownMenuItem
               onClick={toggleCamera}
               className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
@@ -432,6 +517,32 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                 {isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
               </span>
             </DropdownMenuItem>
+
+            {/* Camera Selection Submenu */}
+            {availableCameras.length > 1 && isCameraEnabled && (
+              <>
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Camera</div>
+                {availableCameras.map((camera) => (
+                  <DropdownMenuItem
+                    key={camera.deviceId}
+                    onClick={() => switchCamera(camera.deviceId)}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-6"
+                  >
+                    <Camera className={`w-3.5 h-3.5 ${selectedCamera === camera.deviceId ? 'text-purple-400' : 'text-gray-400'}`} />
+                    <span className="text-sm truncate">
+                      {camera.label || `Camera ${availableCameras.indexOf(camera) + 1}`}
+                    </span>
+                    {selectedCamera === camera.deviceId && (
+                      <span className="ml-auto text-xs text-purple-400">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
+
+            <DropdownMenuSeparator className="bg-gray-700" />
+
             <DropdownMenuItem
               onClick={toggleMicrophone}
               className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
@@ -445,6 +556,32 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                 {isMicEnabled ? 'Turn Off Microphone' : 'Turn On Microphone'}
               </span>
             </DropdownMenuItem>
+
+            {/* Microphone Selection Submenu */}
+            {availableMicrophones.length > 1 && isMicEnabled && (
+              <>
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Microphone</div>
+                {availableMicrophones.map((microphone) => (
+                  <DropdownMenuItem
+                    key={microphone.deviceId}
+                    onClick={() => switchMicrophone(microphone.deviceId)}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-6"
+                  >
+                    <Mic className={`w-3.5 h-3.5 ${selectedMicrophone === microphone.deviceId ? 'text-blue-400' : 'text-gray-400'}`} />
+                    <span className="text-sm truncate">
+                      {microphone.label || `Microphone ${availableMicrophones.indexOf(microphone) + 1}`}
+                    </span>
+                    {selectedMicrophone === microphone.deviceId && (
+                      <span className="ml-auto text-xs text-blue-400">✓</span>
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
+
+            <DropdownMenuSeparator className="bg-gray-700" />
+
             <DropdownMenuItem
               onClick={toggleScreenShare}
               className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"

@@ -32,8 +32,19 @@ import {
     Settings,
     Monitor,
     Video,
-    Clock
+    Clock,
+    SwitchCamera
 } from 'lucide-react';
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
+
 
 interface ViewerPlayerProps {
     streamId: string;
@@ -150,6 +161,8 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showLike, setShowLike] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
+    const [selectedView, setSelectedView] = useState<'camera' | 'screen'>('camera');
+    const [videoContainerRef, setVideoContainerRef] = useState<HTMLDivElement | null>(null);
 
     const toggleAudio = () => {
         setIsAudioMuted(!isAudioMuted);
@@ -174,8 +187,11 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
     };
 
     const toggleFullscreen = () => {
+        const container = videoContainerRef;
+        if (!container) return;
+
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
+            container.requestFullscreen();
             setIsFullscreen(true);
         } else {
             document.exitFullscreen();
@@ -200,9 +216,30 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
         (trackRef) => trackRef.source === Track.Source.ScreenShare && trackRef.publication?.kind === 'video'
     );
 
-    // Prioritize screen share over camera
-    const displayTrack = screenTrack || videoTrack;
+    // Prioritize screen share over camera, or use selected view
+    let displayTrack = videoTrack;
+
+    if (screenTrack && videoTrack) {
+        // Both available - use selected view
+        displayTrack = selectedView === 'screen' ? screenTrack : videoTrack;
+    } else if (screenTrack) {
+        // Only screen available
+        displayTrack = screenTrack;
+    } else if (videoTrack) {
+        // Only camera available
+        displayTrack = videoTrack;
+    }
+
     const activeParticipants = participants.filter(p => p.isLocal === false);
+
+    // Auto-select view when tracks change
+    useEffect(() => {
+        if (screenTrack && !videoTrack) {
+            setSelectedView('screen');
+        } else if (videoTrack && !screenTrack) {
+            setSelectedView('camera');
+        }
+    }, [screenTrack, videoTrack]);
 
     // Debug logging for viewer
     useEffect(() => {
@@ -213,7 +250,11 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
     }, [connectionState, tracks, participants, displayTrack]);
 
     return (
-        <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+        <div
+            ref={setVideoContainerRef}
+            className={`relative w-full bg-black rounded-lg overflow-hidden ${isFullscreen ? 'h-full' : 'h-full'
+                }`}
+        >
             {/* Top Stats Bar */}
             <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4">
                 <LiveViewerStats
@@ -263,17 +304,17 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                             className="w-full h-full object-cover"
                         />
 
-                        {/* Track Type Indicator */}
-                        <div className="absolute top-20 right-4 z-10">
-                            <div className="bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-medium flex items-center">
-                                {screenTrack ? (
+                        {/* Track Type Indicator - Repositioned to bottom left */}
+                        <div className="absolute bottom-20 left-4 z-10">
+                            <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center">
+                                {screenTrack && displayTrack === screenTrack ? (
                                     <>
-                                        <Monitor className="w-3 h-3 mr-1" />
-                                        Screen
+                                        <Monitor className="w-3.5 h-3.5 mr-1.5" />
+                                        Screen Share
                                     </>
                                 ) : (
                                     <>
-                                        <Video className="w-3 h-3 mr-1" />
+                                        <Video className="w-3.5 h-3.5 mr-1.5" />
                                         Camera
                                     </>
                                 )}
@@ -345,6 +386,40 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
 
                     {/* Right Controls */}
                     <div className="flex items-center space-x-2">
+                        {/* View Switcher - Only show if both camera and screen are available */}
+                        {videoTrack && screenTrack && (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-white hover:bg-white/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                                    >
+                                        <SwitchCamera className="w-5 h-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white">
+                                    <DropdownMenuItem
+                                        onClick={() => setSelectedView('camera')}
+                                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+                                    >
+                                        <Video className={`w-4 h-4 ${selectedView === 'camera' ? 'text-blue-400' : 'text-gray-400'}`} />
+                                        <span>Camera View</span>
+                                        {selectedView === 'camera' && <span className="ml-auto text-xs text-blue-400">✓</span>}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator className="bg-gray-700" />
+                                    <DropdownMenuItem
+                                        onClick={() => setSelectedView('screen')}
+                                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+                                    >
+                                        <Monitor className={`w-4 h-4 ${selectedView === 'screen' ? 'text-blue-400' : 'text-gray-400'}`} />
+                                        <span>Screen Share</span>
+                                        {selectedView === 'screen' && <span className="ml-auto text-xs text-blue-400">✓</span>}
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        )}
+
                         <Button
                             variant="ghost"
                             size="sm"
