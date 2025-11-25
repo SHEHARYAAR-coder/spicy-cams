@@ -71,6 +71,13 @@ enum TargetType {
   MESSAGE
 }
 
+enum PrivateChatRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
 // ============================================
 // USER & AUTHENTICATION
 // ============================================
@@ -111,12 +118,14 @@ model User {
   ledgerEntries           LedgerEntry[]
   payments                Payment[]
   streams                 Stream[]
-  follows                 Follow[]           @relation("UserFollows")
-  followers               Follow[]           @relation("CreatorFollowers")
+  follows                 Follow[]             @relation("UserFollows")
+  followers               Follow[]             @relation("CreatorFollowers")
   chatMessages            ChatMessage[]
-  sentPrivateMessages     PrivateMessage[]   @relation("SentPrivateMessages")
-  receivedPrivateMessages PrivateMessage[]   @relation("ReceivedPrivateMessages")
-  moderationActions       ModerationAction[] @relation("ModeratorActions")
+  sentPrivateMessages     PrivateMessage[]     @relation("SentPrivateMessages")
+  receivedPrivateMessages PrivateMessage[]     @relation("ReceivedPrivateMessages")
+  sentChatRequests        PrivateChatRequest[] @relation("SentChatRequests")
+  receivedChatRequests    PrivateChatRequest[] @relation("ReceivedChatRequests")
+  moderationActions       ModerationAction[]   @relation("ModeratorActions")
   // moderationTargets       ModerationAction[] @relation("TargetUser")
   streamSessions          StreamSession[]
   meterEvents             MeterEvent[]
@@ -137,23 +146,23 @@ model Profile {
   // Creator-specific fields
   category String?
   language String?
-  
+
   // Extended Creator Profile Fields
-  hairColor         String?   @map("hair_color")        // Blonde, Brunette, Red, Black, etc.
-  physique          String?                             // Athletic, Slim, Average, Curvy, etc.
-  breastSize        String?   @map("breast_size")       // A, B, C, D, Double D, etc.
-  pubicHair         String?   @map("pubic_hair")        // Shaved, Trimmed, Natural, etc.
-  displayedAge      Int?      @map("displayed_age")     // Must be 18+
-  spokenLanguages   String[]  @default([]) @map("spoken_languages") // [English, German, Spanish, etc.]
-  relationship      String?                             // No, Single, Taken, Married, etc.
-  ethnicity         String?                             // White, Black, Asian, Latina, etc.
-  piercings         String?                             // No, Yes, Multiple, etc.
-  tattoos           String?                             // No, Small, Medium, Large, etc.
-  displayedCity     String?   @map("displayed_city")    // City name
-  myShows           String[]  @default([]) @map("my_shows") // Category selections
-  profileDescription String? @db.Text @map("profile_description") // 350 character limit
-  
-  // Media Gallery
+  hairColor          String?  @map("hair_color") // Blonde, Brunette, Red, Black, etc.
+  physique           String? // Athletic, Slim, Average, Curvy, etc.
+  breastSize         String?  @map("breast_size") // A, B, C, D, Double D, etc.
+  pubicHair          String?  @map("pubic_hair") // Shaved, Trimmed, Natural, etc.
+  displayedAge       Int?     @map("displayed_age") // Must be 18+
+  spokenLanguages    String[] @default([]) @map("spoken_languages") // [English, German, Spanish, etc.]
+  relationship       String? // No, Single, Taken, Married, etc.
+  ethnicity          String? // White, Black, Asian, Latina, etc.
+  piercings          String? // No, Yes, Multiple, etc.
+  tattoos            String? // No, Small, Medium, Large, etc.
+  displayedCity      String?  @map("displayed_city") // City name
+  myShows            String[] @default([]) @map("my_shows") // Category selections
+  profileDescription String?  @map("profile_description") @db.Text // 350 character limit
+
+    // Media Gallery
   profileImages     String[]  @default([]) @map("profile_images") // Array of image URLs
   profileVideos     String[]  @default([]) @map("profile_videos") // Array of video URLs
 
@@ -199,10 +208,11 @@ model Stream {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  creator         User             @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creator         User                 @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   sessions        StreamSession[]
   chatMessages    ChatMessage[]
   privateMessages PrivateMessage[]
+  chatRequests    PrivateChatRequest[]
   // moderationActions ModerationAction[] @relation("TargetStream")
 
   @@index([creatorId])
@@ -427,6 +437,32 @@ model PrivateMessage {
   @@index([receiverId, isRead])
   @@index([streamId, createdAt])
   @@map("private_messages")
+}
+
+model PrivateChatRequest {
+  id         String                   @id @default(cuid())
+  senderId   String                   @map("sender_id")
+  receiverId String                   @map("receiver_id")
+  streamId   String                   @map("stream_id")
+  status     PrivateChatRequestStatus @default(PENDING)
+
+  // Optional initial message from viewer
+  initialMessage String? @map("initial_message") @db.Text
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  expiresAt   DateTime? @map("expires_at")
+  respondedAt DateTime? @map("responded_at")
+
+  // Relations
+  sender   User   @relation("SentChatRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedChatRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId, streamId])
+  @@index([receiverId, status])
+  @@index([senderId, streamId])
+  @@map("private_chat_requests")
 }
 
 // ============================================

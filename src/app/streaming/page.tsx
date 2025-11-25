@@ -338,13 +338,11 @@ export default function StreamingPage() {
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="">
+    <div className="min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)] bg-gray-900 text-white lg:overflow-hidden flex flex-col">
+      <main className="flex-1 container mx-auto px-4 py-4 flex flex-col min-h-0">
+        <div className="flex-none">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold">Live Streaming</h1>
               <p className="text-gray-400">Create and watch live streams</p>
@@ -352,15 +350,17 @@ export default function StreamingPage() {
 
             {/* Navigation */}
             <div className="flex gap-2">
-              <Button
-                onClick={() => setMode('browse')}
-                variant={mode === 'browse' ? 'default' : 'outline'}
-                className={mode === 'browse' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Browse Streams
-              </Button>
-              {(session.user && ((session.user as any).role === 'CREATOR' || (session.user as any).role === 'ADMIN')) && (
+              {mode !== 'broadcast' && (
+                <Button
+                  onClick={() => setMode('browse')}
+                  variant={mode === 'browse' ? 'default' : 'outline'}
+                  className={mode === 'browse' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Browse Streams
+                </Button>
+              )}
+              {(session.user && ((session.user as any).role === 'CREATOR' || (session.user as any).role === 'ADMIN') && mode !== 'broadcast') && (
                 <Button
                   onClick={() => setMode('create')}
                   variant={mode === 'create' ? 'default' : 'outline'}
@@ -372,253 +372,260 @@ export default function StreamingPage() {
               )}
             </div>
           </div>
+        </div>
 
+        {/* Content Area */}
+        <div className="flex-1 min-h-0 relative">
           {/* Browse Mode */}
           {mode === 'browse' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Live Streams</h2>
-                <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white">
-                  Refresh
-                </Button>
-              </div>
+            <div className="h-full overflow-y-auto pr-2 pb-4">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-bold">Live Streams</h2>
+                  <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white">
+                    Refresh
+                  </Button>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {streams.map((stream) => (
-                  <StreamCard
-                    key={stream.id}
-                    stream={stream}
-                    onJoinStream={handleJoinStream}
-                  />
-                ))}
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {streams.map((stream) => (
+                    <StreamCard
+                      key={stream.id}
+                      stream={stream}
+                      onJoinStream={handleJoinStream}
+                    />
+                  ))}
+                </div>
 
-              {streams.length === 0 && (
-                <Card className="bg-gray-800 border-gray-700">
-                  <CardContent className="p-12 text-center">
-                    <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-xl text-white font-semibold mb-2">No streams available</h3>
-                    <p className="text-gray-400 mb-4">Be the first to start streaming!</p>
-                    {isCreator && (
-                      <Button onClick={() => setMode('create')} className="bg-purple-600 hover:bg-purple-700">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Start Streaming
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                {streams.length === 0 && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardContent className="p-12 text-center">
+                      <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-xl text-white font-semibold mb-2">No streams available</h3>
+                      <p className="text-gray-400 mb-4">Be the first to start streaming!</p>
+                      {isCreator && (
+                        <Button onClick={() => setMode('create')} className="bg-purple-600 hover:bg-purple-700">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Start Streaming
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           )}
 
           {/* Create Stream Mode */}
           {mode === 'create' && (
-            <div className="max-w-2xl mx-auto space-y-6">
-              {!hasMediaPermissions ? (
-                <div>
-                  <MediaPermissions
-                    onPermissionsGranted={() => setHasMediaPermissions(true)}
-                    onPermissionsDenied={(error) => setPermissionError(error)}
-                  />
-                  {permissionError && (
-                    <Card className="mt-4 bg-red-900/20 border-red-500">
-                      <CardContent className="p-4">
-                        <p className="text-sm text-red-400">{permissionError}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              ) : (
-                <Card className="bg-gray-800 border-gray-700 text-white">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Video className="w-6 h-6" />
-                      Start a New Stream
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* Thumbnail Upload */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Stream Thumbnail</label>
-                      <div className="flex flex-col gap-4">
-                        {newStream.thumbnailUrl ? (
-                          <div className="relative">
-                            <img
-                              src={newStream.thumbnailUrl}
-                              alt="Stream thumbnail"
-                              className="w-full max-w-xs rounded-lg object-cover aspect-video"
-                            />
-                            <Button
-                              onClick={() => {
-                                // Clean up object URL if it's not a base64 string
-                                if (newStream.thumbnailUrl && !newStream.thumbnailUrl.startsWith('data:')) {
-                                  URL.revokeObjectURL(newStream.thumbnailUrl);
-                                }
-                                setNewStream(prev => ({ ...prev, thumbnailUrl: '' }));
-                              }}
-                              variant="outline"
-                              size="sm"
-                              className="absolute top-2 right-2 h-8 w-8 p-0 bg-gray-800/80 border-gray-600 hover:bg-gray-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
-                            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-400 mb-2">Upload a thumbnail image</p>
-                            <p className="text-xs text-gray-500">PNG, JPG up to 2MB (auto-compressed)</p>
-                          </div>
-                        )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleThumbnailUpload}
-                          className="hidden"
-                          id="thumbnail-upload"
-                        />
-                        <Button
-                          onClick={() => document.getElementById('thumbnail-upload')?.click()}
-                          variant="outline"
-                          className="w-fit border-gray-600 text-gray-300 hover:bg-gray-700"
-                        >
-                          <Upload className="w-4 h-4 mr-2" />
-                          {newStream.thumbnailUrl ? 'Change Thumbnail' : 'Upload Thumbnail'}
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Stream Title *</label>
-                      <Input
-                        value={newStream.title}
-                        onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="Enter an engaging stream title"
-                        maxLength={100}
-                        className="bg-gray-900 border-gray-700 focus:ring-purple-500"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">{newStream.title.length}/100</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Description (Optional)</label>
-                      <textarea
-                        className="flex min-h-[100px] w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={newStream.description}
-                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
-                        placeholder="Describe what you'll be streaming about..."
-                        rows={4}
-                        maxLength={500}
-                      />
-                      <p className="text-xs text-gray-400 mt-1">{newStream.description.length}/500</p>
-                    </div>
-
-                    {/* Category Selection */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Category *</label>
-                      <div className="relative">
-                        <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <select
-                          value={newStream.category}
-                          onChange={(e) => setNewStream(prev => ({ ...prev, category: e.target.value }))}
-                          className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-md text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                        >
-                          <option value="">Select a category</option>
-                          {streamCategories.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Tags</label>
-                      <div className="space-y-3">
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Tag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                              value={tagInput}
-                              onChange={(e) => setTagInput(e.target.value)}
-                              onKeyPress={handleTagKeyPress}
-                              placeholder="Add a tag and press Enter"
-                              className="pl-10 bg-gray-900 border-gray-700 focus:ring-purple-500"
-                              maxLength={20}
-                            />
-                          </div>
+            <div className="h-full overflow-y-auto pr-2 pb-4">
+              <div className="max-w-2xl mx-auto space-y-6">
+                {!hasMediaPermissions ? (
+                  <div>
+                    <MediaPermissions
+                      onPermissionsGranted={() => setHasMediaPermissions(true)}
+                      onPermissionsDenied={(error) => setPermissionError(error)}
+                    />
+                    {permissionError && (
+                      <Card className="mt-4 bg-red-900/20 border-red-500">
+                        <CardContent className="p-4">
+                          <p className="text-sm text-red-400">{permissionError}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ) : (
+                  <Card className="bg-gray-800 border-gray-700 text-white">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Video className="w-6 h-6" />
+                        Start a New Stream
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Thumbnail Upload */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Stream Thumbnail</label>
+                        <div className="flex flex-col gap-4">
+                          {newStream.thumbnailUrl ? (
+                            <div className="relative">
+                              <img
+                                src={newStream.thumbnailUrl}
+                                alt="Stream thumbnail"
+                                className="w-full max-w-xs rounded-lg object-cover aspect-video"
+                              />
+                              <Button
+                                onClick={() => {
+                                  // Clean up object URL if it's not a base64 string
+                                  if (newStream.thumbnailUrl && !newStream.thumbnailUrl.startsWith('data:')) {
+                                    URL.revokeObjectURL(newStream.thumbnailUrl);
+                                  }
+                                  setNewStream(prev => ({ ...prev, thumbnailUrl: '' }));
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="absolute top-2 right-2 h-8 w-8 p-0 bg-gray-800/80 border-gray-600 hover:bg-gray-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center">
+                              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                              <p className="text-sm text-gray-400 mb-2">Upload a thumbnail image</p>
+                              <p className="text-xs text-gray-500">PNG, JPG up to 2MB (auto-compressed)</p>
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleThumbnailUpload}
+                            className="hidden"
+                            id="thumbnail-upload"
+                          />
                           <Button
-                            onClick={addTag}
+                            onClick={() => document.getElementById('thumbnail-upload')?.click()}
                             variant="outline"
-                            disabled={!tagInput.trim() || newStream.tags.includes(tagInput.trim()) || newStream.tags.length >= 10}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            className="w-fit border-gray-600 text-gray-300 hover:bg-gray-700"
                           >
-                            Add
+                            <Upload className="w-4 h-4 mr-2" />
+                            {newStream.thumbnailUrl ? 'Change Thumbnail' : 'Upload Thumbnail'}
                           </Button>
                         </div>
-
-                        {newStream.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {newStream.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30"
-                              >
-                                {tag}
-                                <Button
-                                  onClick={() => removeTag(tag)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-4 w-4 p-0 hover:bg-purple-500/30"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-xs text-gray-500">Add tags to help viewers find your stream (max 10 tags)</p>
                       </div>
-                    </div>
 
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={handleCreateStream}
-                        disabled={loading || !newStream.title.trim() || !newStream.category.trim()}
-                        className="flex-1 bg-purple-600 hover:bg-purple-700"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Creating Stream...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4 mr-2" />
-                            Start Streaming
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => setMode('browse')}
-                        variant="outline"
-                        className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Stream Title *</label>
+                        <Input
+                          value={newStream.title}
+                          onChange={(e) => setNewStream(prev => ({ ...prev, title: e.target.value }))}
+                          placeholder="Enter an engaging stream title"
+                          maxLength={100}
+                          className="bg-gray-900 border-gray-700 focus:ring-purple-500"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">{newStream.title.length}/100</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Description (Optional)</label>
+                        <textarea
+                          className="flex min-h-[100px] w-full rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          value={newStream.description}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewStream(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Describe what you'll be streaming about..."
+                          rows={4}
+                          maxLength={500}
+                        />
+                        <p className="text-xs text-gray-400 mt-1">{newStream.description.length}/500</p>
+                      </div>
+
+                      {/* Category Selection */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Category *</label>
+                        <div className="relative">
+                          <FolderOpen className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <select
+                            value={newStream.category}
+                            onChange={(e) => setNewStream(prev => ({ ...prev, category: e.target.value }))}
+                            className="w-full pl-10 pr-4 py-2 bg-gray-900 border border-gray-700 rounded-md text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                          >
+                            <option value="">Select a category</option>
+                            {streamCategories.map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Tags</label>
+                        <div className="space-y-3">
+                          <div className="flex gap-2">
+                            <div className="relative flex-1">
+                              <Tag className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                              <Input
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyPress={handleTagKeyPress}
+                                placeholder="Add a tag and press Enter"
+                                className="pl-10 bg-gray-900 border-gray-700 focus:ring-purple-500"
+                                maxLength={20}
+                              />
+                            </div>
+                            <Button
+                              onClick={addTag}
+                              variant="outline"
+                              disabled={!tagInput.trim() || newStream.tags.includes(tagInput.trim()) || newStream.tags.length >= 10}
+                              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                            >
+                              Add
+                            </Button>
+                          </div>
+
+                          {newStream.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {newStream.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="inline-flex items-center gap-1 px-3 py-1 bg-purple-600/20 text-purple-300 rounded-full text-sm border border-purple-500/30"
+                                >
+                                  {tag}
+                                  <Button
+                                    onClick={() => removeTag(tag)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-4 w-4 p-0 hover:bg-purple-500/30"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <p className="text-xs text-gray-500">Add tags to help viewers find your stream (max 10 tags)</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={handleCreateStream}
+                          disabled={loading || !newStream.title.trim() || !newStream.category.trim()}
+                          className="flex-1 bg-purple-600 hover:bg-purple-700"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Creating Stream...
+                            </>
+                          ) : (
+                            <>
+                              <Video className="w-4 h-4 mr-2" />
+                              Start Streaming
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={() => setMode('browse')}
+                          variant="outline"
+                          className="border-gray-700 text-gray-900 hover:bg-gray-800 hover:text-white"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           )}
 
           {/* Creator Broadcast */}
           {mode === 'broadcast' && selectedStream && streamToken && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
+            <div className="h-full flex flex-col space-y-4">
+              <div className="flex-none flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Broadcasting Live</h2>
                 <Button
                   onClick={handleStreamEnd}
@@ -629,26 +636,28 @@ export default function StreamingPage() {
                 </Button>
               </div>
 
-              {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-16rem)] min-h-[600px]">
+              {/* Responsive Video + Chat Layout */}
+              <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2 h-full">
-                  <CreatorBroadcast
-                    streamId={selectedStream}
-                    token={streamToken}
-                    serverUrl={LIVEKIT_SERVER_URL}
-                    streamTitle={currentStreamData?.title || newStream.title}
-                    onStreamEnd={handleStreamEnd}
-                    className="h-full"
-                  />
+                <div className="lg:col-span-2 flex flex-col h-[40vh] lg:h-full">
+                  <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
+                    <CreatorBroadcast
+                      streamId={selectedStream}
+                      token={streamToken}
+                      serverUrl={LIVEKIT_SERVER_URL}
+                      streamTitle={currentStreamData?.title || newStream.title}
+                      onStreamEnd={handleStreamEnd}
+                      className="h-full w-full absolute inset-0"
+                    />
+                  </div>
                 </div>
 
                 {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1 h-full">
+                <div className="lg:col-span-1 h-[50vh] lg:h-full">
                   <TabbedChatContainer
                     streamId={selectedStream}
                     canModerate={true}
-                    className="h-full"
+                    className="h-full w-full"
                   />
                 </div>
               </div>
@@ -657,8 +666,8 @@ export default function StreamingPage() {
 
           {/* Viewer Player */}
           {mode === 'watch' && selectedStream && streamToken && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
+            <div className="h-full flex flex-col space-y-4">
+              <div className="flex-none flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Watching Stream</h2>
                 <Button
                   onClick={handleStreamEnd}
@@ -670,21 +679,23 @@ export default function StreamingPage() {
               </div>
 
               {/* Video + Chat Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-16rem)] min-h-[600px]">
+              <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Video Section - Takes 2/3 width on large screens */}
-                <div className="lg:col-span-2 h-full">
-                  <ViewerPlayer
-                    streamId={selectedStream}
-                    token={streamToken}
-                    serverUrl={LIVEKIT_SERVER_URL}
-                    streamTitle={currentStreamData?.title}
-                    creatorName={currentStreamData?.creator?.name}
-                    className="h-full"
-                  />
+                <div className="lg:col-span-2 flex flex-col h-[40vh] lg:h-full">
+                  <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
+                    <ViewerPlayer
+                      streamId={selectedStream}
+                      token={streamToken}
+                      serverUrl={LIVEKIT_SERVER_URL}
+                      streamTitle={currentStreamData?.title}
+                      creatorName={currentStreamData?.creator?.name}
+                      className="h-full w-full absolute inset-0"
+                    />
+                  </div>
                 </div>
 
                 {/* Chat Section - Takes 1/3 width on large screens */}
-                <div className="lg:col-span-1 h-full">
+                <div className="lg:col-span-1 h-[50vh] lg:h-full">
                   <TabbedChatContainer
                     streamId={selectedStream}
                     canModerate={false}

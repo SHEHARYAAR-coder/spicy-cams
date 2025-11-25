@@ -24,6 +24,51 @@ export async function GET(
 
     const senderId = session.user.id;
 
+    // Get the stream to check if user is the creator
+    const stream = await prisma.stream.findUnique({
+      where: { id: streamId },
+      select: { creatorId: true },
+    });
+
+    if (!stream) {
+      return NextResponse.json({ error: "Stream not found" }, { status: 404 });
+    }
+
+    const isCreator = stream.creatorId === senderId || stream.creatorId === receiverId;
+
+    let requestStatus = null;
+
+    // If neither party is the creator, check for accepted chat request
+    if (!isCreator) {
+      const chatRequest = await prisma.privateChatRequest.findUnique({
+        where: {
+          senderId_receiverId_streamId: {
+            senderId,
+            receiverId,
+            streamId,
+          },
+        },
+      });
+
+      if (!chatRequest) {
+        return NextResponse.json(
+          { error: "No chat request found" },
+          { status: 403 }
+        );
+      }
+
+      requestStatus = chatRequest.status;
+
+      if (chatRequest.status !== "ACCEPTED") {
+        // Return the status so the UI can show appropriate message
+        return NextResponse.json(
+          { messages: [], requestStatus: chatRequest.status },
+          { status: 200 }
+        );
+      }
+    }
+
+
     // Get conversation history between sender and receiver in this stream
     const messages = await prisma.privateMessage.findMany({
       where: {
@@ -76,7 +121,10 @@ export async function GET(
       },
     }));
 
-    return NextResponse.json({ messages: formattedMessages });
+    return NextResponse.json({ 
+      messages: formattedMessages,
+      requestStatus: requestStatus || "ACCEPTED"
+    });
   } catch (error) {
     console.error("Error fetching private messages:", error);
     return NextResponse.json(
@@ -159,6 +207,55 @@ export async function POST(
     }
 
     const isCreator = stream.creatorId === senderId;
+
+    // If sender is not the creator, check for accepted chat request
+    if (!isCreator) {
+      const chatRequest = await prisma.privateChatRequest.findUnique({
+        where: {
+          senderId_receiverId_streamId: {
+            senderId,
+            receiverId,
+            streamId,
+          },
+        },
+      });
+
+      if (!chatRequest) {
+        return NextResponse.json(
+          { error: "Please send a chat request first" },
+          { status: 403 }
+        );
+      }
+
+      if (chatRequest.status === "PENDING") {
+        return NextResponse.json(
+          { error: "Chat request is pending approval" },
+          { status: 403 }
+        );
+      }
+
+      if (chatRequest.status === "REJECTED") {
+        return NextResponse.json(
+          { error: "Chat request was rejected" },
+          { status: 403 }
+        );
+      }
+
+      if (chatRequest.status === "EXPIRED") {
+        return NextResponse.json(
+          { error: "Chat request has expired. Please send a new request" },
+          { status: 403 }
+        );
+      }
+
+      if (chatRequest.status !== "ACCEPTED") {
+        return NextResponse.json(
+          { error: "Chat request not accepted" },
+          { status: 403 }
+        );
+      }
+    }
+
 
     // Atomically create message and (if needed) debit wallet + ledger
     const privateMessage = await prisma.$transaction(async (tx) => {

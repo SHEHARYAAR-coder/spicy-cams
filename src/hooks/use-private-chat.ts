@@ -32,6 +32,20 @@ export interface PrivateConversation {
   unreadCount: number;
 }
 
+export interface ChatRequest {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderImage?: string;
+  senderRole: string;
+  initialMessage?: string;
+  createdAt: string;
+  expiresAt?: string;
+}
+
+export type ChatRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED" | null;
+
+
 interface UsePrivateChatProps {
   streamId: string;
   receiverId?: string;
@@ -47,9 +61,12 @@ export function usePrivateChat({
 }: UsePrivateChatProps) {
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [conversations, setConversations] = useState<PrivateConversation[]>([]);
+  const [chatRequests, setChatRequests] = useState<ChatRequest[]>([]);
+  const [requestStatus, setRequestStatus] = useState<ChatRequestStatus>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+
 
   // Polling refs
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -57,13 +74,18 @@ export function usePrivateChat({
   const isInitialLoadRef = useRef(true);
 
   // Fetch conversations list
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = useCallback(async (showLoading = false) => {
     if (!token || !enabled) return;
 
     // Load from cache first for instant display
     const cached = getCachedConversations(streamId);
     if (cached && cached.length > 0) {
       setConversations(cached);
+    }
+
+    // Show loading only on initial load if no cache
+    if (showLoading && (!cached || cached.length === 0)) {
+      setLoading(true);
     }
 
     try {
@@ -86,6 +108,10 @@ export function usePrivateChat({
       }
     } catch (error) {
       console.error("Error fetching conversations:", error);
+    } finally {
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }, [streamId, token, enabled]);
 
@@ -103,7 +129,7 @@ export function usePrivateChat({
       }
 
       // Only show loading state if it's the initial load and no cache
-      if (isInitialLoadRef.current && !cached) {
+      if (isInitialLoadRef.current && (!cached || cached.length === 0)) {
         setLoading(true);
       }
       
@@ -122,6 +148,11 @@ export function usePrivateChat({
         if (response.ok) {
           const data = await response.json();
           const newMessages = data.messages || [];
+          
+          // Check if there's a request status in the response
+          if (data.requestStatus) {
+            setRequestStatus(data.requestStatus);
+          }
           
           // Filter out duplicates
           const filteredMessages = newMessages.filter(
@@ -252,6 +283,160 @@ export function usePrivateChat({
     [streamId, token, receiverId, fetchConversations]
   );
 
+  // Fetch pending chat requests (for creators)
+  const fetchChatRequests = useCallback(async () => {
+    if (!token || !enabled) return;
+
+    try {
+      const response = await fetch(
+        `/api/streams/${streamId}/chat-requests`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setChatRequests(data.requests || []);
+      } else {
+        console.error("Failed to fetch chat requests");
+      }
+    } catch (error) {
+      console.error("Error fetching chat requests:", error);
+    }
+  }, [streamId, token, enabled]);
+
+  // Send a chat request
+  const sendChatRequest = useCallback(
+    async (targetReceiverId: string, initialMessage?: string) => {
+      if (!token) return false;
+
+      setSending(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `/api/streams/${streamId}/chat-requests`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              receiverId: targetReceiverId,
+              initialMessage,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setRequestStatus("PENDING");
+          return true;
+        } else {
+          const data = await response.json();
+          setError(data.error || "Failed to send chat request");
+          return false;
+        }
+      } catch (error) {
+        setError("Failed to send chat request");
+        console.error("Error sending chat request:", error);
+        return false;
+      } finally {
+        setSending(false);
+      }
+    },
+    [streamId, token]
+  );
+
+  // Accept a chat request
+  const acceptChatRequest = useCallback(
+    async (requestId: string) => {
+      if (!token) return false;
+
+      try {
+        const response = await fetch(
+          `/api/streams/${streamId}/chat-requests/${requestId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ action: "accept" }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Remove the accepted request from the list immediately
+          setChatRequests(prev => prev.filter(req => req.id !== requestId));
+          
+          // Update request status if this is the current conversation
+          if (data.request?.senderId === receiverId) {
+            setRequestStatus("ACCEPTED");
+          }
+          
+          // Force refresh conversations to get the new conversation
+          await fetchConversations(false);
+          await fetchChatRequests();
+          
+          return true;
+        } else {
+          const data = await response.json();
+          setError(data.error || "Failed to accept chat request");
+          return false;
+        }
+      } catch (error) {
+        setError("Failed to accept chat request");
+        console.error("Error accepting chat request:", error);
+        return false;
+      }
+    },
+    [streamId, token, receiverId, fetchChatRequests, fetchConversations]
+  );
+
+  // Reject a chat request
+  const rejectChatRequest = useCallback(
+    async (requestId: string) => {
+      if (!token) return false;
+
+      try {
+        const response = await fetch(
+          `/api/streams/${streamId}/chat-requests/${requestId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ action: "reject" }),
+          }
+        );
+
+        if (response.ok) {
+          // Refresh chat requests
+          fetchChatRequests();
+          return true;
+        } else {
+          const data = await response.json();
+          setError(data.error || "Failed to reject chat request");
+          return false;
+        }
+      } catch (error) {
+        setError("Failed to reject chat request");
+        console.error("Error rejecting chat request:", error);
+        return false;
+      }
+    },
+    [streamId, token, fetchChatRequests]
+  );
+
+
   // Start polling for new messages and conversations
   const startPolling = useCallback(() => {
     if (!enabled || !token) return;
@@ -259,13 +444,14 @@ export function usePrivateChat({
     // Poll conversations every 10 seconds (reduced frequency)
     pollIntervalRef.current = setInterval(() => {
       fetchConversations();
+      fetchChatRequests(); // Poll for new chat requests
 
       // If we have an active conversation, refresh its messages too
       if (receiverId) {
         fetchMessages(receiverId);
       }
     }, 10000); // Increased from 5s to 10s to reduce load
-  }, [enabled, token, fetchConversations, receiverId, fetchMessages]);
+  }, [enabled, token, fetchConversations, fetchChatRequests, receiverId, fetchMessages]);
 
   // Stop polling
   const stopPolling = useCallback(() => {
@@ -279,13 +465,14 @@ export function usePrivateChat({
   useEffect(() => {
     if (enabled && token) {
       startPolling();
-      fetchConversations();
+      fetchConversations(true); // Show loading on initial fetch
+      fetchChatRequests(); // Initial fetch of chat requests
     } else {
       stopPolling();
     }
 
     return () => stopPolling();
-  }, [enabled, token, startPolling, stopPolling, fetchConversations]);
+  }, [enabled, token, startPolling, stopPolling, fetchConversations, fetchChatRequests]);
 
   // Effect to fetch messages when receiverId changes
   useEffect(() => {
@@ -293,9 +480,11 @@ export function usePrivateChat({
       // Reset initial load flag for new conversation
       isInitialLoadRef.current = true;
       messageSeenRef.current.clear();
+      setRequestStatus(null); // Reset request status
       fetchMessages(receiverId);
     } else {
       setMessages([]);
+      setRequestStatus(null);
       isInitialLoadRef.current = true;
     }
   }, [receiverId, enabled, token, fetchMessages]);
@@ -310,11 +499,17 @@ export function usePrivateChat({
   return {
     messages,
     conversations,
+    chatRequests,
+    requestStatus,
     loading,
     error,
     sending,
     sendMessage,
+    sendChatRequest,
+    acceptChatRequest,
+    rejectChatRequest,
     fetchMessages,
     fetchConversations,
+    fetchChatRequests,
   };
 }

@@ -46,8 +46,8 @@ export function TabbedChatContainer({
         fetchChatToken();
     }, [streamId, session]);
 
-    // Get unread private message count
-    const { conversations } = usePrivateChat({
+    // Get unread private message count and chat requests
+    const { conversations, chatRequests } = usePrivateChat({
         streamId,
         token: chatToken,
         enabled: !!chatToken && activeTab === "private",
@@ -57,6 +57,10 @@ export function TabbedChatContainer({
         (total, conv) => total + conv.unreadCount,
         0
     );
+
+    // Total notifications = unread messages + pending chat requests
+    const totalNotifications = totalUnreadPrivateMessages + chatRequests.length;
+
 
     // Handle starting a private conversation
     const handleStartPrivateChat = (userId: string, userName: string) => {
@@ -96,11 +100,11 @@ export function TabbedChatContainer({
                     <MessageCircle className="w-4 h-4" />
                     <span className="hidden sm:inline">Private</span>
                     <span className="sm:hidden">DMs</span>
-                    {totalUnreadPrivateMessages > 0 && (
+                    {totalNotifications > 0 && (
                         <Badge
                             className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs min-w-[18px] h-5 rounded-full bg-red-500 text-white border border-red-400 shadow-lg animate-pulse"
                         >
-                            {totalUnreadPrivateMessages > 99 ? "99+" : totalUnreadPrivateMessages}
+                            {totalNotifications > 99 ? "99+" : totalNotifications}
                         </Badge>
                     )}
                 </Button>
