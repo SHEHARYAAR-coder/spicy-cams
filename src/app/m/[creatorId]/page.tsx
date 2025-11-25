@@ -20,6 +20,9 @@ import {
   Sparkles,
   Share2,
   PlayCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
 import { StreamCard } from "@/components/stream";
@@ -61,6 +64,8 @@ interface Creator {
   displayedCity?: string;
   myShows: string[];
   profileDescription?: string;
+  profileImages: string[];
+  profileVideos: string[];
   followersCount: number;
   streamsCount: number;
   createdAt: Date;
@@ -76,6 +81,7 @@ export default function CreatorProfilePage() {
   const [creator, setCreator] = useState<Creator | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const fetchCreator = async () => {
     setLoading(true);
@@ -136,6 +142,44 @@ export default function CreatorProfilePage() {
     }
     router.push(`/profile?message=${creatorId}`);
   };
+
+  const handleImageClick = (index: number) => {
+    setSelectedImageIndex(index);
+  };
+
+  const handleClosePreview = () => {
+    setSelectedImageIndex(null);
+  };
+
+  const handlePreviousImage = () => {
+    if (selectedImageIndex !== null && creator) {
+      setSelectedImageIndex((selectedImageIndex - 1 + creator.profileImages.length) % creator.profileImages.length);
+    }
+  };
+
+  const handleNextImage = () => {
+    if (selectedImageIndex !== null && creator) {
+      setSelectedImageIndex((selectedImageIndex + 1) % creator.profileImages.length);
+    }
+  };
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedImageIndex === null) return;
+      
+      if (e.key === "Escape") {
+        handleClosePreview();
+      } else if (e.key === "ArrowLeft") {
+        handlePreviousImage();
+      } else if (e.key === "ArrowRight") {
+        handleNextImage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedImageIndex, creator]);
 
   // --- Loading State ---
   if (loading) {
@@ -376,6 +420,69 @@ export default function CreatorProfilePage() {
                 </div>
               )}
 
+              {/* Media Gallery */}
+              {(creator.profileImages.length > 0 || creator.profileVideos.length > 0) && (
+                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
+                  <h2 className="text-2xl font-bold flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                    Media Gallery
+                  </h2>
+
+                  {/* Images Section */}
+                  {creator.profileImages.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-white mb-4">Photos</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {creator.profileImages.map((imageUrl, index) => (
+                          <div
+                            key={index}
+                            className="relative group aspect-square overflow-hidden rounded-xl bg-gray-900 cursor-pointer"
+                            onClick={() => handleImageClick(index)}
+                          >
+                            <Image
+                              src={imageUrl}
+                              alt={`${creator.displayName} photo ${index + 1}`}
+                              fill
+                              className="object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+                                <Sparkles className="w-6 h-6 text-white" />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Videos Section */}
+                  {creator.profileVideos.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-4">Videos</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {creator.profileVideos.map((videoUrl, index) => (
+                          <div
+                            key={index}
+                            className="relative group rounded-xl overflow-hidden bg-gray-900"
+                          >
+                            <video
+                              src={videoUrl}
+                              className="w-full h-auto rounded-xl"
+                              controls
+                              preload="metadata"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Streams Tab Section */}
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -424,6 +531,65 @@ export default function CreatorProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedImageIndex !== null && creator && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={handleClosePreview}
+        >
+          {/* Close Button */}
+          <button
+            onClick={handleClosePreview}
+            className="absolute top-4 right-4 p-2 bg-gray-800/80 hover:bg-gray-700 rounded-full transition-colors z-10"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+
+          {/* Image Counter */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-800/80 px-4 py-2 rounded-full text-white text-sm z-10">
+            {selectedImageIndex + 1} / {creator.profileImages.length}
+          </div>
+
+          {/* Previous Button */}
+          {creator.profileImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePreviousImage();
+              }}
+              className="absolute left-4 p-3 bg-gray-800/80 hover:bg-gray-700 rounded-full transition-colors z-10"
+            >
+              <ChevronLeft className="w-6 h-6 text-white" />
+            </button>
+          )}
+
+          {/* Next Button */}
+          {creator.profileImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNextImage();
+              }}
+              className="absolute right-4 p-3 bg-gray-800/80 hover:bg-gray-700 rounded-full transition-colors z-10"
+            >
+              <ChevronRight className="w-6 h-6 text-white" />
+            </button>
+          )}
+
+          {/* Image */}
+          <div
+            className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={creator.profileImages[selectedImageIndex]}
+              alt={`${creator.displayName} photo ${selectedImageIndex + 1}`}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

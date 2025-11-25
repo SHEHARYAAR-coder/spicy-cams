@@ -152,6 +152,10 @@ model Profile {
   displayedCity     String?   @map("displayed_city")    // City name
   myShows           String[]  @default([]) @map("my_shows") // Category selections
   profileDescription String? @db.Text @map("profile_description") // 350 character limit
+  
+  // Media Gallery
+  profileImages     String[]  @default([]) @map("profile_images") // Array of image URLs
+  profileVideos     String[]  @default([]) @map("profile_videos") // Array of video URLs
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

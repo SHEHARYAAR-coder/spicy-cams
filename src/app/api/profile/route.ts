@@ -96,7 +96,10 @@ export async function PUT(req: NextRequest) {
       tattoos,
       displayedCity,
       myShows,
-      profileDescription
+      profileDescription,
+      // Media gallery
+      profileImages,
+      profileVideos
     } = body;
 
     if (targetRole && targetRole !== 'CREATOR') {
@@ -161,6 +164,8 @@ export async function PUT(req: NextRequest) {
     if (typeof tattoos !== 'undefined') profileUpdateData.tattoos = tattoos;
     if (typeof displayedCity !== 'undefined') profileUpdateData.displayedCity = displayedCity;
     if (Array.isArray(myShows)) profileUpdateData.myShows = myShows;
+    if (Array.isArray(profileImages)) profileUpdateData.profileImages = profileImages;
+    if (Array.isArray(profileVideos)) profileUpdateData.profileVideos = profileVideos;
 
     // Determine the bio/profileDescription values with syncing logic for creators
     let bioValue = typeof bio === 'string' && bio.length > 0 ? bio : null;
@@ -204,6 +209,8 @@ export async function PUT(req: NextRequest) {
       displayedCity: typeof displayedCity === 'string' && displayedCity.length > 0 ? displayedCity : null,
       myShows: Array.isArray(myShows) ? myShows : [],
       profileDescription: profileDescValue,
+      profileImages: Array.isArray(profileImages) ? profileImages : [],
+      profileVideos: Array.isArray(profileVideos) ? profileVideos : [],
     };
 
     // Update profile

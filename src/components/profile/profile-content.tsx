@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CreatorProfileEditDialog from "./creator-profile-edit-dialog";
+import MediaGalleryUpload from "./media-gallery-upload";
 
 export default function ProfileContent() {
   const { data: session } = useSession();
@@ -346,6 +347,25 @@ export default function ProfileContent() {
     setUserData(updated);
   };
 
+  const handleMediaUpdate = async (images: string[], videos: string[]) => {
+    const res = await fetch("/api/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        displayName: userData?.profile?.displayName,
+        bio: userData?.profile?.bio,
+        category: userData?.profile?.category,
+        language: userData?.profile?.language,
+        isCreator: userData?.profile?.isCreator,
+        profileImages: images,
+        profileVideos: videos,
+      }),
+    });
+    if (!res.ok) throw new Error("Failed to update media gallery");
+    const updated = await res.json();
+    setUserData(updated);
+  };
+
   const personalInfo = useMemo(() => {
     if (!userData) return null;
     return (
@@ -663,6 +683,24 @@ export default function ProfileContent() {
     );
   }, [userData]);
 
+  const mediaGallery = useMemo(() => {
+    if (!userData?.profile?.isCreator) return null;
+
+    return (
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-white mb-2">Media Gallery</h3>
+          <p className="text-sm text-gray-400">Upload images and videos to showcase on your public profile</p>
+        </div>
+        <MediaGalleryUpload
+          images={userData.profile.profileImages || []}
+          videos={userData.profile.profileVideos || []}
+          onUpdate={handleMediaUpdate}
+        />
+      </div>
+    );
+  }, [userData, handleMediaUpdate]);
+
   const walletActivity = useMemo(() => {
     if (!userData) return null;
 
@@ -753,6 +791,7 @@ export default function ProfileContent() {
           {profileCard}
           {personalInfo}
           {creatorInfo}
+          {mediaGallery}
           {walletActivity}
           {accountSettings}
           

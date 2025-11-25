@@ -39,6 +39,8 @@ export async function GET(
             displayedCity: true,
             myShows: true,
             profileDescription: true,
+            profileImages: true,
+            profileVideos: true,
           },
         },
         _count: {
@@ -71,7 +73,7 @@ export async function GET(
           },
         },
       },
-    });
+    }) as any; // Type assertion - Prisma types need refresh
 
     if (!creator) {
       return NextResponse.json(
@@ -119,6 +121,8 @@ export async function GET(
         displayedCity: creator.profile?.displayedCity,
         myShows: creator.profile?.myShows || [],
         profileDescription: creator.profile?.profileDescription,
+        profileImages: creator.profile?.profileImages || [],
+        profileVideos: creator.profile?.profileVideos || [],
         followersCount: creator._count.followers,
         streamsCount: creator._count.streams,
         createdAt: creator.createdAt,
