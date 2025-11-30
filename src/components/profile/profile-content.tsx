@@ -54,12 +54,6 @@ export default function ProfileContent() {
   // Memoize the user ID to prevent unnecessary effect triggers
   const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
 
-  React.useEffect(() => {
-    if (userId && !userData) {
-      fetchProfile(userId);
-    }
-  }, [userId, userData, fetchProfile]);
-
   // Function to manually refresh profile data
   const refreshProfile = useCallback(() => {
     if (userId) {
@@ -67,6 +61,19 @@ export default function ProfileContent() {
       fetchProfile(userId);
     }
   }, [userId, fetchProfile]);
+
+  React.useEffect(() => {
+    if (userId && !userData) {
+      fetchProfile(userId);
+    }
+  }, [userId, userData, fetchProfile]);
+
+  // Refresh profile when component mounts or becomes visible (e.g., returning from upgrade page)
+  React.useEffect(() => {
+    if (userId) {
+      refreshProfile();
+    }
+  }, [userId, refreshProfile]);
 
   // Handle avatar change
   const handleAvatarChange = useCallback(
@@ -152,10 +159,9 @@ export default function ProfileContent() {
                       className="w-24 h-24 rounded-full object-cover"
                     />
                   ) : (
-                    `${
-                      userData.profile?.displayName?.[0] ||
-                      userData.email?.[0] ||
-                      "U"
+                    `${userData.profile?.displayName?.[0] ||
+                    userData.email?.[0] ||
+                    "U"
                     }`
                   )}
                 </div>
@@ -193,11 +199,11 @@ export default function ProfileContent() {
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
-                  {session?.user && (session.user as any).role !== "CREATOR" && (
+                  {userData?.role !== "CREATOR" && (
                     <Link href={"/upgrade"}>
-                      <button className="px-4 py-2 bg-linear-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold cursor-pointer">
+                      <button className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold cursor-pointer">
                         <Crown className="w-4 h-4" />
-                        Upgrade to Pro
+                        Upgrade to Creator
                       </button>
                     </Link>
                   )}
@@ -541,7 +547,7 @@ export default function ProfileContent() {
           <h3 className="text-xl font-semibold text-white">
             Creator Information
           </h3>
-          <button 
+          <button
             onClick={() => setCreatorEditDialogOpen(true)}
             className="flex items-center gap-2 text-gray-400 hover:text-white px-4 py-2 rounded-lg border border-gray-600 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors">
             <Edit2 size={16} />
@@ -569,7 +575,7 @@ export default function ProfileContent() {
               {userData._count?.streams || 0}
             </p>
           </div>
-          
+
           {/* New Creator Fields */}
           {userData.profile.hairColor && (
             <div>
@@ -577,63 +583,63 @@ export default function ProfileContent() {
               <p className="text-gray-200 font-medium">{userData.profile.hairColor}</p>
             </div>
           )}
-          
+
           {userData.profile.physique && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Physique</label>
               <p className="text-gray-200 font-medium">{userData.profile.physique}</p>
             </div>
           )}
-          
+
           {userData.profile.breastSize && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Breast Size</label>
               <p className="text-gray-200 font-medium">{userData.profile.breastSize}</p>
             </div>
           )}
-          
+
           {userData.profile.pubicHair && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Pubic Hair</label>
               <p className="text-gray-200 font-medium">{userData.profile.pubicHair}</p>
             </div>
           )}
-          
+
           {userData.profile.displayedAge && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Age</label>
               <p className="text-gray-200 font-medium">{userData.profile.displayedAge}</p>
             </div>
           )}
-          
+
           {userData.profile.relationship && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Relationship</label>
               <p className="text-gray-200 font-medium">{userData.profile.relationship}</p>
             </div>
           )}
-          
+
           {userData.profile.ethnicity && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Ethnicity</label>
               <p className="text-gray-200 font-medium">{userData.profile.ethnicity}</p>
             </div>
           )}
-          
+
           {userData.profile.piercings && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Piercings</label>
               <p className="text-gray-200 font-medium">{userData.profile.piercings}</p>
             </div>
           )}
-          
+
           {userData.profile.tattoos && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Tattoos</label>
               <p className="text-gray-200 font-medium">{userData.profile.tattoos}</p>
             </div>
           )}
-          
+
           {userData.profile.displayedCity && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">City</label>
@@ -641,7 +647,7 @@ export default function ProfileContent() {
             </div>
           )}
         </div>
-        
+
         {/* Spoken Languages */}
         {userData.profile.spokenLanguages && userData.profile.spokenLanguages.length > 0 && (
           <div className="mt-6">
@@ -655,7 +661,7 @@ export default function ProfileContent() {
             </div>
           </div>
         )}
-        
+
         {/* My Shows */}
         {userData.profile.myShows && userData.profile.myShows.length > 0 && (
           <div className="mt-6">
@@ -669,7 +675,7 @@ export default function ProfileContent() {
             </div>
           </div>
         )}
-        
+
         {/* Profile Description */}
         {/* {userData.profile.profileDescription && (
           <div className="mt-6">
@@ -770,8 +776,8 @@ export default function ProfileContent() {
               {userData.googleId
                 ? "Google OAuth"
                 : userData.appleId
-                ? "Apple OAuth"
-                : "Email & Password"}
+                  ? "Apple OAuth"
+                  : "Email & Password"}
             </p>
           </div>
         </div>
@@ -794,7 +800,7 @@ export default function ProfileContent() {
           {mediaGallery}
           {walletActivity}
           {accountSettings}
-          
+
           {/* Creator Profile Edit Dialog */}
           {userData?.profile?.isCreator && (
             <CreatorProfileEditDialog
