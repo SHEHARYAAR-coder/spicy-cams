@@ -81,27 +81,9 @@ export function DashboardSidebar({
 
     const creatorItems = [
       {
-        label: "Creator Studio",
-        href: "/creator",
-        icon: Video,
-        roles: ["CREATOR"],
-      },
-      {
         label: "My Streams",
-        href: "/creator/stream",
+        href: "/creator/streams",
         icon: Activity,
-        roles: ["CREATOR"],
-      },
-      {
-        label: "Analytics",
-        href: "/creator/analytics",
-        icon: TrendingUp,
-        roles: ["CREATOR"],
-      },
-      {
-        label: "Earnings",
-        href: "/creator/earnings",
-        icon: DollarSign,
         roles: ["CREATOR"],
       },
       {
