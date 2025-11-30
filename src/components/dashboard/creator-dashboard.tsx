@@ -152,6 +152,12 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
             Manage Streams
           </a>
           <a
+            href="/finances"
+            className="text-green-400 hover:text-green-300 transition-colors font-semibold"
+          >
+            View Detailed Earnings
+          </a>
+          <a
             href="/profile"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
@@ -161,7 +167,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
             href="/pricing"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
-            Buy Credits
+            Earnings Info
           </a>
         </CardContent>
       </Card>

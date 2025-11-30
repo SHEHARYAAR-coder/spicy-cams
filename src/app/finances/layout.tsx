@@ -17,7 +17,7 @@ export default async function FinancesLayoutWrapper({
 
   const userId = (session.user as any).id;
 
-  // Fetch user for layout props and verify admin role
+  // Fetch user for layout props
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -37,8 +37,8 @@ export default async function FinancesLayoutWrapper({
     redirect("/login");
   }
 
-  // Redirect if not admin
-  if (user.role !== UserRole.ADMIN) {
+  // Allow both ADMIN and CREATOR to access finances
+  if (user.role !== UserRole.ADMIN && user.role !== UserRole.CREATOR) {
     redirect("/unauthorized");
   }
 

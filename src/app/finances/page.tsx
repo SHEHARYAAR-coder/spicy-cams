@@ -1,14 +1,35 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { FinancialOverview } from "@/components/admin/financial-overview";
+import { CreatorEarningsView } from "@/components/dashboard/creator-earnings-view";
 
 export const metadata = {
-  title: "Financial Overview - Admin",
+  title: "Financial Overview",
   description: "View financial statistics and revenue analytics",
 };
 
 export default async function FinancesPage() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const userId = (session.user as any).id;
+  const userRole = (session.user as any).role;
+
+  // If creator, show their earnings view
+  if (userRole === "CREATOR") {
+    return (
+      <>
+        <CreatorEarningsView />
+      </>
+    );
+  }
+
+  // Admin sees full financial overview
   // Fetch comprehensive financial data
-  // Admin check is handled in layout.tsx
 
   // Get all payments
   const payments = await prisma.payment.findMany({

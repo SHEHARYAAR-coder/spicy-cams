@@ -33,7 +33,10 @@ import {
     Monitor,
     Video,
     Clock,
-    SwitchCamera
+    SwitchCamera,
+    Wallet,
+    AlertTriangle,
+    DollarSign
 } from 'lucide-react';
 
 import {
@@ -163,6 +166,9 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
     const [likeCount, setLikeCount] = useState(0);
     const [selectedView, setSelectedView] = useState<'camera' | 'screen'>('camera');
     const [videoContainerRef, setVideoContainerRef] = useState<HTMLDivElement | null>(null);
+    const [balance, setBalance] = useState<number | null>(null);
+    const [showLowBalanceWarning, setShowLowBalanceWarning] = useState(false);
+    const [billingError, setBillingError] = useState<string | null>(null);
 
     const toggleAudio = () => {
         setIsAudioMuted(!isAudioMuted);
@@ -206,6 +212,87 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
 
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    // Billing mechanism - charge every 60 seconds
+    useEffect(() => {
+        // Only bill if connected to stream
+        if (connectionState !== ConnectionState.Connected) {
+            return;
+        }
+
+        // Function to process billing
+        const processBilling = async () => {
+            try {
+                const response = await fetch(`/api/streams/${streamId}/bill`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        watchTimeSeconds: 60, // Bill for 1 minute
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.charged) {
+                        // Update balance display
+                        setBalance(parseFloat(data.remainingBalance));
+
+                        // Show warning if balance is low (less than $1)
+                        if (parseFloat(data.remainingBalance) < 1) {
+                            setShowLowBalanceWarning(true);
+                        }
+
+                        console.log(`✅ Billed $${data.amount} for ${data.watchTimeSeconds}s viewing`);
+                    }
+                    setBillingError(null);
+                } else if (response.status === 402) {
+                    // Insufficient funds
+                    setBillingError('Insufficient balance. Please add credits to continue watching.');
+                    setShowLowBalanceWarning(true);
+
+                    // Optionally, you could disconnect the user here
+                    // For now, we'll just show the error
+                } else {
+                    console.error('Billing error:', data.error);
+                    setBillingError(data.error);
+                }
+            } catch (error) {
+                console.error('Failed to process billing:', error);
+                setBillingError('Failed to process payment');
+            }
+        };
+
+        // Initial billing after 60 seconds
+        const initialTimer = setTimeout(processBilling, 60000);
+
+        // Then bill every 60 seconds
+        const interval = setInterval(processBilling, 60000);
+
+        return () => {
+            clearTimeout(initialTimer);
+            clearInterval(interval);
+        };
+    }, [streamId, connectionState]);
+
+    // Fetch initial balance
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const response = await fetch('/api/wallet/balance');
+                if (response.ok) {
+                    const data = await response.json();
+                    setBalance(parseFloat(data.balance));
+                }
+            } catch (error) {
+                console.error('Failed to fetch balance:', error);
+            }
+        };
+
+        fetchBalance();
     }, []);
 
     const videoTrack = tracks.find(
@@ -284,7 +371,67 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                         {activeParticipants.length + 1}
                     </div>
                 )}
+
+                {/* Balance Display */}
+                {balance !== null && (
+                    <div className={`backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium flex items-center ${balance < 1 ? 'bg-red-500/90' : balance < 5 ? 'bg-yellow-500/90' : 'bg-purple-500/90'
+                        }`}>
+                        <Wallet className="w-4 h-4 mr-1" />
+                        ${balance.toFixed(2)}
+                    </div>
+                )}
             </div>
+
+            {/* Low Balance Warning */}
+            {showLowBalanceWarning && balance !== null && balance < 1 && (
+                <div className="absolute top-28 left-4 right-4 z-30 mx-auto max-w-md">
+                    <div className="bg-yellow-500/95 backdrop-blur-sm text-black px-4 py-3 rounded-lg shadow-lg border-2 border-yellow-400">
+                        <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="font-semibold text-sm">Low Balance Warning</p>
+                                <p className="text-xs mt-1">
+                                    Your balance is running low (${balance.toFixed(2)}).
+                                    Add credits to continue watching without interruption.
+                                </p>
+                                <button
+                                    onClick={() => window.location.href = '/pricing'}
+                                    className="mt-2 bg-black text-yellow-400 px-3 py-1 rounded text-xs font-medium hover:bg-gray-900"
+                                >
+                                    Add Credits
+                                </button>
+                                <button
+                                    onClick={() => setShowLowBalanceWarning(false)}
+                                    className="ml-2 text-xs underline"
+                                >
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Billing Error Alert */}
+            {billingError && (
+                <div className="absolute top-28 left-4 right-4 z-30 mx-auto max-w-md">
+                    <div className="bg-red-500/95 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-lg border-2 border-red-400">
+                        <div className="flex items-start gap-3">
+                            <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="font-semibold text-sm">Payment Error</p>
+                                <p className="text-xs mt-1">{billingError}</p>
+                                <button
+                                    onClick={() => window.location.href = '/pricing'}
+                                    className="mt-2 bg-white text-red-600 px-3 py-1 rounded text-xs font-medium hover:bg-gray-100"
+                                >
+                                    Add Credits Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Like Animation */}
             {showLike && (
