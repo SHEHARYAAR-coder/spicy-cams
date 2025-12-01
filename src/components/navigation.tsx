@@ -125,11 +125,10 @@ export function Header() {
                     <li key={item.href} className="px-1">
                       <Link
                         href={item.href}
-                        className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${
-                          active
+                        className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active
                             ? "text-white"
                             : "text-gray-300 hover:text-white hover:bg-gray-700/60"
-                        }`}
+                          }`}
                       >
                         <span className="whitespace-nowrap">{item.label}</span>
                         {active && (
@@ -217,13 +216,13 @@ export function Header() {
                     .role === "CREATOR" ||
                     (session.user as import("../../lib/auth-utils").SessionUser)
                       .role === "ADMIN") && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/creator" className="cursor-pointer">
-                        <Settings className="w-4 h-4 mr-2" />
-                        <span>Creator Studio</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
+                      <DropdownMenuItem asChild>
+                        <Link href="/creator" className="cursor-pointer">
+                          <Settings className="w-4 h-4 mr-2" />
+                          <span>Creator Studio</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   <DropdownMenuSeparator className="bg-gray-700" />
                   <DropdownMenuItem
                     onSelect={handleSignOut}
@@ -276,11 +275,10 @@ export function Header() {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`block px-4 py-3 rounded-lg text-sm transition-colors ${
-                      active
+                    className={`block px-4 py-3 rounded-lg text-sm transition-colors ${active
                         ? "bg-purple-600 text-white"
                         : "text-gray-300 hover:text-white hover:bg-gray-800/60"
-                    }`}
+                      }`}
                   >
                     {item.label}
                   </Link>

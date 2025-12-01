@@ -43,11 +43,10 @@ export default function ViewerTokenPage() {
           {/* Basic Plan */}
           <Card
             onClick={() => setSelectedPlan("basic")}
-            className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all group ${
-              selectedPlan === "basic"
+            className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all group ${selectedPlan === "basic"
                 ? "border-purple-500/50 shadow-2xl shadow-purple-500/20 scale-105"
                 : "border-gray-700/50 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10"
-            }`}
+              }`}
           >
             <CardHeader className="pb-8 pt-8">
               <div className="flex items-center justify-between mb-6">
@@ -110,11 +109,10 @@ export default function ViewerTokenPage() {
           {/* Plus Plan - Most Popular */}
           <Card
             onClick={() => setSelectedPlan("plus")}
-            className={`cursor-pointer bg-gradient-to-br from-purple-900/20 via-gray-800/40 to-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden relative transition-all group ${
-              selectedPlan === "plus"
+            className={`cursor-pointer bg-gradient-to-br from-purple-900/20 via-gray-800/40 to-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden relative transition-all group ${selectedPlan === "plus"
                 ? "border-purple-400 shadow-2xl shadow-purple-500/30 scale-110"
                 : "border-purple-500/30 hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/20"
-            }`}
+              }`}
           >
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-purple-400 to-purple-500"></div>
             <div className="absolute top-4 right-4">
@@ -191,11 +189,10 @@ export default function ViewerTokenPage() {
           {/* Pro Plan */}
           <Card
             onClick={() => setSelectedPlan("pro")}
-            className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all group ${
-              selectedPlan === "pro"
+            className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm rounded-2xl overflow-hidden transition-all group ${selectedPlan === "pro"
                 ? "border-purple-500/50 shadow-2xl shadow-purple-500/20 scale-105"
                 : "border-gray-700/50 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/10"
-            }`}
+              }`}
           >
             <CardHeader className="pb-8 pt-8">
               <div className="flex items-center justify-between mb-6">

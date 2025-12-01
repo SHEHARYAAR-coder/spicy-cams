@@ -6,12 +6,9 @@ export async function GET(_req: NextRequest) {
   try {
     // Get authenticated user
     const session = await auth();
-    
+
     if (!session || !session.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -51,13 +48,10 @@ export async function GET(_req: NextRequest) {
       payments,
       wallet,
     });
-
   } catch (error: unknown) {
     console.error("Error fetching payments:", error);
-    const errorMessage = error instanceof Error ? error.message : "Failed to fetch payments";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch payments";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

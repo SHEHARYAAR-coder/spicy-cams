@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * GET /api/earnings
- * 
+ *
  * Returns detailed earnings information for creators
  */
 export async function GET(_req: NextRequest) {

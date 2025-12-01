@@ -137,11 +137,10 @@ export function Header() {
                       <li key={item.href} className="px-1">
                         <Link
                           href={item.href}
-                          className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${
-                            active
+                          className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active
                               ? "text-white"
                               : "text-gray-300 hover:text-white hover:bg-gray-700/60"
-                          }`}
+                            }`}
                         >
                           <span className="whitespace-nowrap">
                             {item.label}
@@ -208,13 +207,13 @@ export function Header() {
 
                   {(session.user as import("../../lib/auth-utils").SessionUser)
                     .role === "CREATOR" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/creator" className="cursor-pointer">
-                        <Settings className="w-4 h-4 mr-2" />
-                        <span>Creator Studio</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
+                      <DropdownMenuItem asChild>
+                        <Link href="/creator" className="cursor-pointer">
+                          <Settings className="w-4 h-4 mr-2" />
+                          <span>Creator Studio</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   <DropdownMenuSeparator className="bg-gray-700" />
                   <DropdownMenuItem
                     onSelect={handleSignOut}

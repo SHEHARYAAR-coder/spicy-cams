@@ -33,7 +33,12 @@ export async function GET(_req: NextRequest) {
   } catch (error: unknown) {
     console.error("Error checking Stripe config:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to check configuration" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to check configuration",
+      },
       { status: 500 }
     );
   }

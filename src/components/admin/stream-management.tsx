@@ -171,8 +171,7 @@ export function StreamManagement({ streams }: StreamManagementProps) {
       }
 
       toast.success(
-        `Stream ${
-          actionDialog.action === "delete" ? "deleted" : "ended"
+        `Stream ${actionDialog.action === "delete" ? "deleted" : "ended"
         } successfully`
       );
 
@@ -431,8 +430,8 @@ export function StreamManagement({ streams }: StreamManagementProps) {
               {isLoading
                 ? "Processing..."
                 : actionDialog.action === "delete"
-                ? "Delete Stream"
-                : "End Stream"}
+                  ? "Delete Stream"
+                  : "End Stream"}
             </Button>
           </DialogFooter>
         </DialogContent>

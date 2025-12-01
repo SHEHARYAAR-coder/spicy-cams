@@ -197,7 +197,7 @@ export function FinancialOverview({ data }: FinancialOverviewProps) {
   const revenueGrowth =
     previousMonthRevenue > 0
       ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) *
-        100
+      100
       : 0;
 
   return (
@@ -217,9 +217,8 @@ export function FinancialOverview({ data }: FinancialOverviewProps) {
             </div>
             {revenueGrowth !== 0 && (
               <p
-                className={`text-xs mt-1 font-medium flex items-center gap-1 ${
-                  revenueGrowth > 0 ? "text-green-400" : "text-red-400"
-                }`}
+                className={`text-xs mt-1 font-medium flex items-center gap-1 ${revenueGrowth > 0 ? "text-green-400" : "text-red-400"
+                  }`}
               >
                 {revenueGrowth > 0 ? (
                   <TrendingUp className="h-3 w-3" />
@@ -572,11 +571,10 @@ export function FinancialOverview({ data }: FinancialOverviewProps) {
                         </TableCell>
                         <TableCell>{getLedgerTypeBadge(entry.type)}</TableCell>
                         <TableCell
-                          className={`font-medium ${
-                            entry.type === "DEPOSIT" || entry.type === "REFUND"
+                          className={`font-medium ${entry.type === "DEPOSIT" || entry.type === "REFUND"
                               ? "text-green-400"
                               : "text-red-400"
-                          }`}
+                            }`}
                         >
                           {entry.type === "DEPOSIT" || entry.type === "REFUND"
                             ? "+"

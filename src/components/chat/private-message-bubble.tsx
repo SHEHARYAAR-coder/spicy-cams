@@ -16,7 +16,7 @@ export function PrivateMessageBubble({
     showAvatar = true,
 }: PrivateMessageBubbleProps) {
     const isPending = message.isPending || false;
-    
+
     const roleColors = {
         CREATOR: "bg-purple-500",
         MODERATOR: "bg-green-500",

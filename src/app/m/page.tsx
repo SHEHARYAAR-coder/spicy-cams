@@ -187,9 +187,8 @@ export default function ModelsPage() {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-3 h-3 ${
-                            star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
-                          }`}
+                          className={`w-3 h-3 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
+                            }`}
                         />
                       ))}
                     </div>
@@ -214,9 +213,8 @@ export default function ModelsPage() {
 
                   {/* Hover Overlay */}
                   <div
-                    className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${
-                      hoveredCard === creator.id ? 'opacity-100' : 'opacity-0'
-                    }`}
+                    className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${hoveredCard === creator.id ? 'opacity-100' : 'opacity-0'
+                      }`}
                   >
                     <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
                       <MessageCircle className="w-8 h-8 text-white" />

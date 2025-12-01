@@ -85,8 +85,8 @@ export function ChatRequestDialog({
                             </span>
                             <span
                                 className={`${initialMessage.length > 250
-                                        ? "text-orange-400"
-                                        : "text-gray-500"
+                                    ? "text-orange-400"
+                                    : "text-gray-500"
                                     }`}
                             >
                                 {initialMessage.length}/300

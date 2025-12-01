@@ -103,7 +103,8 @@ export async function GET(
         email: creator.email,
         role: creator.role,
         status: creator.status,
-        displayName: creator.profile?.displayName || creator.email.split("@")[0],
+        displayName:
+          creator.profile?.displayName || creator.email.split("@")[0],
         avatarUrl: creator.profile?.avatarUrl,
         bio: creator.profile?.bio,
         category: creator.profile?.category,
@@ -137,6 +138,6 @@ export async function GET(
         error: "Failed to fetch creator",
       },
       { status: 500 }
-      );
+    );
   }
 }

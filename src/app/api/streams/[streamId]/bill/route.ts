@@ -5,10 +5,10 @@ import { Prisma } from "@prisma/client";
 
 /**
  * POST /api/streams/[streamId]/bill
- * 
+ *
  * Bills a viewer for watching a stream.
  * Deducts credits from viewer's wallet and credits them to the creator.
- * 
+ *
  * Pricing:
  * - $0.22 per minute per viewer (based on pricing page)
  * - This translates to approximately $0.0037 per second
@@ -32,7 +32,8 @@ export async function POST(
     const { watchTimeSeconds = 60 } = body; // Default to 60 seconds (1 minute)
 
     // Validate watch time
-    if (watchTimeSeconds <= 0 || watchTimeSeconds > 300) { // Max 5 minutes per billing cycle
+    if (watchTimeSeconds <= 0 || watchTimeSeconds > 300) {
+      // Max 5 minutes per billing cycle
       return NextResponse.json(
         { error: "Invalid watch time. Must be between 1 and 300 seconds." },
         { status: 400 }
@@ -66,10 +67,10 @@ export async function POST(
     // Prevent creator from being billed for their own stream
     if (stream.creatorId === userId) {
       return NextResponse.json(
-        { 
-          success: true, 
-          charged: false, 
-          message: "Creator not charged for own stream" 
+        {
+          success: true,
+          charged: false,
+          message: "Creator not charged for own stream",
         },
         { status: 200 }
       );
@@ -136,7 +137,9 @@ export async function POST(
     }
 
     // Calculate interval index (how many billing cycles have passed)
-    const intervalIndex = Math.floor(streamSession.totalWatchMs / (watchTimeSeconds * 1000));
+    const intervalIndex = Math.floor(
+      streamSession.totalWatchMs / (watchTimeSeconds * 1000)
+    );
 
     // Perform transaction: deduct from viewer, credit to creator, create ledger entries
     const result = await prisma.$transaction(async (tx) => {

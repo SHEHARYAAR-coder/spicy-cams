@@ -1,12 +1,12 @@
 "use client"
 
-import React, {useState} from "react"
-import {useRouter, useParams} from "next/navigation"
-import {useForm} from "react-hook-form"
-import {z} from "zod"
-import {zodResolver} from "@hookform/resolvers/zod"
+import React, { useState } from "react"
+import { useRouter, useParams } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
-import {Lock, Eye, EyeOff, Video} from "lucide-react"
+import { Lock, Eye, EyeOff, Video } from "lucide-react"
 
 const resetPasswordSchema = z
     .object({
@@ -34,7 +34,7 @@ export default function ResetPasswordForm() {
     const {
         register,
         handleSubmit,
-        formState: {errors},
+        formState: { errors },
     } = useForm<ResetPasswordFormData>({
         resolver: zodResolver(resetPasswordSchema),
     })
@@ -50,7 +50,7 @@ export default function ResetPasswordForm() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({...data, token}),
+                body: JSON.stringify({ ...data, token }),
             })
 
             const responseData = await res.json()
@@ -86,7 +86,7 @@ export default function ResetPasswordForm() {
 
                 <div className="relative z-10 flex flex-col justify-between p-12 text-gray-100">
                     <div className="flex items-center space-x-2">
-                        <Video className="w-8 h-8 text-purple-400"/>
+                        <Video className="w-8 h-8 text-purple-400" />
                         <span className="text-2xl font-bold">SpicyCams</span>
                     </div>
 
@@ -143,7 +143,7 @@ export default function ResetPasswordForm() {
                             </label>
                             <div className="relative">
                                 <Lock
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5"/>
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <input
                                     {...register("password")}
                                     type={showPassword ? "text" : "password"}
@@ -157,9 +157,9 @@ export default function ResetPasswordForm() {
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                                 >
                                     {showPassword ? (
-                                        <EyeOff className="w-5 h-5"/>
+                                        <EyeOff className="w-5 h-5" />
                                     ) : (
-                                        <Eye className="w-5 h-5"/>
+                                        <Eye className="w-5 h-5" />
                                     )}
                                 </button>
                             </div>
@@ -177,7 +177,7 @@ export default function ResetPasswordForm() {
                             </label>
                             <div className="relative">
                                 <Lock
-                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5"/>
+                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                                 <input
                                     {...register("confirmPassword")}
                                     type={showConfirmPassword ? "text" : "password"}
@@ -191,9 +191,9 @@ export default function ResetPasswordForm() {
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-300"
                                 >
                                     {showConfirmPassword ? (
-                                        <EyeOff className="w-5 h-5"/>
+                                        <EyeOff className="w-5 h-5" />
                                     ) : (
-                                        <Eye className="w-5 h-5"/>
+                                        <Eye className="w-5 h-5" />
                                     )}
                                 </button>
                             </div>
@@ -208,9 +208,8 @@ export default function ResetPasswordForm() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${
-                                isLoading ? "opacity-70 cursor-not-allowed" : ""
-                            }`}
+                            className={`w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+                                }`}
                         >
                             {isLoading ? "Resetting..." : "Reset Password"}
                         </button>

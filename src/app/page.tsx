@@ -385,8 +385,8 @@ export default function Home() {
                       {/* Expandable Search Container */}
                       <div
                         className={`relative flex items-center transition-all duration-500 ease-in-out rounded-full backdrop-blur-sm ${isSearchOpen
-                            ? "w-64 md:w-96 bg-gray-800/95 border-2 border-purple-500 shadow-lg shadow-purple-500/30"
-                            : "w-10 h-10 bg-gray-800/80 border border-gray-600 hover:border-gray-500"
+                          ? "w-64 md:w-96 bg-gray-800/95 border-2 border-purple-500 shadow-lg shadow-purple-500/30"
+                          : "w-10 h-10 bg-gray-800/80 border border-gray-600 hover:border-gray-500"
                           }`}
                       >
                         {/* Search Input */}
@@ -396,8 +396,8 @@ export default function Home() {
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className={`h-10 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-400 text-sm md:text-base transition-all duration-500 rounded-full ${isSearchOpen
-                              ? "pl-5 pr-14 opacity-100 visible"
-                              : "w-0 pl-0 pr-0 opacity-0 invisible"
+                            ? "pl-5 pr-14 opacity-100 visible"
+                            : "w-0 pl-0 pr-0 opacity-0 invisible"
                             }`}
                           autoFocus={isSearchOpen}
                         />
@@ -408,8 +408,8 @@ export default function Home() {
                           size="icon"
                           onClick={() => setIsSearchOpen(!isSearchOpen)}
                           className={`absolute right-1 rounded-full transition-all duration-300 z-10 shadow-none ${isSearchOpen
-                              ? "bg-transparent hover:bg-gray-700/50 border-0 h-8 w-8"
-                              : "bg-transparent h-8 w-8 border-0"
+                            ? "bg-transparent hover:bg-gray-700/50 border-0 h-8 w-8"
+                            : "bg-transparent h-8 w-8 border-0"
                             }`}
                         >
                           <Search

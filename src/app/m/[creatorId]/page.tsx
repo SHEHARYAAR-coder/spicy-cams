@@ -164,7 +164,7 @@ export default function CreatorProfilePage() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedImageIndex === null) return;
-      
+
       if (e.key === "Escape") {
         handleClosePreview();
       } else if (e.key === "ArrowLeft") {
@@ -311,16 +311,14 @@ export default function CreatorProfilePage() {
                 <div className="flex items-center justify-center md:justify-start gap-3">
                   <Button
                     onClick={handleFollowToggle}
-                    className={`min-w-[140px] transition-all duration-300 ${
-                      isFollowing
+                    className={`min-w-[140px] transition-all duration-300 ${isFollowing
                         ? "bg-gray-700 hover:bg-gray-600 text-white"
                         : "bg-purple-600 hover:bg-purple-700 text-white font-semibold"
-                    }`}
+                      }`}
                   >
                     <Heart
-                      className={`w-4 h-4 mr-2 transition-colors ${
-                        isFollowing ? "fill-pink-500 text-pink-500" : ""
-                      }`}
+                      className={`w-4 h-4 mr-2 transition-colors ${isFollowing ? "fill-pink-500 text-pink-500" : ""
+                        }`}
                     />
                     {isFollowing ? "Following" : "Follow"}
                   </Button>
@@ -343,7 +341,7 @@ export default function CreatorProfilePage() {
         {/* Main Content Grid */}
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
+
             {/* Left Sidebar: Info & Attributes */}
             <div className="lg:col-span-4 space-y-6">
               {/* About Card */}
@@ -357,7 +355,7 @@ export default function CreatorProfilePage() {
                     {creator.bio || "No bio available."}
                   </p>
                 </div>
-                
+
                 {creator.spokenLanguages.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Languages</h4>
@@ -374,19 +372,19 @@ export default function CreatorProfilePage() {
 
                 {/* Stats / Bento Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                   <AttributeBox label="Ethnicity" value={creator.ethnicity} />
-                   <AttributeBox label="Hair" value={creator.hairColor} />
-                   <AttributeBox label="Body" value={creator.physique} />
-                   <AttributeBox label="Eye Color" value="--" /> 
-                   <AttributeBox label="Tattoos" value={creator.tattoos} />
-                   <AttributeBox label="Joined" value={new Date(creator.createdAt).getFullYear().toString()} icon={<Calendar className="w-3 h-3" />} />
+                  <AttributeBox label="Ethnicity" value={creator.ethnicity} />
+                  <AttributeBox label="Hair" value={creator.hairColor} />
+                  <AttributeBox label="Body" value={creator.physique} />
+                  <AttributeBox label="Eye Color" value="--" />
+                  <AttributeBox label="Tattoos" value={creator.tattoos} />
+                  <AttributeBox label="Joined" value={new Date(creator.createdAt).getFullYear().toString()} icon={<Calendar className="w-3 h-3" />} />
                 </div>
               </div>
 
               {/* My Shows */}
               {creator.myShows.length > 0 && (
                 <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-3xl p-6">
-                   <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                     <Activity className="w-4 h-4 text-pink-500" />
                     My Shows
                   </h3>
@@ -407,7 +405,7 @@ export default function CreatorProfilePage() {
 
             {/* Right Content: Description & Streams */}
             <div className="lg:col-span-8 space-y-8">
-              
+
               {/* Profile Description (Long) */}
               {creator.profileDescription && (
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
@@ -499,17 +497,17 @@ export default function CreatorProfilePage() {
                         {/* Custom wrapper for StreamCard to add hover effects */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-30 transition duration-300 blur-sm"></div>
                         <div className="relative">
-                            <StreamCard
-                                stream={{
-                                ...stream,
-                                creator: {
-                                    id: creator.id,
-                                    name: creator.displayName,
-                                    image: creator.avatarUrl,
-                                },
-                                }}
-                                onJoinStream={handleJoinStream}
-                            />
+                          <StreamCard
+                            stream={{
+                              ...stream,
+                              creator: {
+                                id: creator.id,
+                                name: creator.displayName,
+                                image: creator.avatarUrl,
+                              },
+                            }}
+                            onJoinStream={handleJoinStream}
+                          />
                         </div>
                       </div>
                     ))}
@@ -594,15 +592,15 @@ export default function CreatorProfilePage() {
 
 // Helper Component for Bento Grid Attributes
 function AttributeBox({ label, value, icon }: { label: string; value?: string; icon?: React.ReactNode }) {
-    if (!value || value === "None") return null;
-    return (
-        <div className="bg-gray-700/50 p-3 rounded-xl border border-gray-600/50 hover:bg-gray-700 transition-colors group">
-            <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
-                {icon} {label}
-            </div>
-            <div className="font-medium text-sm text-gray-200 truncate group-hover:text-white">
-                {value}
-            </div>
-        </div>
-    );
+  if (!value || value === "None") return null;
+  return (
+    <div className="bg-gray-700/50 p-3 rounded-xl border border-gray-600/50 hover:bg-gray-700 transition-colors group">
+      <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+        {icon} {label}
+      </div>
+      <div className="font-medium text-sm text-gray-200 truncate group-hover:text-white">
+        {value}
+      </div>
+    </div>
+  );
 }
