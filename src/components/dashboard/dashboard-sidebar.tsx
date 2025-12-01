@@ -9,7 +9,6 @@ import {
   Wallet,
   User,
   Settings,
-  TrendingUp,
   Users,
   Shield,
   AlertTriangle,
@@ -225,6 +224,7 @@ export function DashboardSidebar({
           )}
         >
           {avatarUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={avatarUrl}
               alt="User avatar"

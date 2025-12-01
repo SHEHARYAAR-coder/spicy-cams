@@ -47,8 +47,8 @@ export default function ForgotPasswordForm() {
             }
 
             setSuccess(responseData.message)
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An unknown error occurred")
         } finally {
             setIsLoading(false)
         }
@@ -60,6 +60,7 @@ export default function ForgotPasswordForm() {
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/forget_password.jpeg"
                         alt="Forgot Password Background"
@@ -102,7 +103,7 @@ export default function ForgotPasswordForm() {
                             Forgot Your Password?
                         </h1>
                         <p className="text-gray-400">
-                            No worries! Enter your email and we'll send you a reset link.
+                            No worries! Enter your email and we&apos;ll send you a reset link.
                         </p>
                     </div>
 

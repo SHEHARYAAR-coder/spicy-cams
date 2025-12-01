@@ -3,7 +3,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Clock, MessageCircle } from "lucide-react";
+import { Check, X, Clock } from "lucide-react";
 import { ChatRequest } from "@/hooks/use-private-chat";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +59,7 @@ export function PrivateChatRequestNotification({
                         <div className="flex items-start gap-3">
                             {/* Avatar */}
                             <Avatar className="w-12 h-12 ring-2 ring-purple-500/30">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={request.senderImage || "/default-avatar.png"}
                                     alt={request.senderName}

@@ -4,7 +4,7 @@ import { ChatContainer, PrivateChatContainer } from "@/components/chat";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Users, MessageSquare } from "lucide-react";
+import { MessageCircle, Users } from "lucide-react";
 import { usePrivateChat } from "@/hooks/use-private-chat";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +63,7 @@ export function TabbedChatContainer({
 
 
     // Handle starting a private conversation
-    const handleStartPrivateChat = (userId: string, userName: string) => {
+    const handleStartPrivateChat = (userId: string, _userName: string) => {
         setSelectedPrivateUserId(userId);
         setActiveTab("private");
     };

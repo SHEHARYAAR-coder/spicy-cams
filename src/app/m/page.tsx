@@ -3,22 +3,17 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Search,
   MapPin,
   Users,
-  Heart,
-  Camera,
   MessageCircle,
   Eye,
   Star,
 } from "lucide-react";
-import Image from "next/image";
 
 interface Creator {
   id: string;
@@ -42,9 +37,9 @@ interface Creator {
 }
 
 export default function ModelsPage() {
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
   const router = useRouter();
-  const [creators, setCreators] = useState<Creator[]>([]);
+  const [_creators, setCreators] = useState<Creator[]>([]);
   const [filteredCreators, setFilteredCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,7 +56,7 @@ export default function ModelsPage() {
       const response = await fetch(`/api/users/creators?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
-        const creatorsWithDates = (data.creators || []).map((creator: any) => ({
+        const creatorsWithDates = (data.creators || []).map((creator: Creator) => ({
           ...creator,
           createdAt: new Date(creator.createdAt),
         }));
@@ -159,6 +154,7 @@ export default function ModelsPage() {
                 {/* Avatar with fixed height */}
                 <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
                   {creator.avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={creator.avatarUrl}
                       alt={creator.displayName}

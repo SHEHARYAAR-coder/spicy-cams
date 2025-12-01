@@ -15,7 +15,7 @@ export default async function StreamsLayoutWrapper({
     redirect("/login");
   }
 
-  const userId = (session.user as any).id;
+  const userId = (session.user as { id: string; role?: string }).id;
 
   // Fetch user for layout props and verify admin role
   const user = await prisma.user.findUnique({

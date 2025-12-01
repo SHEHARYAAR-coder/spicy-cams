@@ -36,7 +36,6 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 interface Stream {
     id: string;
@@ -292,6 +291,7 @@ export function MyStreamsContent({ streams }: MyStreamsContentProps) {
                             {/* Thumbnail */}
                             <div className="relative h-48 bg-gray-900 overflow-hidden">
                                 {stream.thumbnailUrl ? (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
                                     <img
                                         src={stream.thumbnailUrl}
                                         alt={stream.title}

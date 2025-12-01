@@ -13,22 +13,14 @@ import { PrivateChatContainer } from "@/components/chat";
 import {
   Video,
   Users,
-  RefreshCw,
   Play,
   Star,
   MapPin,
   Calendar,
   Heart,
   Languages,
-  Filter,
   Search,
-  Grid3X3,
-  List,
-  MoreHorizontal,
-  Eye,
-  Flame,
   MessageCircle,
-  DollarSign,
 } from "lucide-react";
 
 interface Stream {
@@ -60,7 +52,7 @@ export default function Home() {
   const [selectedAge, setSelectedAge] = useState("");
   const [selectedEthnicity, setSelectedEthnicity] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, _setViewMode] = useState<"grid" | "list">("grid");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleCategoryClick = (categoryName: string) => {
@@ -138,12 +130,12 @@ export default function Home() {
       const response = await fetch("/api/streams/list");
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+        const streamsWithDates = (data.streams || []).map((stream: Stream) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           creator: {
             ...stream.creator,
-            image: stream.creator.avatar, // Map avatar to image for consistency
+            image: stream.creator.image, // Map avatar to image for consistency
           },
         }));
         setStreams(streamsWithDates);
@@ -215,13 +207,14 @@ export default function Home() {
           <div className="mb-6">
             {categories.map((category) => {
               const IconComponent = category.icon;
-              const isCreator = !!(
-                session?.user &&
+              const sessionUser = session?.user as { isCreator?: boolean; role?: string; roles?: string[] } | undefined;
+              const _isCreator = !!(
+                sessionUser &&
                 // common possible flags for "creator" role
-                ((session.user as any).isCreator ||
-                  (session.user as any).role === "CREATOR" ||
-                  (Array.isArray((session.user as any).roles) &&
-                    (session.user as any).roles.includes("CREATOR")))
+                (sessionUser.isCreator ||
+                  sessionUser.role === "CREATOR" ||
+                  (Array.isArray(sessionUser.roles) &&
+                    sessionUser.roles.includes("CREATOR")))
               );
 
               return (

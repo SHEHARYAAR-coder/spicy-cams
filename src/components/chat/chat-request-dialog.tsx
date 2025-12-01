@@ -62,7 +62,7 @@ export function ChatRequestDialog({
                         <p className="text-sm text-purple-200 leading-relaxed">
                             <strong className="text-purple-300">Note:</strong> The creator
                             will receive your request and can choose to accept or decline it.
-                            You'll be notified once they respond.
+                            You&apos;ll be notified once they respond.
                         </p>
                     </div>
 

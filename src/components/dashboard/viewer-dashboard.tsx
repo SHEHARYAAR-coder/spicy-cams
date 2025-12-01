@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatsCard } from "./stats-card";
-import { Wallet, Video, Clock, TrendingUp } from "lucide-react";
+import { Wallet, Video, Clock } from "lucide-react";
 import { generateChartData } from "@/lib/chart-utils";
 
 interface ViewerDashboardProps {
@@ -42,6 +42,7 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={userData.avatarUrl}
               alt="Avatar"

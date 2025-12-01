@@ -10,7 +10,6 @@ import {
     TrendingUp,
     Video,
     Calendar,
-    Eye,
     Loader2,
     Download,
     ArrowUpRight,
@@ -35,13 +34,13 @@ interface EarningsData {
         amount: number;
         description: string;
         createdAt: Date;
-        metadata: any;
+        metadata: Record<string, unknown>;
     }>;
 }
 
 export function CreatorEarningsView() {
     const { data: session, status } = useSession();
-    const router = useRouter();
+    const _router = useRouter();
     const [earnings, setEarnings] = useState<EarningsData | null>(null);
     const [loading, setLoading] = useState(true);
 

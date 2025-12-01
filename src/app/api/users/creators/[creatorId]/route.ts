@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { creatorId: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ creatorId: string }> }
 ) {
   try {
-    const { creatorId } = params;
+    const { creatorId } = await params;
 
     const creator = await prisma.user.findUnique({
       where: {
@@ -73,7 +73,7 @@ export async function GET(
           },
         },
       },
-    }) as any; // Type assertion - Prisma types need refresh
+    });
 
     if (!creator) {
       return NextResponse.json(

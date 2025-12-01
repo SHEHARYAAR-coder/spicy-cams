@@ -44,8 +44,9 @@ export async function POST(req: NextRequest) {
     const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     console.log("✅ Webhook signature verified");
-  } catch (err: any) {
-    console.error("❌ Webhook signature verification failed:", err.message);
+  } catch (err: unknown) {
+    const errMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("❌ Webhook signature verification failed:", errMessage);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -138,7 +139,7 @@ export async function POST(req: NextRequest) {
             amount: (session.amount_total || 0) / 100, // Convert cents to dollars
             currency: session.currency?.toUpperCase() || "USD",
             credits: tokens,
-            webhookData: session as any,
+            webhookData: JSON.parse(JSON.stringify(session)),
             completedAt: new Date(),
           },
         });
@@ -188,7 +189,7 @@ export async function POST(req: NextRequest) {
               amount: (session.amount_total || 0) / 100,
               currency: session.currency?.toUpperCase() || "USD",
               credits: 0,
-              webhookData: session as any,
+              webhookData: JSON.parse(JSON.stringify(session)),
               failureReason: "Async payment failed",
             },
           });
@@ -209,10 +210,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error processing webhook:", error);
+    const errorMessage = error instanceof Error ? error.message : "Webhook processing failed";
     return NextResponse.json(
-      { error: error.message || "Webhook processing failed" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

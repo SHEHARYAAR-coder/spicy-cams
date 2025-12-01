@@ -33,7 +33,7 @@ export function AgeVerificationDialog() {
                             The pages of this website contain explicit material and are not suitable for minors. If you are a minor (-18year)
                             or do not wish to be confronted with explicit websites, please leave this website by clicking on{' '}
                             <span className="font-semibold">Exit</span> below. By clicking on{' '}
-                            <span className="font-semibold">Enter</span> below you expressly confirm that you are of age and agree with this website's user
+                            <span className="font-semibold">Enter</span> below you expressly confirm that you are of age and agree with this website&apos;s user
                             agreement. All models on this website are at least 18 years old. Parents, protect your children against explicit
                             websites using one of the following programs.
                         </p>
@@ -56,7 +56,7 @@ export function AgeVerificationDialog() {
                             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium"
                         >
                             <CheckCircle className="w-5 h-5 mr-2" />
-                            I'm 18 or older – Enter
+                            I&apos;m 18 or older – Enter
                         </Button>
 
                         <Button
@@ -65,7 +65,7 @@ export function AgeVerificationDialog() {
                             className="w-full border-gray-600 text-gray-900 hover:text-gray-200 hover:bg-gray-700 py-3 rounded-lg font-medium"
                         >
                             <XCircle className="w-5 h-5 mr-2" />
-                            I'm under 18 – Exit
+                            I&apos;m under 18 – Exit
                         </Button>
                     </div>
 

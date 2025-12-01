@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Get authenticated user
     const session = await auth();
@@ -52,10 +52,11 @@ export async function GET(req: NextRequest) {
       wallet,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching payments:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch payments";
     return NextResponse.json(
-      { error: error.message || "Failed to fetch payments" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

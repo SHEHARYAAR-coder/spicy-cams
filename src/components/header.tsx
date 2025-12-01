@@ -14,7 +14,6 @@ import {
 import {
   Video,
   Settings,
-  Shield,
   LogOut,
   User,
   Hand,
@@ -25,11 +24,22 @@ import React, { useCallback, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+interface UserData {
+  id: string;
+  displayName?: string;
+  avatarUrl?: string;
+  role?: string;
+  profile?: {
+    avatarUrl?: string;
+    displayName?: string;
+  };
+}
+
 export function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Memoize the fetch function to prevent recreation on every render
@@ -46,7 +56,7 @@ export function Header() {
       if (!res.ok) throw new Error("Failed to fetch profile");
       const data = await res.json();
       setUserData(data);
-    } catch (err) {
+    } catch (_err) {
       setUserData(null);
     } finally {
       setLoading(false);

@@ -23,7 +23,7 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [showPassword, setShowPassword] = useState(false)
-    const [rememberMe, setRememberMe] = useState(false)
+    const [_rememberMe, _setRememberMe] = useState(false)
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
     const callbackUrl = searchParams.get("callbackUrl") || "/"
@@ -114,6 +114,7 @@ export default function LoginForm() {
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/login.jpeg"
                         alt="Login Background"

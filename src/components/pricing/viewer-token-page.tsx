@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles, Crown, Zap } from "lucide-react";
+import { Check, Sparkles, Crown } from "lucide-react";
 
 export default function ViewerTokenPage() {
   const router = useRouter();
-  const [billingCycle, setBillingCycle] = useState("personal");
+  const [_billingCycle, _setBillingCycle] = useState("personal");
   const [selectedPlan, setSelectedPlan] = useState("plus");
 
   const handlePlanPurchase = (planId: string) => {
@@ -270,7 +270,7 @@ export default function ViewerTokenPage() {
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto leading-relaxed">
               Tokens are consumed based on the features and services you use.
-              Here's a breakdown of token costs for different actions.
+              Here&apos;s a breakdown of token costs for different actions.
             </p>
           </div>
           <div className="overflow-x-auto">

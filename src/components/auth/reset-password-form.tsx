@@ -63,8 +63,8 @@ export default function ResetPasswordForm() {
             setTimeout(() => {
                 router.push("/login")
             }, 3000)
-        } catch (err: any) {
-            setError(err.message)
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "An unknown error occurred")
         } finally {
             setIsLoading(false)
         }
@@ -76,6 +76,7 @@ export default function ResetPasswordForm() {
             <div
                 className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/reset_password.jpeg"
                         alt="Reset Password Background"

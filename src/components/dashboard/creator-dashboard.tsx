@@ -8,7 +8,6 @@ import {
 import { StatsCard } from "./stats-card";
 import {
   DollarSign,
-  Users,
   Video,
   Eye,
   MessageSquare,
@@ -46,6 +45,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={userData.avatarUrl}
               alt="Avatar"

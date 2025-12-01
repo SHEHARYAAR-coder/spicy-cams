@@ -7,15 +7,15 @@ import { prisma } from "@/lib/prisma";
  * 
  * Returns detailed earnings information for creators
  */
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
-    const userRole = (session.user as any).role;
+    const userId = (session.user as { id: string }).id;
+    const userRole = (session.user as { role: string }).role;
 
     // Only creators can view earnings
     if (userRole !== "CREATOR" && userRole !== "ADMIN") {

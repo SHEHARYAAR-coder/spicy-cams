@@ -26,12 +26,23 @@ import React, { useCallback, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+interface UserData {
+  id: string;
+  displayName?: string;
+  avatarUrl?: string;
+  role?: string;
+  profile?: {
+    avatarUrl?: string;
+    displayName?: string;
+  };
+}
+
 export function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Memoize the fetch function to prevent recreation on every render
@@ -48,7 +59,7 @@ export function Header() {
       if (!res.ok) throw new Error("Failed to fetch profile");
       const data = await res.json();
       setUserData(data);
-    } catch (err) {
+    } catch (_err) {
       setUserData(null);
     } finally {
       setLoading(false);
@@ -149,7 +160,7 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0 justify-end px-4 md:w-64 md:px-6">
-            {(session?.user as any)?.role === "ADMIN" && (
+            {(session?.user as { role?: string })?.role === "ADMIN" && (
               <Link href="/streams" className="hidden md:block">
                 <Button
                   variant="ghost"

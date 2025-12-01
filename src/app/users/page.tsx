@@ -448,6 +448,7 @@ export default function UsersManagementPage() {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             {user.avatarUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
                               <img
                                 src={user.avatarUrl}
                                 alt={user.displayName || user.email}

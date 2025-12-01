@@ -72,6 +72,7 @@ export function ConversationList({
                         {/* Avatar */}
                         <div className="relative">
                             <Avatar className="w-12 h-12 ring-2 ring-gray-600/50 transition-all duration-200 group-hover:ring-purple-500/30">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={conversation.partnerImage || "/default-avatar.png"}
                                     alt={conversation.partnerName}

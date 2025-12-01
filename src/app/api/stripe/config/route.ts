@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getSessionUser } from "@/lib/session-helpers";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const session = await auth();
 
@@ -30,10 +30,10 @@ export async function GET(req: NextRequest) {
       webhookUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/webhook`,
       note: "For local development, use Stripe CLI: stripe listen --forward-to localhost:3000/api/stripe/webhook",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error checking Stripe config:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to check configuration" },
+      { error: error instanceof Error ? error.message : "Failed to check configuration" },
       { status: 500 }
     );
   }

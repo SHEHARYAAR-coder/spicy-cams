@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // Handle status changes
-    const updateData: any = { ...updates };
+    const updateData: Record<string, unknown> = { ...updates };
 
     if (updates.status === "LIVE" && stream.status !== "LIVE") {
       updateData.startedAt = new Date();

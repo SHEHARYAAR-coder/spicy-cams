@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
 
     // Build where clause
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (status === "live") {
       where.status = { in: ["LIVE", "PAUSED"] };
@@ -40,9 +40,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Add cursor-based pagination
-    const orderBy: any = [
-      { startedAt: "desc" }, // Most recent first
-      { createdAt: "desc" },
+    const orderBy = [
+      { startedAt: "desc" as const }, // Most recent first
+      { createdAt: "desc" as const },
     ];
 
     let cursorCondition = {};
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
                 data: { status: "ENDED", endedAt: new Date() },
               });
               // Update the stream object
-              stream.status = "ENDED" as any;
+              stream.status = "ENDED";
             }
           } catch (error) {
             console.error(

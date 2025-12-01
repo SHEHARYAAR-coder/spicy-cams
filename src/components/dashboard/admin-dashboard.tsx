@@ -57,6 +57,7 @@ export function AdminDashboard({
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {userData.avatarUrl && (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={userData.avatarUrl}
               alt="Avatar"

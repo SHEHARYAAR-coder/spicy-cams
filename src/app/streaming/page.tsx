@@ -164,7 +164,7 @@ export default function StreamingPage() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+        const streamsWithDates = (data.streams || []).map((stream: Stream & { creator: { avatar?: string } }) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           creator: {
@@ -360,7 +360,7 @@ export default function StreamingPage() {
                   Browse Streams
                 </Button>
               )}
-              {(session.user && ((session.user as any).role === 'CREATOR' || (session.user as any).role === 'ADMIN') && mode !== 'broadcast') && (
+              {(session.user && (((session.user as { role?: string }).role === 'CREATOR') || ((session.user as { role?: string }).role === 'ADMIN')) && mode !== 'broadcast') && (
                 <Button
                   onClick={() => setMode('create')}
                   variant={mode === 'create' ? 'default' : 'outline'}
@@ -449,6 +449,7 @@ export default function StreamingPage() {
                         <div className="flex flex-col gap-4">
                           {newStream.thumbnailUrl ? (
                             <div className="relative">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={newStream.thumbnailUrl}
                                 alt="Stream thumbnail"

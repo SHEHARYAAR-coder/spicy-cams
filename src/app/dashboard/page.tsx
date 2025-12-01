@@ -5,7 +5,22 @@ import { ViewerDashboard } from "@/components/dashboard/viewer-dashboard";
 import { CreatorDashboard } from "@/components/dashboard/creator-dashboard";
 import { ModeratorDashboard } from "@/components/dashboard/moderator-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
-import { UserRole, UserStatus } from "@prisma/client";
+import { UserRole, UserStatus, User, Profile, Wallet, Stream, StreamSession, ChatMessage, Follow, LedgerEntry, ModerationAction } from "@prisma/client";
+
+// Define types for the user with related data
+type UserWithRelations = User & {
+  profile: Profile | null;
+  wallet: Wallet | null;
+  streams: (Stream & {
+    sessions: StreamSession[];
+    chatMessages: ChatMessage[];
+  })[];
+  streamSessions: StreamSession[];
+  follows: Follow[];
+  followers: Follow[];
+  ledgerEntries: LedgerEntry[];
+  moderationActions: ModerationAction[];
+};
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -14,7 +29,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const userId = (session.user as any).id;
+  const userId = (session.user as { id: string }).id;
 
   // Fetch user with related data
   const user = await prisma.user.findUnique({
@@ -60,14 +75,14 @@ export default async function DashboardPage() {
 }
 
 // Viewer Dashboard Component
-async function ViewerDashboardContent({ user }: { user: any }) {
+async function ViewerDashboardContent({ user }: { user: UserWithRelations }) {
   const totalWatchTimeMs = user.streamSessions.reduce(
-    (total: number, session: any) => total + session.totalWatchMs,
+    (total: number, session) => total + session.totalWatchMs,
     0
   );
 
   const activeStreamSessions = user.streamSessions.filter(
-    (session: any) => session.status === "active"
+    (session) => session.status === "active"
   ).length;
 
   const userData = {
@@ -88,14 +103,14 @@ async function ViewerDashboardContent({ user }: { user: any }) {
 }
 
 // Creator Dashboard Component
-async function CreatorDashboardContent({ user }: { user: any }) {
+async function CreatorDashboardContent({ user }: { user: UserWithRelations }) {
   const totalStreams = user.streams.length;
   const liveStreams = user.streams.filter(
-    (stream: any) => stream.status === "LIVE"
+    (stream) => stream.status === "LIVE"
   ).length;
 
   // Calculate total views from all stream sessions
-  const totalViews = user.streams.reduce((total: number, stream: any) => {
+  const totalViews = user.streams.reduce((total: number, stream) => {
     return total + stream.sessions.length;
   }, 0);
 
@@ -104,7 +119,7 @@ async function CreatorDashboardContent({ user }: { user: any }) {
 
   // Calculate total chat messages
   const totalChatMessages = user.streams.reduce(
-    (total: number, stream: any) => {
+    (total: number, stream) => {
       return total + stream.chatMessages.length;
     },
     0
@@ -112,8 +127,8 @@ async function CreatorDashboardContent({ user }: { user: any }) {
 
   // Calculate total earnings from ledger entries (DEPOSIT types)
   const totalEarnings = user.ledgerEntries
-    .filter((entry: any) => entry.type === "DEPOSIT")
-    .reduce((total: number, entry: any) => total + Number(entry.amount), 0);
+    .filter((entry) => entry.type === "DEPOSIT")
+    .reduce((total: number, entry) => total + Number(entry.amount), 0);
 
   const userData = {
     email: user.email,
@@ -137,7 +152,7 @@ async function CreatorDashboardContent({ user }: { user: any }) {
 }
 
 // Moderator Dashboard Component
-async function ModeratorDashboardContent({ user }: { user: any }) {
+async function ModeratorDashboardContent({ user }: { user: UserWithRelations }) {
   const totalModerationActions = user.moderationActions.length;
 
   // Get moderation actions from the last 30 days
@@ -145,19 +160,19 @@ async function ModeratorDashboardContent({ user }: { user: any }) {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const recentActions = user.moderationActions.filter(
-    (action: any) => new Date(action.createdAt) >= thirtyDaysAgo
+    (action) => new Date(action.createdAt) >= thirtyDaysAgo
   );
 
   const recentBans = recentActions.filter(
-    (action: any) => action.action === "BAN"
+    (action) => action.action === "BAN"
   ).length;
 
   const recentMutes = recentActions.filter(
-    (action: any) => action.action === "MUTE"
+    (action) => action.action === "MUTE"
   ).length;
 
   const recentMessageDeletions = recentActions.filter(
-    (action: any) => action.action === "DELETE_MESSAGE"
+    (action) => action.action === "DELETE_MESSAGE"
   ).length;
 
   // Get platform-wide stats
@@ -191,7 +206,7 @@ async function ModeratorDashboardContent({ user }: { user: any }) {
 }
 
 // Admin Dashboard Component
-async function AdminDashboardContent({ user }: { user: any }) {
+async function AdminDashboardContent({ user }: { user: UserWithRelations }) {
   // Get comprehensive platform statistics
   const totalUsers = await prisma.user.count();
 

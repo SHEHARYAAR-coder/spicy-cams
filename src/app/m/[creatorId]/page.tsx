@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,7 +12,6 @@ import {
   User,
   MessageCircle,
   Video,
-  ArrowLeft,
   Globe,
   Activity,
   Sparkles,
@@ -582,6 +579,7 @@ export default function CreatorProfilePage() {
             className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={creator.profileImages[selectedImageIndex]}
               alt={`${creator.displayName} photo ${selectedImageIndex + 1}`}

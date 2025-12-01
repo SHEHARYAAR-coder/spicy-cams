@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Ban, VolumeX, Trash2 } from "lucide-react";
+import { Shield, Trash2 } from "lucide-react";
 
 interface ModerationPanelProps {
     streamId: string;
 }
 
-export function ModerationPanel({ streamId }: ModerationPanelProps) {
+export function ModerationPanel({ streamId: _streamId }: ModerationPanelProps) {
     const [selectedDuration, setSelectedDuration] = useState(60);
 
     const handleClearChat = async () => {

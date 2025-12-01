@@ -278,6 +278,7 @@ export function StreamManagement({ streams }: StreamManagementProps) {
                   <TableCell className="max-w-xs">
                     <div className="flex items-center gap-3">
                       {stream.thumbnailUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={stream.thumbnailUrl}
                           alt={stream.title}
@@ -398,16 +399,16 @@ export function StreamManagement({ streams }: StreamManagementProps) {
             <DialogDescription className="text-gray-300">
               {actionDialog.action === "delete" ? (
                 <>
-                  Are you sure you want to delete the stream "
+                  Are you sure you want to delete the stream &quot;
                   <span className="font-semibold">{selectedStream?.title}</span>
-                  "? This action cannot be undone and will permanently remove
+                  &quot;? This action cannot be undone and will permanently remove
                   all stream data, sessions, and chat messages.
                 </>
               ) : (
                 <>
-                  Are you sure you want to end the stream "
+                  Are you sure you want to end the stream &quot;
                   <span className="font-semibold">{selectedStream?.title}</span>
-                  "? This will immediately terminate the stream for all viewers.
+                  &quot;? This will immediately terminate the stream for all viewers.
                 </>
               )}
             </DialogDescription>

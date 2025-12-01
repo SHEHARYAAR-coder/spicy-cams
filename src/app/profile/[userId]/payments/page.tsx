@@ -12,7 +12,6 @@ import {
   Clock,
   DollarSign,
   CreditCard,
-  ArrowLeft,
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -78,9 +77,9 @@ export default function PaymentsPage({
       const data = await response.json();
       setPayments(data.payments);
       setWallet(data.wallet);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching payments:", err);
-      setError(err.message || "Failed to load payments");
+      setError(err instanceof Error ? err.message : "Failed to load payments");
     } finally {
       setLoading(false);
     }

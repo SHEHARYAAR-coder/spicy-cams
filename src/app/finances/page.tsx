@@ -16,8 +16,8 @@ export default async function FinancesPage() {
     redirect("/login");
   }
 
-  const userId = (session.user as any).id;
-  const userRole = (session.user as any).role;
+  const _userId = (session.user as { id: string; role?: string }).id;
+  const userRole = (session.user as { id: string; role?: string }).role;
 
   // If creator, show their earnings view
   if (userRole === "CREATOR") {

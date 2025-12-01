@@ -16,7 +16,7 @@ import { Prisma } from "@prisma/client";
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { streamId: string } }
+  { params }: { params: Promise<{ streamId: string }> }
 ) {
   try {
     const session = await auth();
@@ -24,8 +24,8 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
-    const { streamId } = params;
+    const userId = (session.user as { id: string }).id;
+    const { streamId } = await params;
 
     // Parse request body
     const body = await req.json();

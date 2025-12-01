@@ -56,7 +56,7 @@ function VerifyEmailContent() {
             } else {
                 setResendMessage(data.error || "Failed to resend verification email.")
             }
-        } catch (error) {
+        } catch (_error) {
             setResendMessage("An unexpected error occurred.")
         } finally {
             setIsResending(false)
@@ -134,6 +134,7 @@ function VerifyEmailContent() {
             {/* Left Side - Image & Branding */}
             <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/verify.jpeg"
                         alt="Verify Background"

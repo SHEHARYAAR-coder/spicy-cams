@@ -8,7 +8,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Trash2, Ban, Volume2, VolumeX, MessageCircle } from "lucide-react";
+import { MoreVertical, Trash2, Ban, VolumeX, MessageCircle } from "lucide-react";
 import { ChatMessage as ChatMessageType } from "@/hooks/use-chat";
 
 interface ChatMessageProps {
@@ -55,6 +55,7 @@ export function ChatMessage({
                 {/* Avatar */}
                 <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
                     {message.user.avatarUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img src={message.user.avatarUrl} alt={message.user.displayName} className="rounded-full" />
                     ) : (
                         <div className={`${roleColor} w-full h-full flex items-center justify-center text-white text-xs font-semibold rounded-full`}>

@@ -21,11 +21,27 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 
+interface ProfileData {
+  hairColor?: string | null;
+  physique?: string | null;
+  breastSize?: string | null;
+  pubicHair?: string | null;
+  displayedAge?: string | number | null;
+  spokenLanguages?: string[];
+  relationship?: string | null;
+  ethnicity?: string | null;
+  piercings?: string | null;
+  tattoos?: string | null;
+  displayedCity?: string | null;
+  myShows?: string[];
+  profileDescription?: string | null;
+}
+
 interface CreatorProfileEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  profileData: any;
-  onSave: (data: any) => Promise<void>;
+  profileData: ProfileData | null;
+  onSave: (data: ProfileData) => Promise<void>;
 }
 
 // Constants for dropdown options
@@ -178,7 +194,7 @@ export default function CreatorProfileEditDialog({
     setError(null);
 
     // Validate age
-    const age = parseInt(displayedAge as any);
+    const age = parseInt(String(displayedAge));
     if (displayedAge && (isNaN(age) || age < 18)) {
       setError("Displayed age must be 18 or older");
       setLoading(false);
@@ -198,7 +214,7 @@ export default function CreatorProfileEditDialog({
         physique: physique || null,
         breastSize: breastSize || null,
         pubicHair: pubicHair || null,
-        displayedAge: displayedAge ? parseInt(displayedAge as any) : null,
+        displayedAge: displayedAge ? parseInt(String(displayedAge)) : null,
         spokenLanguages,
         relationship: relationship || null,
         ethnicity: ethnicity || null,

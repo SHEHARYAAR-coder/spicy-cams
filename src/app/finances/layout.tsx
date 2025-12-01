@@ -15,7 +15,7 @@ export default async function FinancesLayoutWrapper({
     redirect("/login");
   }
 
-  const userId = (session.user as any).id;
+  const userId = (session.user as { id: string; role?: string }).id;
 
   // Fetch user for layout props
   const user = await prisma.user.findUnique({

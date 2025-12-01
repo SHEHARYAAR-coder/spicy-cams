@@ -3,17 +3,13 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Navigation } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-    DollarSign,
     Clock,
-    Users,
     MessageCircle,
     Video,
-    Star,
     TrendingUp,
     Calendar,
     Calculator,
@@ -127,7 +123,7 @@ export default function EarningsPage() {
                         Earn Up To $55/Hour
                     </h1>
                     <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-                        With our services you can quickly earn up to $55 per hour! What's more, we pay out your earnings every 10 days.
+                        With our services you can quickly earn up to $55 per hour! What&apos;s more, we pay out your earnings every 10 days.
                         Check out the earnings per service below and find out how you can get started right away!
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
