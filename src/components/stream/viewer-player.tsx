@@ -241,12 +241,12 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                         // Update balance display
                         setBalance(parseFloat(data.remainingBalance));
 
-                        // Show warning if balance is low (less than $1)
-                        if (parseFloat(data.remainingBalance) < 1) {
+                        // Show warning if balance is low (less than 10 tokens)
+                        if (parseFloat(data.remainingBalance) < 10) {
                             setShowLowBalanceWarning(true);
                         }
 
-                        console.log(`✅ Billed $${data.amount} for ${data.watchTimeSeconds}s viewing`);
+                        console.log(`✅ Billed ${data.tokensCharged} tokens for ${data.watchTimeSeconds}s viewing (Creator earned: $${data.creatorEarned})`);
                     }
                     setBillingError(null);
                 } else if (response.status === 402) {
@@ -374,16 +374,16 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
 
                 {/* Balance Display */}
                 {balance !== null && (
-                    <div className={`backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium flex items-center ${balance < 1 ? 'bg-red-500/90' : balance < 5 ? 'bg-yellow-500/90' : 'bg-purple-500/90'
+                    <div className={`backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium flex items-center ${balance < 10 ? 'bg-red-500/90' : balance < 50 ? 'bg-yellow-500/90' : 'bg-purple-500/90'
                         }`}>
                         <Wallet className="w-4 h-4 mr-1" />
-                        ${balance.toFixed(2)}
+                        {balance.toFixed(0)} tokens
                     </div>
                 )}
             </div>
 
             {/* Low Balance Warning */}
-            {showLowBalanceWarning && balance !== null && balance < 1 && (
+            {showLowBalanceWarning && balance !== null && balance < 10 && (
                 <div className="absolute top-28 left-4 right-4 z-30 mx-auto max-w-md">
                     <div className="bg-yellow-500/95 backdrop-blur-sm text-black px-4 py-3 rounded-lg shadow-lg border-2 border-yellow-400">
                         <div className="flex items-start gap-3">
@@ -391,8 +391,10 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                             <div className="flex-1">
                                 <p className="font-semibold text-sm">Low Balance Warning</p>
                                 <p className="text-xs mt-1">
-                                    Your balance is running low (${balance.toFixed(2)}).
+                                    Your balance is running low ({balance.toFixed(0)} tokens).
                                     Add credits to continue watching without interruption.
+                                    <br />
+                                    <span className="font-semibold mt-1 inline-block">Rate: 5 tokens per minute</span>
                                 </p>
                                 <button
                                     onClick={() => window.location.href = '/pricing'}

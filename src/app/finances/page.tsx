@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { FinancialOverview } from "@/components/admin/financial-overview";
-import { CreatorEarningsView } from "@/components/dashboard/creator-earnings-view";
+import { CreatorEarnings } from "@/components/creator/creator-earnings";
 
 export const metadata = {
   title: "Financial Overview",
@@ -21,10 +21,35 @@ export default async function FinancesPage() {
 
   // If creator, show their earnings view
   if (userRole === "CREATOR") {
+    const userId = (session.user as { id: string }).id;
+
+    // Get wallet balance
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId },
+    });
+
+    // Get total earnings
+    const earningsEntries = await prisma.ledgerEntry.findMany({
+      where: {
+        userId,
+        type: "DEPOSIT",
+        referenceType: "STREAM_EARNINGS",
+      },
+    });
+
+    const totalEarnings = earningsEntries.reduce(
+      (sum, entry) => sum + Number(entry.amount),
+      0
+    );
+
     return (
-      <>
-        <CreatorEarningsView />
-      </>
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6 text-white">Earnings & Withdrawals</h1>
+        <CreatorEarnings
+          balance={Number(wallet?.balance || 0)}
+          totalEarnings={totalEarnings}
+        />
+      </div>
     );
   }
 

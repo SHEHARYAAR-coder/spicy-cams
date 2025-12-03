@@ -246,6 +246,18 @@ export function AdminDashboard({
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
           <a
+            href="/admin/withdrawals"
+            className="text-green-400 hover:text-green-300 transition-colors font-semibold"
+          >
+            Manage Withdrawals
+          </a>
+          <a
+            href="/finances"
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            Financial Overview
+          </a>
+          <a
             href="/streaming"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >

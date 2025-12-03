@@ -92,18 +92,21 @@ export async function POST(
     }
 
     // Calculate charge amount
-    // $0.22 per minute = $0.0036667 per second
-    const ratePerSecond = 0.22 / 60; // $0.0036667
-    const chargeAmount = new Prisma.Decimal(
-      (ratePerSecond * watchTimeSeconds).toFixed(4)
-    );
+    // Viewer: 5 tokens per minute
+    // Creator: $13.20 per minute
+    const TOKENS_PER_MINUTE = 5;
+    const CREATOR_EARNINGS_PER_MINUTE = 13.20;
+    
+    const minutes = watchTimeSeconds / 60;
+    const viewerTokenCharge = new Prisma.Decimal((TOKENS_PER_MINUTE * minutes).toFixed(4));
+    const creatorEarnings = new Prisma.Decimal((CREATOR_EARNINGS_PER_MINUTE * minutes).toFixed(4));
 
     // Check if viewer has sufficient balance
-    if (viewerWallet.balance.lt(chargeAmount)) {
+    if (viewerWallet.balance.lt(viewerTokenCharge)) {
       return NextResponse.json(
         {
           error: "Insufficient balance",
-          required: chargeAmount.toString(),
+          required: viewerTokenCharge.toString(),
           current: viewerWallet.balance.toString(),
           insufficientFunds: true,
         },
@@ -143,12 +146,12 @@ export async function POST(
 
     // Perform transaction: deduct from viewer, credit to creator, create ledger entries
     const result = await prisma.$transaction(async (tx) => {
-      // Deduct from viewer's wallet
+      // Deduct tokens from viewer's wallet
       const updatedViewerWallet = await tx.wallet.update({
         where: { userId },
         data: {
           balance: {
-            decrement: chargeAmount,
+            decrement: viewerTokenCharge,
           },
         },
       });
@@ -162,7 +165,7 @@ export async function POST(
         creatorWallet = await tx.wallet.create({
           data: {
             userId: stream.creatorId,
-            balance: chargeAmount,
+            balance: creatorEarnings,
             currency: "USD",
           },
         });
@@ -171,7 +174,7 @@ export async function POST(
           where: { userId: stream.creatorId },
           data: {
             balance: {
-              increment: chargeAmount,
+              increment: creatorEarnings,
             },
           },
         });
@@ -182,18 +185,19 @@ export async function POST(
         data: {
           userId,
           type: "DEBIT",
-          amount: chargeAmount.neg(), // Negative for debit
+          amount: viewerTokenCharge.neg(), // Negative for debit
           currency: "USD",
           balanceAfter: updatedViewerWallet.balance,
           referenceType: "STREAM_VIEW",
           referenceId: streamId,
-          description: `Watched stream: ${stream.title}`,
+          description: `Watched stream: ${stream.title} (${viewerTokenCharge} tokens)`,
           metadata: {
             streamId,
             streamTitle: stream.title,
             creatorId: stream.creatorId,
             watchTimeSeconds,
             sessionId: streamSession.id,
+            tokensCharged: viewerTokenCharge.toString(),
           },
         },
       });
@@ -203,18 +207,19 @@ export async function POST(
         data: {
           userId: stream.creatorId,
           type: "DEPOSIT",
-          amount: chargeAmount,
+          amount: creatorEarnings,
           currency: "USD",
           balanceAfter: creatorWallet.balance,
           referenceType: "STREAM_EARNINGS",
           referenceId: streamId,
-          description: `Earnings from stream: ${stream.title}`,
+          description: `Earnings from stream: ${stream.title} ($${creatorEarnings})`,
           metadata: {
             streamId,
             streamTitle: stream.title,
             viewerId: userId,
             watchTimeSeconds,
             sessionId: streamSession.id,
+            earningsAmount: creatorEarnings.toString(),
           },
         },
       });
@@ -237,7 +242,7 @@ export async function POST(
           userId,
           intervalIndex,
           playbackMs: watchTimeSeconds * 1000,
-          creditsDebited: chargeAmount,
+          creditsDebited: viewerTokenCharge,
         },
       });
 
@@ -251,7 +256,8 @@ export async function POST(
     return NextResponse.json({
       success: true,
       charged: true,
-      amount: chargeAmount.toString(),
+      tokensCharged: viewerTokenCharge.toString(),
+      creatorEarned: creatorEarnings.toString(),
       remainingBalance: result.viewerWallet.balance.toString(),
       watchTimeSeconds,
       totalWatchTimeMs: result.streamSession.totalWatchMs,

@@ -153,9 +153,9 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           </a>
           <a
             href="/finances"
-            className="text-green-400 hover:text-green-300 transition-colors font-semibold"
+            className="text-green-400 hover:text-green-300 transition-colors font-semibold text-base"
           >
-            View Detailed Earnings
+            💰 View Earnings & Request Withdrawal
           </a>
           <a
             href="/profile"

@@ -57,6 +57,14 @@ enum PaymentStatus {
   DISPUTED
 }
 
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  FAILED
+}
+
 enum ModerationActionType {
   MUTE
   BAN
@@ -129,6 +137,8 @@ model User {
   // moderationTargets       ModerationAction[] @relation("TargetUser")
   streamSessions          StreamSession[]
   meterEvents             MeterEvent[]
+  withdrawalRequests      WithdrawalRequest[]  @relation("UserWithdrawals")
+  reviewedWithdrawals     WithdrawalRequest[]  @relation("AdminReviews")
 
   @@index([email])
   @@index([status])
@@ -525,6 +535,38 @@ model StreamAnalytics {
 // ============================================
 // CONFIGURATION
 // ============================================
+
+model WithdrawalRequest {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  amount    Decimal          @db.Decimal(10, 2)
+  currency  String           @default("USD")
+  status    WithdrawalStatus @default(PENDING)
+
+  // Stripe payout details
+  stripePayoutId String? @unique @map("stripe_payout_id")
+  stripeAccountId String? @map("stripe_account_id")
+
+  // Admin review
+  reviewedBy String?   @map("reviewed_by")
+  reviewedAt DateTime? @map("reviewed_at")
+  reviewNote String?   @map("review_note") @db.Text
+
+  // Failure details
+  failureReason String? @map("failure_reason") @db.Text
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  completedAt DateTime? @map("completed_at")
+
+  // Relations
+  user     User  @relation("UserWithdrawals", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("AdminReviews", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("withdrawal_requests")
+}
 
 model SystemConfig {
   id    String @id @default(cuid())
