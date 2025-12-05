@@ -62,12 +62,32 @@ export default function Home() {
     }
     setSelectedCategory(categoryName);
   };
+
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
     { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
   ];
+
+  // Get user role from session
+  const sessionUser = session?.user as { isCreator?: boolean; role?: string; roles?: string[] } | undefined;
+  const isCreator = !!(
+    sessionUser &&
+    (sessionUser.isCreator ||
+      sessionUser.role === "CREATOR" ||
+      (Array.isArray(sessionUser.roles) &&
+        sessionUser.roles.includes("CREATOR")))
+  );
+
+  // Filter categories based on user role
+  const visibleCategories = categories.filter(category => {
+    // Hide "All Models" for creators
+    if (category.name === "All Models" && isCreator) {
+      return false;
+    }
+    return true;
+  });
 
   const categoryFilters = [
     { name: "Asian", hot: false },
@@ -205,17 +225,8 @@ export default function Home() {
         <div className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-700/50 p-4 overflow-y-auto scrollbar-hide z-40 shadow-xl">
           {/* Main Categories */}
           <div className="mb-6">
-            {categories.map((category) => {
+            {visibleCategories.map((category) => {
               const IconComponent = category.icon;
-              const sessionUser = session?.user as { isCreator?: boolean; role?: string; roles?: string[] } | undefined;
-              const _isCreator = !!(
-                sessionUser &&
-                // common possible flags for "creator" role
-                (sessionUser.isCreator ||
-                  sessionUser.role === "CREATOR" ||
-                  (Array.isArray(sessionUser.roles) &&
-                    sessionUser.roles.includes("CREATOR")))
-              );
 
               return (
                 <button
