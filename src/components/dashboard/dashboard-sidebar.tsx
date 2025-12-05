@@ -91,12 +91,6 @@ export function DashboardSidebar({
         icon: Video,
         roles: ["CREATOR"],
       },
-      {
-        label: "Buy Credits",
-        href: "/pricing",
-        icon: Wallet,
-        roles: ["CREATOR"],
-      },
     ];
 
     const moderatorItems = [

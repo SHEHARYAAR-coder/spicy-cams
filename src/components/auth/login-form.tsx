@@ -16,7 +16,11 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginForm() {
+interface LoginFormProps {
+    userType?: 'viewer' | 'model'
+}
+
+export default function LoginForm({ userType }: LoginFormProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -295,9 +299,9 @@ export default function LoginForm() {
                     </form>
 
                     <p className="mt-8 text-center text-sm text-gray-400">
-                        Don’t have an account?{" "}
+                        Don't have an account?{" "}
                         <Link
-                            href="/register"
+                            href={userType === 'model' ? '/m/register' : '/v/register'}
                             className="text-purple-400 hover:text-purple-300 font-semibold transition"
                         >
                             Sign up

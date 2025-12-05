@@ -126,8 +126,8 @@ export function Header() {
                       <Link
                         href={item.href}
                         className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active
-                            ? "text-white"
-                            : "text-gray-300 hover:text-white hover:bg-gray-700/60"
+                          ? "text-white"
+                          : "text-gray-300 hover:text-white hover:bg-gray-700/60"
                           }`}
                       >
                         <span className="whitespace-nowrap">{item.label}</span>
@@ -235,23 +235,70 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-2 md:space-x-3">
-                <Link href="/login" className="hidden sm:block">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-gray-300 hover:text-purple-400"
-                  >
-                    Sign In
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-3 sm:px-4"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
+                <div className="hidden sm:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-300 hover:text-purple-400"
+                      >
+                        Sign In
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/v/login"
+                          className="cursor-pointer"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          <span>Sign In as Viewer</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/m/login"
+                          className="cursor-pointer"
+                        >
+                          <Video className="w-4 h-4 mr-2" />
+                          <span>Sign In as Model</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm px-3 sm:px-4"
+                    >
+                      Sign Up
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/v/register"
+                        className="cursor-pointer"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        <span>Sign Up as Viewer</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/m/register"
+                        className="cursor-pointer"
+                      >
+                        <Video className="w-4 h-4 mr-2" />
+                        <span>Sign Up as Model</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </div>
@@ -276,8 +323,8 @@ export function Header() {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`block px-4 py-3 rounded-lg text-sm transition-colors ${active
-                        ? "bg-purple-600 text-white"
-                        : "text-gray-300 hover:text-white hover:bg-gray-800/60"
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-300 hover:text-white hover:bg-gray-800/60"
                       }`}
                   >
                     {item.label}
