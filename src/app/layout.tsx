@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased font-sans">
+    <html lang="en" className="dark">
+      <body className="antialiased font-sans bg-gray-950 text-white">
         <AuthProvider>
           <AgeVerificationDialog />
           <Header />

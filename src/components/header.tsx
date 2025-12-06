@@ -20,60 +20,20 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-interface UserData {
-  id: string;
-  displayName?: string;
-  avatarUrl?: string;
-  role?: string;
-  profile?: {
-    avatarUrl?: string;
-    displayName?: string;
-  };
-}
 
 export function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  // Memoize the fetch function to prevent recreation on every render
-  const fetchProfile = useCallback(async (userId: string) => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId }),
-      });
-      if (!res.ok) throw new Error("Failed to fetch profile");
-      const data = await res.json();
-      setUserData(data);
-    } catch (_err) {
-      setUserData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const userId = useMemo(() => session?.user?.id, [session?.user?.id]);
-
-  React.useEffect(() => {
-    if (userId && !userData) {
-      fetchProfile(userId);
-    }
-  }, [userId, userData, fetchProfile]);
-
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
   };
+
+  // Get user data directly from session
+  const sessionUser = session?.user as import("../../lib/auth-utils").SessionUser | undefined;
 
   // Hide header on auth pages and upgrade page
   const hideHeaderPaths = [
@@ -94,13 +54,13 @@ export function Header() {
     return null;
   }
 
-  // Show skeleton only while auth is resolving or while profile is fetching for an authenticated user
-  if (status === "loading" || (session?.user && loading)) {
+  // Show skeleton only while auth is resolving
+  if (status === "loading") {
     return (
-      <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
-        <div className="mx-auto px-5">
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
+        <div className="mx-auto px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <div className="animate-pulse h-6 w-24 bg-gray-700 rounded" />
+            <div className="animate-pulse h-8 w-32 bg-gray-700 rounded" />
           </div>
         </div>
       </header>
@@ -108,25 +68,24 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gray-900 shadow-sm sticky top-0 z-50">
-      <div className="mx-auto px-5">
-        <div className="flex justify-between h-16">
+    <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
+      <div className="mx-auto px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center">
-                <Video className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent">
-                SpicyCams
-              </span>
+            <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
+              <img 
+                src="/logo/logo.png" 
+                alt="SpicyCams Logo" 
+                className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+              />
             </Link>
           </div>
 
           {/* Center nav pill - Only show when logged in */}
           {session?.user && (
             <nav className="hidden md:flex flex-1 items-center justify-center">
-              <div className="relative rounded-full border border-gray-700 bg-gray-800/70 backdrop-blur px-2 py-1 shadow-sm">
-                <ul className="flex items-center">
+              <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-3 py-1.5 shadow-xl">
+                <ul className="flex items-center gap-1">
                   {[
                     { label: "Home", href: "/" },
                     { label: "Pricing", href: "/pricing" },
@@ -136,20 +95,17 @@ export function Header() {
                       pathname === item.href ||
                       (item.href !== "/" && pathname?.startsWith(item.href));
                     return (
-                      <li key={item.href} className="px-1">
+                      <li key={item.href}>
                         <Link
                           href={item.href}
-                          className={`relative inline-flex items-center rounded-full px-4 py-2 text-sm transition-colors ${active
-                            ? "text-white"
-                            : "text-gray-300 hover:text-white hover:bg-gray-700/60"
+                          className={`relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${active
+                            ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50"
+                            : "text-gray-300 hover:text-white hover:bg-gray-700/70"
                             }`}
                         >
-                          <span className="whitespace-nowrap">
+                          <span className="whitespace-nowrap relative z-10">
                             {item.label}
                           </span>
-                          {active && (
-                            <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-purple-400" />
-                          )}
                         </Link>
                       </li>
                     );
@@ -159,70 +115,66 @@ export function Header() {
             </nav>
           )}
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div tabIndex={0} className="outline-none">
-                    <Avatar className="w-8 h-8 cursor-pointer transition-all hover:ring-2 hover:ring-purple-400 hover:shadow-[0_0_16px_4px_rgba(168,85,247,0.5)]">
+                    <Avatar className="w-10 h-10 cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-purple-500 hover:shadow-lg hover:shadow-purple-500/50 ring-offset-2 ring-offset-gray-900">
                       <AvatarImage
-                        src={userData?.profile?.avatarUrl || undefined}
+                        src={sessionUser?.image || undefined}
                         alt="User avatar"
-                        className="object-cover w-8 h-8 rounded-full"
+                        className="object-cover w-10 h-10 rounded-full"
                       />
-                      <AvatarFallback>
-                        <User className="w-4 h-4 text-gray-400" />
+                      <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
+                        <User className="w-5 h-5 text-white" />
                       </AvatarFallback>
                     </Avatar>
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[220px]">
                   <DropdownMenuLabel
-                    className={"flex items-center justify-start"}
+                    className="flex items-center justify-start px-3 py-2.5 font-medium text-white"
                   >
-                    <Hand className={"w-4 h-4 mr-2"} /> hi,{" "}
-                    {
-                      (
-                        session.user as import("../../lib/auth-utils").SessionUser
-                      ).name
-                    }
+                    <Hand className="w-4 h-4 mr-2 text-purple-400" /> Hi,{" "}
+                    {sessionUser?.name || "User"}
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuSeparator className="bg-gray-700/50" />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      <span>Dashboard</span>
+                    <Link href="/dashboard" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                      <LayoutDashboard className="w-4 h-4 mr-3 text-purple-400" />
+                      <span className="font-medium">Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <User className="w-4 h-4 mr-2" />
-                      <span>Profile</span>
+                    <Link href="/profile" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                      <User className="w-4 h-4 mr-3 text-purple-400" />
+                      <span className="font-medium">Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/streaming" className="cursor-pointer">
-                      <Video className="w-4 h-4 mr-2" />
-                      <span>Streaming</span>
+                    <Link href="/streaming" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                      <Video className="w-4 h-4 mr-3 text-purple-400" />
+                      <span className="font-medium">Streaming</span>
                     </Link>
                   </DropdownMenuItem>
 
                   {(session.user as import("../../lib/auth-utils").SessionUser)
                     .role === "CREATOR" && (
                       <DropdownMenuItem asChild>
-                        <Link href="/creator" className="cursor-pointer">
-                          <Settings className="w-4 h-4 mr-2" />
-                          <span>Creator Studio</span>
+                        <Link href="/creator" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                          <Settings className="w-4 h-4 mr-3 text-purple-400" />
+                          <span className="font-medium">Creator Studio</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
-                  <DropdownMenuSeparator className="bg-gray-700" />
+                  <DropdownMenuSeparator className="bg-gray-700/50" />
                   <DropdownMenuItem
                     onSelect={handleSignOut}
-                    className="cursor-pointer text-red-400"
+                    className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 px-3 py-2.5 transition-colors"
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    <span>Sign Out</span>
+                    <LogOut className="w-4 h-4 mr-3" />
+                    <span className="font-medium">Sign Out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -233,28 +185,28 @@ export function Header() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-300 hover:text-purple-400"
+                      className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium"
                     >
                       Sign In
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                  <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[200px]">
                     <DropdownMenuItem asChild>
                       <Link
                         href="/v/login"
-                        className="cursor-pointer"
+                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
                       >
-                        <User className="w-4 h-4 mr-2" />
-                        <span>Sign In as Viewer</span>
+                        <User className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Sign In as Viewer</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
                         href="/m/login"
-                        className="cursor-pointer"
+                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
                       >
-                        <Video className="w-4 h-4 mr-2" />
-                        <span>Sign In as Model</span>
+                        <Video className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Sign In as Model</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -264,28 +216,28 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       size="sm"
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 transition-all duration-300 font-medium"
                     >
                       Sign Up
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-800 border-gray-700 text-gray-300">
+                  <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[200px]">
                     <DropdownMenuItem asChild>
                       <Link
                         href="/v/register"
-                        className="cursor-pointer"
+                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
                       >
-                        <User className="w-4 h-4 mr-2" />
-                        <span>Sign Up as Viewer</span>
+                        <User className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Sign Up as Viewer</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
                         href="/m/register"
-                        className="cursor-pointer"
+                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
                       >
-                        <Video className="w-4 h-4 mr-2" />
-                        <span>Sign Up as Model</span>
+                        <Video className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Sign Up as Model</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
