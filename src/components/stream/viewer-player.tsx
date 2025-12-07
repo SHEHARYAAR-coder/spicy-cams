@@ -445,12 +445,12 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
             )}
 
             {/* Main Video Display */}
-            <div className="w-full h-full relative">
+            <div className="w-full h-full relative flex items-center justify-center">
                 {displayTrack && displayTrack.publication?.isSubscribed ? (
                     <>
                         <VideoTrack
                             trackRef={displayTrack}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                         />
 
                         {/* Track Type Indicator - Repositioned to bottom left */}

@@ -442,10 +442,10 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         {tracks.length > 0 ? (
           <div className="h-full w-full relative">
             {tracks.map((track) => (
-              <div key={track.participant.identity + track.source} className="absolute inset-0">
+              <div key={track.participant.identity + track.source} className="absolute inset-0 flex items-center justify-center">
                 <VideoTrack
                   trackRef={track}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
 
               </div>

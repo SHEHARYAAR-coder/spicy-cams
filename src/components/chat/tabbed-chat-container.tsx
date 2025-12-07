@@ -46,11 +46,11 @@ export function TabbedChatContainer({
         fetchChatToken();
     }, [streamId, session]);
 
-    // Get unread private message count and chat requests
+    // Get unread private message count and chat requests - always enabled to maintain state
     const { conversations, chatRequests } = usePrivateChat({
         streamId,
         token: chatToken,
-        enabled: !!chatToken && activeTab === "private",
+        enabled: !!chatToken, // Always enabled when token is available
     });
 
     const totalUnreadPrivateMessages = conversations.reduce(
@@ -69,77 +69,76 @@ export function TabbedChatContainer({
     };
 
     return (
-        <Card className={cn("flex flex-col h-full bg-gray-900 border-gray-700", className)}>
-            {/* Tab Header */}
-            <div className="flex border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm">
-                <Button
-                    variant={activeTab === "public" ? "default" : "ghost"}
-                    className={cn(
-                        "flex-1 rounded-none border-0 justify-center gap-2 text-white transition-all duration-200",
-                        activeTab === "public"
-                            ? "bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20"
-                            : "bg-transparent hover:bg-gray-700/50 text-gray-300 hover:text-white"
-                    )}
-                    onClick={() => setActiveTab("public")}
-                >
-                    <Users className="w-4 h-4" />
-                    <span className="hidden sm:inline">Live Chat</span>
-                    <span className="sm:hidden">Live</span>
-                </Button>
-
-                <Button
-                    variant={activeTab === "private" ? "default" : "ghost"}
-                    className={cn(
-                        "flex-1 rounded-none border-0 justify-center gap-2 relative text-white transition-all duration-200",
-                        activeTab === "private"
-                            ? "bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-600/20"
-                            : "bg-transparent hover:bg-gray-700/50 text-gray-300 hover:text-white"
-                    )}
-                    onClick={() => setActiveTab("private")}
-                >
-                    <MessageCircle className="w-4 h-4" />
-                    <span className="hidden sm:inline">Private</span>
-                    <span className="sm:hidden">DMs</span>
-                    {totalNotifications > 0 && (
-                        <Badge
-                            className="absolute -top-1 -right-1 px-1.5 py-0.5 text-xs min-w-[18px] h-5 rounded-full bg-red-500 text-white border border-red-400 shadow-lg animate-pulse"
+        <Card className={cn("flex flex-col h-full bg-gray-900 border-gray-700 overflow-hidden", className)}>
+            {/* Sleek Header with Tab Pills */}
+            <div className="flex-shrink-0 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700/50 px-3 sm:px-4 py-2">
+                <div className="flex items-center justify-between gap-3">
+                    {/* Tab Pills */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 bg-gray-800/60 rounded-full p-1">
+                        <button
+                            className={cn(
+                                "px-2.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 whitespace-nowrap",
+                                activeTab === "public"
+                                    ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                                    : "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                            )}
+                            onClick={() => setActiveTab("public")}
                         >
-                            {totalNotifications > 99 ? "99+" : totalNotifications}
-                        </Badge>
+                            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden xs:inline">Live Chat</span>
+                            <span className="xs:hidden">Live</span>
+                        </button>
+
+                        <button
+                            className={cn(
+                                "px-2.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 sm:gap-2 relative whitespace-nowrap",
+                                activeTab === "private"
+                                    ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                                    : "text-gray-400 hover:text-white hover:bg-gray-700/50"
+                            )}
+                            onClick={() => setActiveTab("private")}
+                        >
+                            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden xs:inline">Private</span>
+                            <span className="xs:hidden">DMs</span>
+                            {totalNotifications > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex items-center justify-center rounded-full h-4 w-4 sm:h-5 sm:w-5 bg-red-500 text-[9px] sm:text-[10px] font-bold text-white">
+                                        {totalNotifications > 9 ? "9+" : totalNotifications}
+                                    </span>
+                                </span>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* User info - hidden on very small screens */}
+                    {session && (
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                            <span className="max-w-[120px] truncate">{session.user?.name}</span>
+                        </div>
                     )}
-                </Button>
+                </div>
             </div>
 
-            {/* Tab Content */}
-            <div className="flex-1 overflow-hidden">
-                {activeTab === "public" ? (
+            {/* Chat Content Area - Keep both mounted but toggle visibility */}
+            <div className="flex-1 overflow-hidden min-h-0 relative">
+                <div className={cn("absolute inset-0", activeTab === "public" ? "block" : "hidden")}>
                     <ChatContainer
                         streamId={streamId}
                         canModerate={canModerate}
                         className="h-full border-0 rounded-none"
                         onStartPrivateChat={handleStartPrivateChat}
                     />
-                ) : (
+                </div>
+                <div className={cn("absolute inset-0", activeTab === "private" ? "block" : "hidden")}>
                     <PrivateChatContainer
                         streamId={streamId}
                         token={chatToken}
                         className="h-full border-0 rounded-none"
                         initialPartnerId={selectedPrivateUserId}
                     />
-                )}
-            </div>
-
-            {/* Footer info */}
-            <div className="border-t border-gray-700 px-3 py-2 bg-gray-800/30 backdrop-blur-sm">
-                <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">
-                        {activeTab === "public" ? "Stream Chat" : "Private Messages"}
-                    </span>
-                    {session && (
-                        <span className="text-purple-400 font-medium">
-                            Signed in as {session.user?.name}
-                        </span>
-                    )}
                 </div>
             </div>
         </Card>

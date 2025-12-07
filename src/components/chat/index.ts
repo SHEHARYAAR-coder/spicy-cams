@@ -11,3 +11,4 @@ export { ConversationList } from "./conversation-list";
 
 // Combined chat interface
 export { TabbedChatContainer } from "./tabbed-chat-container";
+export { MobileChatOverlay } from "./mobile-chat-overlay";

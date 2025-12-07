@@ -464,8 +464,10 @@ export function usePrivateChat({
   // Effect to manage polling
   useEffect(() => {
     if (enabled && token) {
+      // Only show loading on very first initialization
+      const shouldShowLoading = isInitialLoadRef.current && conversations.length === 0;
       startPolling();
-      fetchConversations(true); // Show loading on initial fetch
+      fetchConversations(shouldShowLoading);
       fetchChatRequests(); // Initial fetch of chat requests
     } else {
       stopPolling();
