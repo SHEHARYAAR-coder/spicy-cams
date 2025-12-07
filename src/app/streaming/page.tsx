@@ -690,7 +690,7 @@ export default function StreamingPage() {
                       token={streamToken}
                       serverUrl={LIVEKIT_SERVER_URL}
                       streamTitle={currentStreamData?.title}
-                      modelName={currentStreamData?.creator?.name}
+                      modelName={currentStreamData?.model?.name}
                       className="h-full w-full absolute inset-0"
                     />
                   </div>

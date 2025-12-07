@@ -148,10 +148,12 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     quality: 'HD'
   });
 
-  // Auto-enable camera and microphone when connected
+  // Auto-enable camera and microphone when connected (only once on initial connection)
+  const [hasAutoEnabled, setHasAutoEnabled] = useState(false);
+  
   useEffect(() => {
     const enableDevices = async () => {
-      if (connectionState === ConnectionState.Connected && localParticipant && !isCameraEnabled) {
+      if (connectionState === ConnectionState.Connected && localParticipant && !hasAutoEnabled) {
         try {
           console.log('Connection established, enabling camera and microphone...');
 
@@ -168,6 +170,9 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
           setIsMicEnabled(true);
           console.log('✅ Microphone enabled successfully');
 
+          // Mark as auto-enabled so it doesn't run again
+          setHasAutoEnabled(true);
+
         } catch (error) {
           console.error('❌ Failed to enable camera/microphone:', error);
           // Try again after a short delay
@@ -177,6 +182,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
               await localParticipant.setMicrophoneEnabled(true);
               setIsCameraEnabled(true);
               setIsMicEnabled(true);
+              setHasAutoEnabled(true);
               console.log('✅ Retry successful');
             } catch (retryError) {
               console.error('❌ Retry failed:', retryError);
@@ -187,7 +193,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     };
 
     enableDevices();
-  }, [connectionState, localParticipant, isCameraEnabled]);
+  }, [connectionState, localParticipant, hasAutoEnabled]);
 
 
 
