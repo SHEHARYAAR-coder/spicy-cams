@@ -57,11 +57,11 @@ export default function ModelsPage() {
       if (response.ok) {
         const data = await response.json();
         const modelsWithDates = (data.models || []).map((model: Model) => ({
-          ...creator,
-          createdAt: new Datemodel.createdAt),
+          ...model,
+          createdAt: new Date(model.createdAt),
         }));
-        setModels(modelsWithDates);
-        setFilteredModels(modelsWithDates);
+        setCreators(modelsWithDates);
+        setFilteredCreators(modelsWithDates);
       }
     } catch (error) {
       console.error("Error fetching models:", error);
@@ -145,38 +145,38 @@ export default function ModelsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredCreators.map((creator) => (
               <Card
-                key={model.id}
+                key={creator.id}
                 className="p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden"
-                onMouseEnter={() => setHoveredCardmodel.id)}
+                onMouseEnter={() => setHoveredCard(creator.id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => handleModelClickmodel.id)}
+                onClick={() => handleModelClick(creator.id)}
               >
                 {/* Avatar with fixed height */}
                 <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
-                  {model.avatarUrl ? (
+                  {creator.avatarUrl ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
-                      src={model.avatarUrl}
-                      alt={model.displayName}
+                      src={creator.avatarUrl}
+                      alt={creator.displayName}
                       className="w-full h-full object-cover object-center"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">
                       <Users className="w-12 h-12 text-gray-500 mb-2" />
                       <div className="text-xs text-gray-500 text-center px-4">
-                        <div className="font-medium truncate">{model.displayName}</div>
-                        {model.category && (
-                          <div className="text-purple-400 mt-1">{model.category}</div>
+                        <div className="font-medium truncate">{creator.displayName}</div>
+                        {creator.category && (
+                          <div className="text-purple-400 mt-1">{creator.category}</div>
                         )}
                       </div>
                     </div>
                   )}
 
                   {/* Category Badge */}
-                  {model.category && (
+                  {creator.category && (
                     <div className="absolute top-3 left-3 z-10">
                       <div className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium">
-                        {model.category}
+                        {creator.category}
                       </div>
                     </div>
                   )}
@@ -198,22 +198,22 @@ export default function ModelsPage() {
                   <div className="absolute bottom-3 right-3 z-10">
                     <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                       <Eye className="w-3 h-3" />
-                      {model.followersCount}
+                      {creator.followersCount}
                     </div>
                   </div>
 
                   {/* Age Badge */}
-                  {model.displayedAge && (
+                  {creator.displayedAge && (
                     <div className="absolute bottom-3 left-3 z-10">
                       <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold">
-                        {model.displayedAge}
+                        {creator.displayedAge}
                       </div>
                     </div>
                   )}
 
                   {/* Hover Overlay */}
                   <div
-                    className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${hoveredCard === model.id ? 'opacity-100' : 'opacity-0'
+                    className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${hoveredCard === creator.id ? 'opacity-100' : 'opacity-0'
                       }`}
                   >
                     <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
@@ -224,52 +224,52 @@ export default function ModelsPage() {
 
                 <CardContent className="px-4 pb-4">
                   <h3 className="font-semibold text-base mb-2 line-clamp-2 text-white group-hover:text-purple-400 transition-colors">
-                    {model.displayName}
+                    {creator.displayName}
                   </h3>
 
                   <div className="flex items-center gap-2 mb-2">
-                    {model.displayedCity && (
+                    {creator.displayedCity && (
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-purple-400" />
-                        <span className="text-xs text-gray-400 truncate">{model.displayedCity}</span>
+                        <span className="text-xs text-gray-400 truncate">{creator.displayedCity}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Bio */}
-                  {model.bio && (
+                  {creator.bio && (
                     <p className="text-xs text-gray-400 line-clamp-2 mb-2">
-                      {model.bio}
+                      {creator.bio}
                     </p>
                   )}
 
                   {/* Tags */}
-                  {model.ethnicity || model.physique || model.hairColor) && (
+                  {(creator.ethnicity || creator.physique || creator.hairColor) && (
                     <div className="flex flex-wrap gap-1 mb-2">
-                      {model.ethnicity && (
+                      {creator.ethnicity && (
                         <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
-                          {model.ethnicity}
+                          {creator.ethnicity}
                         </span>
                       )}
-                      {model.physique && (
+                      {creator.physique && (
                         <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
-                          {model.physique}
+                          {creator.physique}
                         </span>
                       )}
-                      {model.hairColor && (
+                      {creator.hairColor && (
                         <span className="inline-flex items-center px-2 py-0.5 bg-gray-700/50 text-gray-300 rounded text-xs border border-gray-600/50">
-                          {model.hairColor}
+                          {creator.hairColor}
                         </span>
                       )}
                     </div>
                   )}
 
                   {/* Languages */}
-                  {model.spokenLanguages.length > 0 && (
+                  {creator.spokenLanguages.length > 0 && (
                     <div className="flex items-center gap-1 mb-2">
                       <span className="text-xs font-medium text-purple-400 bg-purple-600/20 px-2 py-1 rounded-full border border-purple-500/30">
-                        {model.spokenLanguages.slice(0, 2).join(", ")}
-                        {model.spokenLanguages.length > 2 && "..."}
+                        {creator.spokenLanguages.slice(0, 2).join(", ")}
+                        {creator.spokenLanguages.length > 2 && "..."}
                       </span>
                     </div>
                   )}
@@ -279,7 +279,7 @@ export default function ModelsPage() {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleModelClickmodel.id);
+                        handleModelClick(creator.id);
                       }}
                       className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
@@ -305,6 +305,6 @@ export default function ModelsPage() {
           </Card>
         )}
       </div>
-    </div>
+    </div >
   );
 }

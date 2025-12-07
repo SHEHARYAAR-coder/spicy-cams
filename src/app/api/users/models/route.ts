@@ -9,9 +9,7 @@ export async function GET(request: NextRequest) {
 
     const models = await prisma.user.findMany({
       where: {
-        profile: {
-          isModel: true,
-        },
+        role: "MODEL",
         status: "ACTIVE",
         ...(search && {
           OR: [
