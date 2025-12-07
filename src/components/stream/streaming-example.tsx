@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { CreatorBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
+import { ModelBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -56,7 +56,7 @@ export function StreamingExample() {
                 setSelectedStream(stream.id);
                 setMode('create');
 
-                // Get creator token
+                // Get model token
                 const tokenResponse = await fetch(`/api/streams/${stream.id}/token`, {
                     method: 'POST'
                 });
@@ -122,7 +122,7 @@ export function StreamingExample() {
                 >
                     Browse Streams
                 </Button>
-                {session.user && 'role' in session.user && session.user.role === 'CREATOR' && (
+                {session.user && 'role' in session.user && session.user.role === 'MODEL' && (
                     <Button
                         onClick={() => setMode('create')}
                         variant={mode === 'create' ? 'default' : 'outline'}
@@ -198,7 +198,7 @@ export function StreamingExample() {
                 </Card>
             )}
 
-            {/* Creator Broadcast */}
+            {/* Model Broadcast */}
             {mode === 'create' && selectedStream && streamToken && (
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
@@ -211,7 +211,7 @@ export function StreamingExample() {
                         </Button>
                     </div>
 
-                    <CreatorBroadcast
+                    <ModelBroadcast
                         streamId={selectedStream}
                         token={streamToken}
                         serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}

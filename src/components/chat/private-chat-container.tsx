@@ -56,46 +56,46 @@ export function PrivateChatContainer({
         enabled: streamId !== "homepage" && !!token,
     });
 
-    // Fetch stream creator info (skip for homepage)
+    // Fetch stream model info (skip for homepage)
     useEffect(() => {
-        const fetchCreatorInfo = async () => {
-            console.log('[PrivateChatContainer] Fetching creator info for streamId:', streamId);
+        const fetchModelInfo = async () => {
+            console.log('[PrivateChatContainer] Fetching model info for streamId:', streamId);
             try {
                 const response = await fetch(`/api/streams/${streamId}`);
-                console.log('[PrivateChatContainer] Creator info response status:', response.status);
+                console.log('[PrivateChatContainer] Model info response status:', response.status);
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('[PrivateChatContainer] Creator info data:', data);
+                    console.log('[PrivateChatContainer] Model info data:', data);
 
                     const streamData = data?.stream ?? data;
-                    const creator = streamData?.creator;
+                    const model = streamData?.model;
 
-                    if (!creator) {
-                        console.warn("[PrivateChatContainer] No creator info returned for stream", streamId);
+                    if (!model) {
+                        console.warn("[PrivateChatContainer] No model info returned for stream", streamId);
                         return;
                     }
 
-                    const creatorData = {
-                        id: creator.id,
-                        name: creator.name || creator.displayName || "Creator",
-                        image: creator.avatar || creator.avatarUrl || creator.image
+                    const modelData = {
+                        id: model.id,
+                        name: model.name || model.displayName || "Model",
+                        image: model.avatar || model.avatarUrl || model.image
                     };
 
-                    console.log('[PrivateChatContainer] Setting creator info:', creatorData);
-                    setCreatorInfo(creatorData);
+                    console.log('[PrivateChatContainer] Setting model info:', modelData);
+                    setCreatorInfo(modelData);
                 } else {
-                    console.error('[PrivateChatContainer] Failed to fetch creator info, status:', response.status);
+                    console.error('[PrivateChatContainer] Failed to fetch model info, status:', response.status);
                 }
             } catch (error) {
-                console.error("[PrivateChatContainer] Error fetching creator info:", error);
+                console.error("[PrivateChatContainer] Error fetching model info:", error);
             }
         };
 
         if (streamId && streamId !== "homepage") {
-            fetchCreatorInfo();
+            fetchModelInfo();
         } else {
-            console.log('[PrivateChatContainer] Skipping creator info fetch for streamId:', streamId);
+            console.log('[PrivateChatContainer] Skipping model info fetch for streamId:', streamId);
         }
     }, [streamId]);
 
@@ -106,7 +106,7 @@ export function PrivateChatContainer({
         }
     }, [initialPartnerId, selectedPartnerId]);
 
-    // Check request status with the creator
+    // Check request status with the model
     useEffect(() => {
         const checkCreatorRequestStatus = async () => {
             if (!creatorInfo || !token || session?.user?.id === creatorInfo.id) {
@@ -193,7 +193,7 @@ export function PrivateChatContainer({
 
         const success = await acceptChatRequest(requestId);
         if (success) {
-            // Update creator request status if this is the creator
+            // Update model request status if this is the model
             if (creatorInfo && request.senderId === creatorInfo.id) {
                 setCreatorRequestStatus("ACCEPTED");
             }
@@ -224,7 +224,7 @@ export function PrivateChatContainer({
                     </div>
                     <h3 className="text-lg font-semibold mb-2 text-white">Sign In Required</h3>
                     <p className="text-sm text-gray-400 leading-relaxed">
-                        Please sign in to use private chat and connect with creators.
+                        Please sign in to use private chat and connect with models.
                     </p>
                 </div>
             </Card>
@@ -253,7 +253,7 @@ export function PrivateChatContainer({
                         </div>
                     ) : (
                         <div className="flex-1 overflow-y-auto bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-300">
-                            {/* Show pending chat requests for creators */}
+                            {/* Show pending chat requests for models */}
                             {creatorInfo && session?.user?.id === creatorInfo.id && chatRequests.length > 0 && (
                                 <div className="p-3">
                                     <PrivateChatRequestNotification
@@ -264,7 +264,7 @@ export function PrivateChatContainer({
                                 </div>
                             )}
 
-                            {/* Show "Message Creator" option based on request status */}
+                            {/* Show "Message Model" option based on request status */}
                             {creatorInfo && session?.user?.id !== creatorInfo.id && (
                                 <div className="p-3">
                                     {creatorRequestStatus === "NONE" && !conversations.find(c => c.partnerId === creatorInfo.id) && (
@@ -286,7 +286,7 @@ export function PrivateChatContainer({
                                                             Message {creatorInfo.name}
                                                         </p>
                                                         <p className="text-xs text-purple-300 text-left">
-                                                            Creator • Send a chat request
+                                                            Model • Send a chat request
                                                         </p>
                                                     </div>
                                                     <MessageCircle className="w-5 h-5 text-purple-400" />
@@ -384,7 +384,7 @@ export function PrivateChatContainer({
                                 className="p-3"
                             />
 
-                            {/* Show available creators for homepage */}
+                            {/* Show available models for homepage */}
                             {streamId === "homepage" && conversations.length === 0 && (
                                 <div className="p-4 text-center">
                                     <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -392,7 +392,7 @@ export function PrivateChatContainer({
                                     </div>
                                     <h3 className="text-lg font-semibold mb-2 text-white">No Conversations Yet</h3>
                                     <p className="text-sm text-gray-400 leading-relaxed">
-                                        Start watching streams to chat with creators privately.
+                                        Start watching streams to chat with models privately.
                                     </p>
                                 </div>
                             )}
@@ -444,7 +444,7 @@ export function PrivateChatContainer({
                                         <Clock className="w-8 h-8 text-purple-400 animate-pulse" />
                                     </div>
                                     <p className="text-sm text-gray-300 font-medium mb-1">Request Pending</p>
-                                    <p className="text-xs text-gray-500">Waiting for {selectedPartner?.partnerName || "creator"} to accept your chat request</p>
+                                    <p className="text-xs text-gray-500">Waiting for {selectedPartner?.partnerName || "model"} to accept your chat request</p>
                                 </div>
                             </div>
                         ) : requestStatus === "REJECTED" ? (
@@ -564,7 +564,7 @@ export function PrivateChatContainer({
                 <ChatRequestDialog
                     open={showRequestDialog}
                     onOpenChange={setShowRequestDialog}
-                    creatorName={creatorInfo.name}
+                    modelName={creatorInfo.name}
                     onSendRequest={handleSendChatRequest}
                 />
             )}

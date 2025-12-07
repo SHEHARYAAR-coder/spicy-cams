@@ -53,13 +53,13 @@ export function DashboardSidebar({
         label: "Dashboard",
         href: "/dashboard",
         icon: LayoutDashboard,
-        roles: ["VIEWER", "CREATOR", "MODERATOR", "ADMIN"],
+        roles: ["VIEWER", "MODEL", "MODERATOR", "ADMIN"],
       },
       {
         label: "Profile",
         href: "/profile",
         icon: User,
-        roles: ["VIEWER", "CREATOR", "MODERATOR", "ADMIN"],
+        roles: ["VIEWER", "MODEL", "MODERATOR", "ADMIN"],
       },
     ];
 
@@ -81,15 +81,15 @@ export function DashboardSidebar({
     const creatorItems = [
       {
         label: "My Streams",
-        href: "/creator/streams",
+        href: "/model/streams",
         icon: Activity,
-        roles: ["CREATOR"],
+        roles: ["MODEL"],
       },
       {
         label: "Browse Streams",
         href: "/streaming",
         icon: Video,
-        roles: ["CREATOR"],
+        roles: ["MODEL"],
       },
     ];
 
@@ -177,7 +177,7 @@ export function DashboardSidebar({
       case "VIEWER":
         items = [...items, ...viewerItems];
         break;
-      case "CREATOR":
+      case "MODEL":
         items = [...items, ...creatorItems];
         break;
       case "MODERATOR":
@@ -199,7 +199,7 @@ export function DashboardSidebar({
         return "bg-red-900/30 text-red-400 border-red-500/50";
       case "MODERATOR":
         return "bg-orange-900/30 text-orange-400 border-orange-500/50";
-      case "CREATOR":
+      case "MODEL":
         return "bg-purple-900/30 text-purple-400 border-purple-500/50";
       case "VIEWER":
       default:

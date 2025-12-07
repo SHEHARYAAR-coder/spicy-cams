@@ -38,7 +38,7 @@ interface Stream {
   startedAt?: Date;
 }
 
-interface Creator {
+interface Model {
   id: string;
   email: string;
   role: string;
@@ -69,27 +69,27 @@ interface Creator {
   streams: Stream[];
 }
 
-export default function CreatorProfilePage() {
+export default function ModelProfilePage() {
   const { data: session } = useSession();
   const router = useRouter();
   const params = useParams();
-  const creatorId = params.creatorId as string;
+  const modelId = params.modelId as string;
 
-  const [creator, setCreator] = useState<Creator | null>(null);
+  const [creator, setCreator] = useState<Model | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
-  const fetchCreator = async () => {
+  const fetchModel = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/users/creators/${creatorId}`);
+      const response = await fetch(`/api/users/models/${modelId}`);
       if (response.ok) {
         const data = await response.json();
-        const creatorWithDates = {
+        const modelWithDates = {
           ...data.creator,
-          createdAt: new Date(data.creator.createdAt),
-          streams: (data.creator.streams || []).map((stream: any) => ({
+          createdAt: new Date(data.model.createdAt),
+          streams: (data.model.streams || []).map((stream: any) => ({
             ...stream,
             createdAt: new Date(stream.createdAt),
             scheduledAt: stream.scheduledAt
@@ -98,7 +98,7 @@ export default function CreatorProfilePage() {
             startedAt: stream.startedAt ? new Date(stream.startedAt) : null,
           })),
         };
-        setCreator(creatorWithDates);
+        setCreator(modelWithDates);
       } else {
         router.push("/m");
       }
@@ -111,10 +111,10 @@ export default function CreatorProfilePage() {
   };
 
   useEffect(() => {
-    if (creatorId) {
-      fetchCreator();
+    if (modelId) {
+      fetchModel();
     }
-  }, [creatorId]);
+  }, [modelId]);
 
   const handleFollowToggle = async () => {
     if (!session) {
@@ -137,7 +137,7 @@ export default function CreatorProfilePage() {
       router.push("/login");
       return;
     }
-    router.push(`/profile?message=${creatorId}`);
+    router.push(`/profile?message=${modelId}`);
   };
 
   const handleImageClick = (index: number) => {
@@ -150,13 +150,13 @@ export default function CreatorProfilePage() {
 
   const handlePreviousImage = () => {
     if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex - 1 + creator.profileImages.length) % creator.profileImages.length);
+      setSelectedImageIndex((selectedImageIndex - 1 + model.profileImages.length) % model.profileImages.length);
     }
   };
 
   const handleNextImage = () => {
     if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex + 1) % creator.profileImages.length);
+      setSelectedImageIndex((selectedImageIndex + 1) % model.profileImages.length);
     }
   };
 
@@ -225,9 +225,9 @@ export default function CreatorProfilePage() {
           {/* Simulated Cover Image */}
           <div className="h-[300px] w-full relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950" />
-            {creator.avatarUrl ? (
+            {model.avatarUrl ? (
               <Image
-                src={creator.avatarUrl}
+                src={model.avatarUrl}
                 alt="Cover"
                 fill
                 className="object-cover opacity-40 blur-xl scale-110"
@@ -244,10 +244,10 @@ export default function CreatorProfilePage() {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-500 to-violet-600 rounded-full opacity-75 blur group-hover:opacity-100 transition duration-1000"></div>
                 <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-800 shadow-2xl">
-                  {creator.avatarUrl ? (
+                  {model.avatarUrl ? (
                     <Image
-                      src={creator.avatarUrl}
-                      alt={creator.displayName}
+                      src={model.avatarUrl}
+                      alt={model.displayName}
                       fill
                       className="object-cover"
                     />
@@ -257,7 +257,7 @@ export default function CreatorProfilePage() {
                     </div>
                   )}
                 </div>
-                {creator.status === "LIVE" && (
+                {model.status === "LIVE" && (
                   <div className="absolute bottom-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-4 border-gray-950 shadow-lg animate-pulse">
                     LIVE
                   </div>
@@ -268,16 +268,16 @@ export default function CreatorProfilePage() {
               <div className="flex-1 pb-2 w-full md:w-auto text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                   <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight drop-shadow-lg">
-                    {creator.displayName}
+                    {model.displayName}
                   </h1>
-                  {creator.displayedAge && (
+                  {model.displayedAge && (
                     <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-gray-600 text-gray-300 bg-gray-800/50">
-                      {creator.displayedAge}
+                      {model.displayedAge}
                     </Badge>
                   )}
-                  {creator.category && (
+                  {model.category && (
                     <Badge className="w-fit mx-auto md:mx-0 bg-purple-600 text-white border-0">
-                      {creator.category}
+                      {model.category}
                     </Badge>
                   )}
                 </div>
@@ -285,23 +285,23 @@ export default function CreatorProfilePage() {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 text-sm mb-6">
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
-                      {creator.followersCount.toLocaleString()}
+                      {model.followersCount.toLocaleString()}
                     </span>{" "}
                     Followers
                   </div>
                   <div className="w-1 h-1 bg-gray-600 rounded-full" />
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
-                      {creator.streamsCount}
+                      {model.streamsCount}
                     </span>{" "}
                     Streams
                   </div>
-                  {creator.displayedCity && (
+                  {model.displayedCity && (
                     <>
                       <div className="w-1 h-1 bg-gray-600 rounded-full" />
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        {creator.displayedCity}
+                        {model.displayedCity}
                       </div>
                     </>
                   )}
@@ -352,15 +352,15 @@ export default function CreatorProfilePage() {
                     About Me
                   </h3>
                   <p className="text-gray-400 leading-relaxed text-sm">
-                    {creator.bio || "No bio available."}
+                    {model.bio || "No bio available."}
                   </p>
                 </div>
 
-                {creator.spokenLanguages.length > 0 && (
+                {model.spokenLanguages.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Languages</h4>
                     <div className="flex flex-wrap gap-2">
-                      {creator.spokenLanguages.map((lang) => (
+                      {model.spokenLanguages.map((lang) => (
                         <div key={lang} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600/20 border border-purple-500/30 text-xs text-purple-300">
                           <Globe className="w-3 h-3" />
                           {lang}
@@ -372,24 +372,24 @@ export default function CreatorProfilePage() {
 
                 {/* Stats / Bento Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                  <AttributeBox label="Ethnicity" value={creator.ethnicity} />
-                  <AttributeBox label="Hair" value={creator.hairColor} />
-                  <AttributeBox label="Body" value={creator.physique} />
+                  <AttributeBox label="Ethnicity" value={model.ethnicity} />
+                  <AttributeBox label="Hair" value={model.hairColor} />
+                  <AttributeBox label="Body" value={model.physique} />
                   <AttributeBox label="Eye Color" value="--" />
-                  <AttributeBox label="Tattoos" value={creator.tattoos} />
+                  <AttributeBox label="Tattoos" value={model.tattoos} />
                   <AttributeBox label="Joined" value={new Date(creator.createdAt).getFullYear().toString()} icon={<Calendar className="w-3 h-3" />} />
                 </div>
               </div>
 
               {/* My Shows */}
-              {creator.myShows.length > 0 && (
+              {model.myShows.length > 0 && (
                 <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-3xl p-6">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                     <Activity className="w-4 h-4 text-pink-500" />
                     My Shows
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {creator.myShows.map((show) => (
+                    {model.myShows.map((show) => (
                       <Badge
                         key={show}
                         variant="outline"
@@ -407,16 +407,16 @@ export default function CreatorProfilePage() {
             <div className="lg:col-span-8 space-y-8">
 
               {/* Profile Description (Long) */}
-              {creator.profileDescription && (
+              {model.profileDescription && (
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
                   <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                    {creator.profileDescription}
+                    {model.profileDescription}
                   </p>
                 </div>
               )}
 
               {/* Media Gallery */}
-              {(creator.profileImages.length > 0 || creator.profileVideos.length > 0) && (
+              {(creator.profileImages.length > 0 || model.profileVideos.length > 0) && (
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
                   <h2 className="text-2xl font-bold flex items-center gap-3 mb-6">
                     <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
@@ -426,11 +426,11 @@ export default function CreatorProfilePage() {
                   </h2>
 
                   {/* Images Section */}
-                  {creator.profileImages.length > 0 && (
+                  {model.profileImages.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-white mb-4">Photos</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {creator.profileImages.map((imageUrl, index) => (
+                        {model.profileImages.map((imageUrl, index) => (
                           <div
                             key={index}
                             className="relative group aspect-square overflow-hidden rounded-xl bg-gray-900 cursor-pointer"
@@ -438,7 +438,7 @@ export default function CreatorProfilePage() {
                           >
                             <Image
                               src={imageUrl}
-                              alt={`${creator.displayName} photo ${index + 1}`}
+                              alt={`${model.displayName} photo ${index + 1}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                             />
@@ -455,11 +455,11 @@ export default function CreatorProfilePage() {
                   )}
 
                   {/* Videos Section */}
-                  {creator.profileVideos.length > 0 && (
+                  {model.profileVideos.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-4">Videos</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {creator.profileVideos.map((videoUrl, index) => (
+                        {model.profileVideos.map((videoUrl, index) => (
                           <div
                             key={index}
                             className="relative group rounded-xl overflow-hidden bg-gray-900"
@@ -490,9 +490,9 @@ export default function CreatorProfilePage() {
                   {/* Optional View All button could go here */}
                 </div>
 
-                {creator.streams.length > 0 ? (
+                {model.streams.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {creator.streams.map((stream) => (
+                    {model.streams.map((stream) => (
                       <div key={stream.id} className="group relative">
                         {/* Custom wrapper for StreamCard to add hover effects */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-30 transition duration-300 blur-sm"></div>
@@ -500,10 +500,10 @@ export default function CreatorProfilePage() {
                           <StreamCard
                             stream={{
                               ...stream,
-                              creator: {
-                                id: creator.id,
-                                name: creator.displayName,
-                                image: creator.avatarUrl,
+                              model: {
+                                id: model.id,
+                                name: model.displayName,
+                                image: model.avatarUrl,
                               },
                             }}
                             onJoinStream={handleJoinStream}
@@ -543,11 +543,11 @@ export default function CreatorProfilePage() {
 
           {/* Image Counter */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-800/80 px-4 py-2 rounded-full text-white text-sm z-10">
-            {selectedImageIndex + 1} / {creator.profileImages.length}
+            {selectedImageIndex + 1} / {model.profileImages.length}
           </div>
 
           {/* Previous Button */}
-          {creator.profileImages.length > 1 && (
+          {model.profileImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -560,7 +560,7 @@ export default function CreatorProfilePage() {
           )}
 
           {/* Next Button */}
-          {creator.profileImages.length > 1 && (
+          {model.profileImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -579,8 +579,8 @@ export default function CreatorProfilePage() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={creator.profileImages[selectedImageIndex]}
-              alt={`${creator.displayName} photo ${selectedImageIndex + 1}`}
+              src={model.profileImages[selectedImageIndex]}
+              alt={`${model.displayName} photo ${selectedImageIndex + 1}`}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>

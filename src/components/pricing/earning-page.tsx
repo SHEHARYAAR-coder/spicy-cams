@@ -32,7 +32,7 @@ export default function EarningsPage() {
     if (status === "loading") {
         return <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">Loading...</div>;
     }
-    if (!session?.user || (userRole !== "CREATOR" && userRole !== "ADMIN")) {
+    if (!session?.user || (userRole !== "MODEL" && userRole !== "ADMIN")) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
                 <div className="bg-gray-800/80 p-8 rounded-lg shadow-lg border border-gray-700 text-center max-w-md">
@@ -117,7 +117,7 @@ export default function EarningsPage() {
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 bg-purple-600/10 text-purple-400 px-4 py-2 rounded-full mb-6">
                         <Coins className="w-5 h-5" />
-                        <span className="text-sm font-medium">Creator Earnings</span>
+                        <span className="text-sm font-medium">Model Earnings</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 bg-clip-text text-transparent">
                         Earn Up To $55/Hour
@@ -333,7 +333,7 @@ export default function EarningsPage() {
                 <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/30 backdrop-blur-sm">
                     <CardContent className="p-8 text-center">
                         <h2 className="text-3xl font-bold mb-4 text-white">Ready to Start Earning?</h2>
-                        <p className="text-gray-300 mb-6 text-lg">Join thousands of creators who are already making money on SpicyCams</p>
+                        <p className="text-gray-300 mb-6 text-lg">Join thousands of models who are already making money on SpicyCams</p>
                         <div className="flex flex-wrap justify-center gap-4">
                             <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
                                 <Zap className="w-5 h-5 mr-2" />

@@ -87,9 +87,9 @@ export async function PUT(req: NextRequest) {
       bio,
       category,
       language,
-      isCreator,
+      isModel,
       targetRole,
-      // New creator profile fields
+      // model profile fields
       hairColor,
       physique,
       breastSize,
@@ -106,9 +106,15 @@ export async function PUT(req: NextRequest) {
       // Media gallery
       profileImages,
       profileVideos,
+      // Verification documents
+      idFrontUrl,
+      idBackUrl,
+      facePhotoUrl,
+      verificationStatus,
+      profileCompleted,
     } = body;
 
-    if (targetRole && targetRole !== "CREATOR") {
+    if (targetRole && targetRole !== "MODEL") {
       return NextResponse.json(
         { error: "Unsupported role change" },
         { status: 400 }
@@ -141,7 +147,7 @@ export async function PUT(req: NextRequest) {
     });
 
     const isUserCreator =
-      currentUser?.role === "CREATOR" || targetRole === "CREATOR";
+      currentUser?.role === "MODEL" || targetRole === "MODEL";
 
     const profileUpdateData: Record<string, unknown> = {
       updatedAt: new Date(),
@@ -150,7 +156,7 @@ export async function PUT(req: NextRequest) {
     if (typeof displayName !== "undefined")
       profileUpdateData.displayName = displayName;
 
-    // For CREATOR users, sync bio and profileDescription
+    // model users, sync bio and profileDescription
     if (isUserCreator) {
       if (typeof bio !== "undefined") {
         profileUpdateData.bio = bio;
@@ -161,7 +167,7 @@ export async function PUT(req: NextRequest) {
         profileUpdateData.bio = profileDescription; // Sync bio with profileDescription
       }
     } else {
-      // For non-creator users, update independently
+      // model users, update independently
       if (typeof bio !== "undefined") profileUpdateData.bio = bio;
       if (typeof profileDescription !== "undefined")
         profileUpdateData.profileDescription = profileDescription;
@@ -169,10 +175,10 @@ export async function PUT(req: NextRequest) {
 
     if (typeof category !== "undefined") profileUpdateData.category = category;
     if (typeof language !== "undefined") profileUpdateData.language = language;
-    if (typeof isCreator === "boolean") profileUpdateData.isCreator = isCreator;
-    if (targetRole === "CREATOR") profileUpdateData.isCreator = true;
+    if (typeof isModel === "boolean") profileUpdateData.isModel = isModel;
+    if (targetRole === "MODEL") profileUpdateData.isModel = true;
 
-    // Add new creator profile fields
+    // model profile fields
     if (typeof hairColor !== "undefined")
       profileUpdateData.hairColor = hairColor;
     if (typeof physique !== "undefined") profileUpdateData.physique = physique;
@@ -199,14 +205,26 @@ export async function PUT(req: NextRequest) {
     if (Array.isArray(profileVideos))
       profileUpdateData.profileVideos = profileVideos;
 
-    // Determine the bio/profileDescription values with syncing logic for creators
+    // Verification documents
+    if (typeof idFrontUrl !== "undefined")
+      profileUpdateData.idFrontUrl = idFrontUrl;
+    if (typeof idBackUrl !== "undefined")
+      profileUpdateData.idBackUrl = idBackUrl;
+    if (typeof facePhotoUrl !== "undefined")
+      profileUpdateData.facePhotoUrl = facePhotoUrl;
+    if (typeof verificationStatus !== "undefined")
+      profileUpdateData.verificationStatus = verificationStatus;
+    if (typeof profileCompleted === "boolean")
+      profileUpdateData.profileCompleted = profileCompleted;
+
+    // Determine the bio/profileDescription values with syncing logic for models
     let bioValue = typeof bio === "string" && bio.length > 0 ? bio : null;
     let profileDescValue =
       typeof profileDescription === "string" && profileDescription.length > 0
         ? profileDescription
         : null;
 
-    // For CREATOR users, sync bio and profileDescription on creation
+    // model users, sync bio and profileDescription on creation
     if (isUserCreator) {
       if (bioValue !== null) {
         profileDescValue = bioValue; // Sync profileDescription with bio
@@ -220,19 +238,19 @@ export async function PUT(req: NextRequest) {
       displayName:
         typeof displayName === "string" && displayName.length > 0
           ? displayName
-          : session.user.name || session.user.email || "Creator",
+          : session.user.name || session.user.email || "Model",
       bio: bioValue,
       category:
         typeof category === "string" && category.length > 0 ? category : null,
       language:
         typeof language === "string" && language.length > 0 ? language : null,
-      isCreator:
-        targetRole === "CREATOR"
+      isModel:
+        targetRole === "MODEL"
           ? true
-          : typeof isCreator === "boolean"
-          ? isCreator
+          : typeof isModel === "boolean"
+          ? isModel
           : false,
-      // New creator profile fields
+      // model profile fields
       hairColor:
         typeof hairColor === "string" && hairColor.length > 0
           ? hairColor
@@ -271,6 +289,27 @@ export async function PUT(req: NextRequest) {
       profileDescription: profileDescValue,
       profileImages: Array.isArray(profileImages) ? profileImages : [],
       profileVideos: Array.isArray(profileVideos) ? profileVideos : [],
+      // Verification documents
+      idFrontUrl:
+        typeof idFrontUrl === "string" && idFrontUrl.length > 0
+          ? idFrontUrl
+          : null,
+      idBackUrl:
+        typeof idBackUrl === "string" && idBackUrl.length > 0
+          ? idBackUrl
+          : null,
+      facePhotoUrl:
+        typeof facePhotoUrl === "string" && facePhotoUrl.length > 0
+          ? facePhotoUrl
+          : null,
+      verificationStatus:
+        typeof verificationStatus === "string" && verificationStatus.length > 0
+          ? verificationStatus
+          : "pending",
+      profileCompleted:
+        typeof profileCompleted === "boolean"
+          ? profileCompleted
+          : false,
     };
 
     // Update profile
@@ -281,13 +320,13 @@ export async function PUT(req: NextRequest) {
     });
 
     // Update role if needed
-    if (targetRole === "CREATOR") {
+    if (targetRole === "MODEL") {
       await prisma.user.updateMany({
         where: {
           id: userId,
-          role: { not: "CREATOR" },
+          role: { not: "MODEL" },
         },
-        data: { role: "CREATOR" },
+        data: { role: "MODEL" },
       });
     }
 

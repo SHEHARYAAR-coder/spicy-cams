@@ -2,10 +2,10 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@prisma/client";
-import { MyStreamsContent } from "@/components/creator/my-streams-content";
+import { MyStreamsContent } from "@/components/model/my-streams-content";
 
 export const metadata = {
-    title: "My Streams - Creator Studio",
+    title: "My Streams - Model Studio",
     description: "Manage and view all your streams",
 };
 
@@ -19,15 +19,15 @@ export default async function MyStreamsPage() {
     const userId = (session.user as { id: string; role?: string }).id;
     const userRole = (session.user as { id: string; role?: string }).role;
 
-    // Only creators and admins can access this page
-    if (userRole !== UserRole.CREATOR && userRole !== UserRole.ADMIN) {
+    // Only models and admins can access this page
+    if (userRole !== UserRole.MODEL && userRole !== UserRole.ADMIN) {
         redirect("/dashboard");
     }
 
     // Fetch user's streams with detailed information
     const streams = await prisma.stream.findMany({
         where: {
-            creatorId: userId,
+            modelId: userId,
         },
         include: {
             sessions: {

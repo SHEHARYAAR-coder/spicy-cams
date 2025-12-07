@@ -9,7 +9,7 @@ I have successfully implemented a complete withdrawal mechanism for your streami
 ### 1. **Automatic Billing System**
 
 - **Viewer Charges**: 5 tokens deducted per minute of viewing
-- **Creator Earnings**: $13.20 credited per minute per viewer
+- **Model Earnings**: $13.20 credited per minute per viewer
 - **Auto-billing**: Runs every 60 seconds while stream is active
 - **Balance Tracking**: Real-time balance updates with low balance warnings
 
@@ -37,21 +37,21 @@ Created RESTful API for withdrawal management:
 
 **`/api/withdrawals` (GET, POST)**
 
-- GET: Fetch all withdrawal requests (creators see their own, admins see all)
+- GET: Fetch all withdrawal requests (models see their own, admins see all)
 - POST: Create new withdrawal request (min $50)
 
 **`/api/withdrawals/[withdrawalId]` (GET, PATCH, DELETE)**
 
 - GET: View specific withdrawal
 - PATCH: Admin approve/reject with notes
-- DELETE: Creator cancel pending request
+- DELETE: Model cancel pending request
 
 **Files Created:**
 
 - `/src/app/api/withdrawals/route.ts`
 - `/src/app/api/withdrawals/[withdrawalId]/route.ts`
 
-### 4. **Creator Dashboard Components**
+### 4. **Model Dashboard Components**
 
 **Earnings Display & Withdrawal Interface:**
 
@@ -63,12 +63,12 @@ Created RESTful API for withdrawal management:
 
 **Files Created:**
 
-- `/src/components/creator/creator-earnings.tsx`
+- `/src/components/model/model-earnings.tsx`
 
 **Files Modified:**
 
-- `/src/app/finances/page.tsx` - Integrated creator earnings view
-- `/src/components/dashboard/creator-dashboard.tsx` - Added earnings link
+- `/src/app/finances/page.tsx` - Integrated model earnings view
+- `/src/components/dashboard/model-dashboard.tsx` - Added earnings link
 
 ### 5. **Admin Dashboard Components**
 
@@ -113,7 +113,7 @@ Complete documentation covering:
 - Low balance warnings at < 10 tokens
 - Insufficient funds error at 0 tokens
 
-### Creator Earnings
+### Model Earnings
 
 - **$13.20 per minute per viewer**
 - Automatic credit to wallet
@@ -131,7 +131,7 @@ Complete documentation covering:
 1. **Authorization**
 
    - Role-based access control
-   - Creators can only manage their withdrawals
+   - Models can only manage their withdrawals
    - Admins have full access
 
 2. **Validation**
@@ -149,7 +149,7 @@ Complete documentation covering:
 
 ## 🎨 User Interface
 
-### Creator Experience
+### Model Experience
 
 1. Dashboard shows earnings prominently
 2. Click "View Earnings & Request Withdrawal"
@@ -163,7 +163,7 @@ Complete documentation covering:
 
 1. Access "Manage Withdrawals" from dashboard
 2. View pending requests with details
-3. Review creator information
+3. Review model information
 4. Approve with optional note (processes payout)
 5. Reject with required reason
 6. View processed history
@@ -176,10 +176,10 @@ VIEWER WATCHES STREAM (1 minute)
     ↓
 Viewer Wallet: -5 tokens
     ↓
-Creator Wallet: +$13.20
+Model Wallet: +$13.20
     ↓
 Ledger Entry: DEBIT (viewer)
-Ledger Entry: DEPOSIT (creator)
+Ledger Entry: DEPOSIT (model)
     ↓
 CREATOR REQUESTS WITHDRAWAL ($100)
     ↓
@@ -194,7 +194,7 @@ Status: REJECTED → Reason provided
 
 ## 🚀 How to Use
 
-### For Creators
+### For Models
 
 1. **Start Streaming**: Your earnings accumulate automatically at $13.20/viewer/minute
 
@@ -226,7 +226,7 @@ Status: REJECTED → Reason provided
 2. **Review Requests**:
 
    - See all pending requests
-   - View creator details
+   - View model details
    - Check requested amounts
 
 3. **Process Requests**:
@@ -254,7 +254,7 @@ The system is ready to use! Just need to:
 
 1. **Stripe Connect Integration**
 
-   - Set up creator Stripe accounts
+   - Set up model Stripe accounts
    - Implement real payouts via Stripe API
    - Handle payout webhooks
 
@@ -276,7 +276,7 @@ The system is ready to use! Just need to:
 
 - `/src/app/api/withdrawals/route.ts`
 - `/src/app/api/withdrawals/[withdrawalId]/route.ts`
-- `/src/components/creator/creator-earnings.tsx`
+- `/src/components/model/model-earnings.tsx`
 - `/src/components/admin/withdrawal-management.tsx`
 - `/src/app/admin/withdrawals/page.tsx`
 - `/WITHDRAWAL_SYSTEM.md`
@@ -288,18 +288,18 @@ The system is ready to use! Just need to:
 - `/src/app/api/streams/[streamId]/bill/route.ts`
 - `/src/components/stream/viewer-player.tsx`
 - `/src/app/finances/page.tsx`
-- `/src/components/dashboard/creator-dashboard.tsx`
+- `/src/components/dashboard/model-dashboard.tsx`
 - `/src/components/dashboard/admin-dashboard.tsx`
 
 ## ✨ What Works Now
 
 ✅ Viewers are automatically charged 5 tokens per minute
-✅ Creators automatically earn $13.20 per viewer per minute
+✅ Models automatically earn $13.20 per viewer per minute
 ✅ Balance tracking with real-time updates
-✅ Creators can request withdrawals (min $50)
+✅ Models can request withdrawals (min $50)
 ✅ Admins can approve/reject with notes
 ✅ Full audit trail in ledger entries
-✅ Beautiful UI for both creators and admins
+✅ Beautiful UI for both models and admins
 ✅ Complete API with validation and security
 ✅ Withdrawal history and status tracking
 ✅ Low balance warnings for viewers
@@ -308,13 +308,13 @@ The system is ready to use! Just need to:
 
 1. **Test Viewer Billing**:
 
-   - Create a stream as creator
+   - Create a stream as model
    - Join as viewer
    - Watch for 1+ minute
    - Check console logs for billing confirmation
    - Verify balance deduction
 
-2. **Test Creator Earnings**:
+2. **Test Model Earnings**:
 
    - Have viewers watch your stream
    - Check earnings increase in wallet
@@ -322,7 +322,7 @@ The system is ready to use! Just need to:
 
 3. **Test Withdrawal Request**:
 
-   - As creator, go to `/finances`
+   - As model, go to `/finances`
    - Click "Request Withdrawal"
    - Enter amount >= $50
    - Submit and check status
@@ -339,7 +339,7 @@ All components are fully integrated and ready to use. The system is production-r
 
 **Note**: For production use with real money, you'll need to:
 
-1. Set up Stripe Connect for creators
+1. Set up Stripe Connect for models
 2. Implement actual payout API calls
 3. Handle payout webhooks for status updates
 4. Add email notifications

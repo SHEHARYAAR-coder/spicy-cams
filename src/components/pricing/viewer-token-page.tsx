@@ -90,7 +90,7 @@ export default function ViewerTokenPage() {
               <div className="flex items-start gap-3">
                 <Check className="w-5 h-5 mt-0.5 flex-shrink-0 text-purple-400" />
                 <span className="text-sm text-gray-300">
-                  Tip creators & buy gifts
+                  Tip models & buy gifts
                 </span>
               </div>
               <div className="flex items-start gap-3">
@@ -323,7 +323,7 @@ export default function ViewerTokenPage() {
 
                 <tr className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
                   <td className="py-4 px-4 font-medium text-white" rowSpan={2}>
-                    Tip Creator
+                    Tip Model
                   </td>
                   <td className="py-4 px-4 text-gray-400">Small</td>
                   <td className="py-4 px-4">

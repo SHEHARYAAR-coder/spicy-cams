@@ -25,7 +25,7 @@ interface StreamCardProps {
         status: 'LIVE' | 'SCHEDULED' | 'ENDED';
         createdAt: Date;
         scheduledFor?: Date;
-        creator: {
+        model: {
             id: string;
             name: string;
             image?: string;
@@ -188,15 +188,15 @@ export function StreamCard({
 
                 <div className="flex items-center gap-2 mb-2">
                     <Avatar className="w-6 h-6">
-                        <AvatarImage src={stream.creator.image} />
+                        <AvatarImage src={stream.model.image} />
                         <AvatarFallback className="text-xs">
-                            {stream.creator.name.charAt(0).toUpperCase()}
+                            {stream.model.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <p className="text-sm font-medium text-gray-200 truncate">
-                                {stream.creator.name}
+                                {stream.model.name}
                             </p>
                             <span className="text-xs text-gray-400 bg-gray-700 px-1 rounded">
                                 {18 + Math.floor(Math.random() * 12)}

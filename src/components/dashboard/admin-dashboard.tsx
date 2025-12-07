@@ -95,7 +95,7 @@ export function AdminDashboard({
           <StatsCard
             title="Creators"
             value={platformStats.totalCreators}
-            description="Platform creators"
+            description="Platform models"
             icon={Activity}
             chartData={generateChartData(
               platformStats.totalCreators,

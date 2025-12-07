@@ -11,7 +11,7 @@ export default function Page() {
 
   return (
     <div>
-      {userRole === "CREATOR" && <EarningsPage />}
+      {userRole === "MODEL" && <EarningsPage />}
       {userRole === "VIEWER" && <ViewerTokenPage />}
       {userRole === "ADMIN" && <ViewerTokenPage />}
     </div>

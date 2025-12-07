@@ -101,7 +101,38 @@ export default function LoginForm({ userType }: LoginFormProps) {
                 // Display the specific error message from the auth provider
                 setError(result.error)
             } else if (result?.ok) {
-                router.push(callbackUrl)
+                // Fetch user data to determine role-based redirect
+                const response = await fetch('/api/users/me')
+                if (response.ok) {
+                    const userData = await response.json()
+
+                    // Check if model needs to complete profile
+                    if (userData.role === 'MODEL') {
+                        const profileResponse = await fetch('/api/profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId: userData.id }),
+                        })
+
+                        if (profileResponse.ok) {
+                            const profileData = await profileResponse.json()
+
+                            // Redirect to profile setup if not completed
+                            if (!profileData.profile?.profileCompleted) {
+                                router.push('/m/profile-setup')
+                                router.refresh()
+                                return
+                            }
+                        }
+
+                        router.push('/model')
+                    } else {
+                        router.push(callbackUrl)
+                    }
+                } else {
+                    // Fallback to callback URL if user data fetch fails
+                    router.push(callbackUrl)
+                }
                 router.refresh()
             }
         } catch (err) {

@@ -18,10 +18,10 @@ export async function POST(
     const { streamId } = await params;
     const actorId = session.user.id;
 
-    // Check if user is creator, moderator, or admin
+    // model, moderator, or admin
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      select: { creatorId: true },
+      select: { modelId: true },
     });
 
     if (!stream) {
@@ -33,14 +33,14 @@ export async function POST(
       select: { role: true },
     });
 
-    const isCreator = stream.creatorId === actorId;
+    const isModel = stream.modelId === actorId;
     const isModerator = user?.role === "MODERATOR" || user?.role === "ADMIN";
 
-    if (!isCreator && !isModerator) {
+    if (!isModel && !isModerator) {
       return NextResponse.json(
         {
           error:
-            "Forbidden: Only creators and moderators can perform moderation actions",
+            "Forbidden: Only models and moderators can perform moderation actions",
         },
         { status: 403 }
       );

@@ -231,7 +231,7 @@ export default function ModelProfileForm({
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    // Creator profile fields
+                    // Model profile fields
                     hairColor: hairColor || null,
                     physique: physique || null,
                     breastSize: breastSize || null,
@@ -250,9 +250,10 @@ export default function ModelProfileForm({
                     idBackUrl,
                     facePhotoUrl,
                     verificationStatus: "pending",
-                    // Upgrade to creator
-                    targetRole: "CREATOR",
-                    isCreator: true,
+                    profileCompleted: true, // Mark profile as completed
+                    // Upgrade to model
+                    targetRole: "MODEL",
+                    isModel: true,
                 }),
             });
 
@@ -284,13 +285,13 @@ export default function ModelProfileForm({
                             <Crown className="w-12 h-12 text-purple-500" />
                         </div>
                         <CardTitle className="text-3xl font-bold text-white">
-                            {isOnboarding ? "Complete Your Model Profile" : "Upgrade to Creator Account"}
+                            {isOnboarding ? "Complete Your Model Profile" : "Upgrade to Model Account"}
                         </CardTitle>
                         <CardDescription className="text-gray-400">
                             {currentStep === 1
                                 ? (isOnboarding
                                     ? "Step 1 of 2: Tell us about yourself"
-                                    : "Fill out your creator profile to unlock premium features")
+                                    : "Fill out your model profile to unlock premium features")
                                 : "Step 2 of 2: Verify your identity"
                             }
                         </CardDescription>
@@ -298,15 +299,15 @@ export default function ModelProfileForm({
                         {/* Progress Indicator */}
                         <div className="flex items-center justify-center gap-2 mt-4">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${currentStep === 1
-                                    ? 'border-purple-500 bg-purple-500 text-white'
-                                    : 'border-green-500 bg-green-500 text-white'
+                                ? 'border-purple-500 bg-purple-500 text-white'
+                                : 'border-green-500 bg-green-500 text-white'
                                 }`}>
                                 {currentStep === 1 ? '1' : <CheckCircle2 className="w-6 h-6" />}
                             </div>
                             <div className={`w-16 h-1 ${currentStep === 2 ? 'bg-purple-500' : 'bg-gray-600'}`} />
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${currentStep === 2
-                                    ? 'border-purple-500 bg-purple-500 text-white'
-                                    : 'border-gray-600 bg-gray-700 text-gray-400'
+                                ? 'border-purple-500 bg-purple-500 text-white'
+                                : 'border-gray-600 bg-gray-700 text-gray-400'
                                 }`}>
                                 2
                             </div>

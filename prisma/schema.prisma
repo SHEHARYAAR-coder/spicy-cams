@@ -18,7 +18,7 @@ datasource db {
 
 enum UserRole {
   VIEWER
-  CREATOR
+  MODEL
   MODERATOR
   ADMIN
 }
@@ -127,7 +127,7 @@ model User {
   payments                Payment[]
   streams                 Stream[]
   follows                 Follow[]             @relation("UserFollows")
-  followers               Follow[]             @relation("CreatorFollowers")
+  followers               Follow[]             @relation("ModelFollowers")
   chatMessages            ChatMessage[]
   sentPrivateMessages     PrivateMessage[]     @relation("SentPrivateMessages")
   receivedPrivateMessages PrivateMessage[]     @relation("ReceivedPrivateMessages")
@@ -151,13 +151,13 @@ model Profile {
   displayName String? @map("display_name")
   avatarUrl   String? @map("avatar_url")
   bio         String? @db.Text
-  isCreator   Boolean @default(false) @map("is_creator")
+  isModel     Boolean @default(false) @map("is_model")
 
-  // Creator-specific fields
+  // Model-specific fields
   category String?
   language String?
 
-  // Extended Creator Profile Fields
+  // Extended Model Profile Fields
   hairColor          String?  @map("hair_color") // Blonde, Brunette, Red, Black, etc.
   physique           String? // Athletic, Slim, Average, Curvy, etc.
   breastSize         String?  @map("breast_size") // A, B, C, D, Double D, etc.
@@ -176,6 +176,13 @@ model Profile {
   profileImages     String[]  @default([]) @map("profile_images") // Array of image URLs
   profileVideos     String[]  @default([]) @map("profile_videos") // Array of video URLs
 
+  // Verification Documents (for MODEL role)
+  idFrontUrl         String? @map("id_front_url") // ID front photo URL
+  idBackUrl          String? @map("id_back_url") // ID back photo URL
+  facePhotoUrl       String? @map("face_photo_url") // Face photo URL
+  verificationStatus String? @default("pending") @map("verification_status") // pending, approved, rejected
+  profileCompleted   Boolean @default(false) @map("profile_completed") // Track if model completed profile setup
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -191,9 +198,9 @@ model Profile {
 // ============================================
 
 model Stream {
-  id           String   @id @default(cuid())
-  creatorId    String   @map("creator_id")
-  title        String
+  id        String   @id @default(cuid())
+  modelId   String   @map("model_id")
+  title     String
   description  String?  @db.Text
   category     String?
   tags         String[] @default([])
@@ -218,14 +225,14 @@ model Stream {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  creator         User                 @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  model           User                 @relation(fields: [modelId], references: [id], onDelete: Cascade)
   sessions        StreamSession[]
   chatMessages    ChatMessage[]
   privateMessages PrivateMessage[]
   chatRequests    PrivateChatRequest[]
   // moderationActions ModerationAction[] @relation("TargetStream")
 
-  @@index([creatorId])
+  @@index([modelId])
   @@index([status, startedAt])
   @@index([category])
   @@map("streams")
@@ -385,19 +392,19 @@ model Price {
 // ============================================
 
 model Follow {
-  id        String @id @default(cuid())
-  userId    String @map("user_id")
-  creatorId String @map("creator_id")
+  id      String @id @default(cuid())
+  userId  String @map("user_id")
+  modelId String @map("model_id")
 
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  user    User @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
-  creator User @relation("CreatorFollowers", fields: [creatorId], references: [id], onDelete: Cascade)
+  user  User @relation("UserFollows", fields: [userId], references: [id], onDelete: Cascade)
+  model User @relation("ModelFollowers", fields: [modelId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, creatorId])
+  @@unique([userId, modelId])
   @@index([userId])
-  @@index([creatorId])
+  @@index([modelId])
   @@map("follows")
 }
 

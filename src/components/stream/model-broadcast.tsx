@@ -58,7 +58,7 @@ import {
   SwitchCamera
 } from 'lucide-react';
 
-interface CreatorBroadcastProps {
+interface ModelBroadcastProps {
   streamId: string;
   token: string;
   serverUrl: string;
@@ -67,21 +67,21 @@ interface CreatorBroadcastProps {
   className?: string;
 }
 
-export function CreatorBroadcast({
+export function ModelBroadcast({
   streamId,
   token,
   serverUrl,
   streamTitle,
   onStreamEnd,
   className = ""
-}: CreatorBroadcastProps) {
+}: ModelBroadcastProps) {
   return (
     <div className={`relative ${className}`}>
       <LiveKitRoom
         token={token}
         serverUrl={serverUrl}
         connectOptions={{
-          autoSubscribe: false, // Creator doesn't need to subscribe to their own tracks
+          autoSubscribe: false, // Model doesn't need to subscribe to their own tracks
         }}
 
         className="w-full h-full min-h-[400px] rounded-lg border bg-black"

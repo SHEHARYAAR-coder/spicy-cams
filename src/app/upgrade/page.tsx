@@ -158,7 +158,7 @@ export default function UpgradePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          // Creator profile fields
+          // Model profile fields
           hairColor: hairColor || null,
           physique: physique || null,
           breastSize: breastSize || null,
@@ -172,15 +172,15 @@ export default function UpgradePage() {
           displayedCity: displayedCity || null,
           myShows,
           profileDescription: profileDescription || null,
-          // Upgrade to creator
-          targetRole: "CREATOR",
-          isCreator: true,
+          // model
+          targetRole: "MODEL",
+          isModel: true,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || "Failed to upgrade to creator");
+        throw new Error(errorData?.error || "Failed to upgrade to model");
       }
 
       setSuccess(true);
@@ -190,7 +190,7 @@ export default function UpgradePage() {
         router.push("/profile");
       }, 2000);
     } catch (err) {
-      console.error("Error upgrading to creator:", err);
+      console.error("Error upgrading to model:", err);
       setError(err instanceof Error ? err.message : "Failed to upgrade account");
     } finally {
       setLoading(false);
@@ -204,7 +204,7 @@ export default function UpgradePage() {
           <CardContent className="pt-6">
             <Alert className="border-yellow-500/50 bg-yellow-500/10">
               <AlertDescription className="text-yellow-200">
-                Please log in to upgrade your account to creator.
+                Please log in to upgrade your account to model.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -221,7 +221,7 @@ export default function UpgradePage() {
             <Alert className="border-green-500/50 bg-green-500/10">
               <AlertDescription className="text-green-200 text-center">
                 <Crown className="w-12 h-12 mx-auto mb-4 text-yellow-400" />
-                <p className="text-xl font-semibold mb-2">Welcome to Creator!</p>
+                <p className="text-xl font-semibold mb-2">Welcome to Model!</p>
                 <p>Your account has been upgraded successfully. Redirecting to your profile...</p>
               </AlertDescription>
             </Alert>
@@ -239,11 +239,11 @@ export default function UpgradePage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Crown className="w-10 h-10 text-yellow-400" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">
-              Upgrade to Creator
+              Upgrade to Model
             </h1>
           </div>
           <p className="text-lg text-gray-400">
-            Fill out your creator profile and start streaming
+            Fill out your model profile and start streaming
           </p>
         </div>
 
@@ -251,7 +251,7 @@ export default function UpgradePage() {
           <Card className="shadow-xl bg-gray-800/40 backdrop-blur-sm border-gray-700/50">
             <CardHeader>
               <CardTitle className="text-2xl text-white">
-                Creator Profile Information
+                Model Profile Information
               </CardTitle>
               <CardDescription className="text-gray-400">
                 Complete your profile to become a creator. All fields are optional but help viewers discover you.
@@ -596,12 +596,12 @@ export default function UpgradePage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Upgrading to Creator...
+                    Upgrading to Model...
                   </>
                 ) : (
                   <>
                     <Crown className="w-5 h-5 mr-2" />
-                    Upgrade to Creator
+                    Upgrade to Model
                   </>
                 )}
               </Button>

@@ -139,21 +139,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine if user is the stream creator (exempt from debit)
+    // model (exempt from debit)
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      select: { creatorId: true },
+      select: { modelId: true },
     });
     if (!stream) {
       return Response.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    const isCreator = stream.creatorId === userId;
+    const isModel = stream.modelId === userId;
 
     // Atomically handle debit (if needed) and message creation
     const chatMessage = await prisma.$transaction(async (tx) => {
-      // For non-creators, ensure balance and debit 1 credit
-      if (!isCreator) {
+      // For non-models, ensure balance and debit 1 credit
+      if (!isModel) {
         // Conditionally debit only if balance >= 1 to avoid negative balances
         const debit = await tx.wallet.updateMany({
           where: { userId, balance: { gte: new Prisma.Decimal(1) } },
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         return createdMessage;
       }
 
-      // Creator path: just create the message without debit
+      // Model path: just create the message without debit
       const createdMessage = await tx.chatMessage.create({
         data: {
           streamId,

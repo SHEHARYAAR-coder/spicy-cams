@@ -7,7 +7,7 @@ import { Prisma } from "@prisma/client";
  * POST /api/streams/[streamId]/bill
  *
  * Bills a viewer for watching a stream.
- * Deducts credits from viewer's wallet and credits them to the creator.
+ * Deducts credits from viewer's wallet and credits them to the model.
  *
  * Pricing:
  * - $0.22 per minute per viewer (based on pricing page)
@@ -44,7 +44,7 @@ export async function POST(
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
       include: {
-        creator: {
+        model: {
           include: {
             wallet: true,
           },
@@ -64,13 +64,13 @@ export async function POST(
       );
     }
 
-    // Prevent creator from being billed for their own stream
-    if (stream.creatorId === userId) {
+    // model from being billed for their own stream
+    if (stream.modelId === userId) {
       return NextResponse.json(
         {
           success: true,
           charged: false,
-          message: "Creator not charged for own stream",
+          message: "Model not charged for own stream",
         },
         { status: 200 }
       );
@@ -93,13 +93,13 @@ export async function POST(
 
     // Calculate charge amount
     // Viewer: 5 tokens per minute
-    // Creator: $13.20 per minute
+    // Model: $13.20 per minute
     const TOKENS_PER_MINUTE = 5;
-    const CREATOR_EARNINGS_PER_MINUTE = 13.20;
+    const MODEL_EARNINGS_PER_MINUTE = 13.20;
     
     const minutes = watchTimeSeconds / 60;
     const viewerTokenCharge = new Prisma.Decimal((TOKENS_PER_MINUTE * minutes).toFixed(4));
-    const creatorEarnings = new Prisma.Decimal((CREATOR_EARNINGS_PER_MINUTE * minutes).toFixed(4));
+    const modelEarnings = new Prisma.Decimal((MODEL_EARNINGS_PER_MINUTE * minutes).toFixed(4));
 
     // Check if viewer has sufficient balance
     if (viewerWallet.balance.lt(viewerTokenCharge)) {
@@ -144,7 +144,7 @@ export async function POST(
       streamSession.totalWatchMs / (watchTimeSeconds * 1000)
     );
 
-    // Perform transaction: deduct from viewer, credit to creator, create ledger entries
+    // model, create ledger entries
     const result = await prisma.$transaction(async (tx) => {
       // Deduct tokens from viewer's wallet
       const updatedViewerWallet = await tx.wallet.update({
@@ -156,25 +156,25 @@ export async function POST(
         },
       });
 
-      // Credit to creator's wallet (get or create)
-      let creatorWallet = await tx.wallet.findUnique({
-        where: { userId: stream.creatorId },
+      // model's wallet (get or create)
+      let modelWallet = await tx.wallet.findUnique({
+        where: { userId: stream.modelId },
       });
 
-      if (!creatorWallet) {
-        creatorWallet = await tx.wallet.create({
+      if (!modelWallet) {
+        modelWallet = await tx.wallet.create({
           data: {
-            userId: stream.creatorId,
-            balance: creatorEarnings,
+            userId: stream.modelId,
+            balance: modelEarnings,
             currency: "USD",
           },
         });
       } else {
-        creatorWallet = await tx.wallet.update({
-          where: { userId: stream.creatorId },
+        modelWallet = await tx.wallet.update({
+          where: { userId: stream.modelId },
           data: {
             balance: {
-              increment: creatorEarnings,
+              increment: modelEarnings,
             },
           },
         });
@@ -194,7 +194,7 @@ export async function POST(
           metadata: {
             streamId,
             streamTitle: stream.title,
-            creatorId: stream.creatorId,
+            modelId: stream.modelId,
             watchTimeSeconds,
             sessionId: streamSession.id,
             tokensCharged: viewerTokenCharge.toString(),
@@ -202,24 +202,24 @@ export async function POST(
         },
       });
 
-      // Create ledger entry for creator (DEPOSIT)
+      // model (DEPOSIT)
       await tx.ledgerEntry.create({
         data: {
-          userId: stream.creatorId,
+          userId: stream.modelId,
           type: "DEPOSIT",
-          amount: creatorEarnings,
+          amount: modelEarnings,
           currency: "USD",
-          balanceAfter: creatorWallet.balance,
+          balanceAfter: modelWallet.balance,
           referenceType: "STREAM_EARNINGS",
           referenceId: streamId,
-          description: `Earnings from stream: ${stream.title} ($${creatorEarnings})`,
+          description: `Earnings from stream: ${stream.title} ($${modelEarnings})`,
           metadata: {
             streamId,
             streamTitle: stream.title,
             viewerId: userId,
             watchTimeSeconds,
             sessionId: streamSession.id,
-            earningsAmount: creatorEarnings.toString(),
+            earningsAmount: modelEarnings.toString(),
           },
         },
       });
@@ -248,7 +248,7 @@ export async function POST(
 
       return {
         viewerWallet: updatedViewerWallet,
-        creatorWallet,
+        modelWallet,
         streamSession: updatedSession,
       };
     });
@@ -257,7 +257,7 @@ export async function POST(
       success: true,
       charged: true,
       tokensCharged: viewerTokenCharge.toString(),
-      creatorEarned: creatorEarnings.toString(),
+      modelEarned: modelEarnings.toString(),
       remainingBalance: result.viewerWallet.balance.toString(),
       watchTimeSeconds,
       totalWatchTimeMs: result.streamSession.totalWatchMs,

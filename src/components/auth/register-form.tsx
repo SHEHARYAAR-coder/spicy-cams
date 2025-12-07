@@ -100,6 +100,7 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
                     displayName: data.displayName,
                     email: data.email,
                     password: data.password,
+                    role: "VIEWER",
                 }),
             })
 
@@ -116,9 +117,14 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
                     email: data.email,
                     displayName: data.displayName,
                     verified: false,
+                    role: "VIEWER",
                 })
             )
 
+            // Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+                router.push("/dashboard")
+            }, 2000)
 
         } catch (err: unknown) {
             setError((err as Error).message || "Unexpected error occurred")
@@ -160,37 +166,35 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
                     displayName: modelFormData.modelName,
                     email: modelFormData.email,
                     password: modelFormData.password,
-                    firstName: modelFormData.firstName,
-                    lastName: modelFormData.lastName,
-                    gender: modelFormData.gender,
-                    birthdate: modelFormData.day && modelFormData.month && modelFormData.year
-                        ? `${modelFormData.year}-${modelFormData.month.padStart(2, '0')}-${modelFormData.day.padStart(2, '0')}`
-                        : null,
-                    role: "CREATOR", // Register as creator/model
+                    role: "MODEL", // Register as model
                 }),
             })
 
             const result = await res.json()
             if (!res.ok) throw new Error(result.error || "Something went wrong")
 
-            setSuccessMessage("Model account created! Redirecting to profile setup...")
+            setSuccessMessage("Model account created! Logging you in...")
 
-            // Save minimal user info to localStorage
-            localStorage.setItem(
-                "user",
-                JSON.stringify({
-                    userId: result.userId,
-                    email: modelFormData.email,
-                    displayName: modelFormData.modelName,
-                    verified: false,
-                    isModel: true,
-                })
-            )
+            // Auto-login the model after registration
+            const loginResult = await signIn("credentials", {
+                email: modelFormData.email,
+                password: modelFormData.password,
+                redirect: false,
+            })
 
-            // Redirect to model profile setup after 2 seconds
+            if (loginResult?.error) {
+                setError("Account created but login failed. Please login manually.")
+                setTimeout(() => {
+                    router.push("/m/login")
+                }, 2000)
+                return
+            }
+
+            // Redirect to model profile setup immediately after login
             setTimeout(() => {
                 router.push("/m/profile-setup")
-            }, 2000)
+                router.refresh()
+            }, 1000)
 
         } catch (err: unknown) {
             setError((err as Error).message || "Unexpected error occurred")
@@ -222,13 +226,13 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
                         <div className="space-y-4">
                             <div className="w-20 h-1 bg-purple-500"></div>
                             <blockquote className="text-3xl font-semibold leading-relaxed text-gray-100">
-                                “Join the SpicyCams creator community and capture your next big moment.”
+                                “Join the SpicyCams model community and capture your next big moment.”
                             </blockquote>
                         </div>
                         <div>
                             <p className="font-semibold">Jane Doe</p>
                             <p className="text-purple-400 text-sm">
-                                Creator at{" "}
+                                Model at{" "}
                                 <a href="#" className="underline hover:text-purple-300">
                                     SpicyCams Studio
                                 </a>

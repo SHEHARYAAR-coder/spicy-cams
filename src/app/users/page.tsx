@@ -59,7 +59,7 @@ interface User {
   emailVerified: boolean;
   displayName: string | null;
   avatarUrl: string | null;
-  isCreator: boolean;
+  isModel: boolean;
   balance: number;
   streamsCount: number;
   messagesCount: number;
@@ -321,10 +321,10 @@ export default function UsersManagementPage() {
             Moderator
           </Badge>
         );
-      case "CREATOR":
+      case "MODEL":
         return (
           <Badge className="bg-purple-900/30 text-purple-400 border-purple-500/50">
-            Creator
+            Model
           </Badge>
         );
       case "VIEWER":
@@ -380,7 +380,7 @@ export default function UsersManagementPage() {
               <SelectContent>
                 <SelectItem value="ALL">All Roles</SelectItem>
                 <SelectItem value="VIEWER">Viewer</SelectItem>
-                <SelectItem value="CREATOR">Creator</SelectItem>
+                <SelectItem value="MODEL">Model</SelectItem>
                 <SelectItem value="MODERATOR">Moderator</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>
               </SelectContent>

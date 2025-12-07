@@ -24,22 +24,22 @@ export async function GET(
 
     const senderId = session.user.id;
 
-    // Get the stream to check if user is the creator
+    // model
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      select: { creatorId: true },
+      select: { modelId: true },
     });
 
     if (!stream) {
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    const isCreator = stream.creatorId === senderId || stream.creatorId === receiverId;
+    const isModel = stream.modelId === senderId || stream.modelId === receiverId;
 
     let requestStatus = null;
 
-    // If neither party is the creator, check for accepted chat request
-    if (!isCreator) {
+    // model, check for accepted chat request
+    if (!isModel) {
       const chatRequest = await prisma.privateChatRequest.findUnique({
         where: {
           senderId_receiverId_streamId: {
@@ -180,7 +180,7 @@ export async function POST(
     // Verify stream exists
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      include: { creator: true },
+      include: { model: true },
     });
 
     if (!stream) {
@@ -196,7 +196,7 @@ export async function POST(
       return NextResponse.json({ error: "Receiver not found" }, { status: 404 });
     }
 
-    // Check if sender has sufficient balance for private messaging unless sender is the stream creator
+    // model
     const sender = await prisma.user.findUnique({
       where: { id: senderId },
       include: { wallet: true },
@@ -206,10 +206,10 @@ export async function POST(
       return NextResponse.json({ error: "Sender not found" }, { status: 404 });
     }
 
-    const isCreator = stream.creatorId === senderId;
+    const isModel = stream.modelId === senderId;
 
-    // If sender is not the creator, check for accepted chat request
-    if (!isCreator) {
+    // model, check for accepted chat request
+    if (!isModel) {
       const chatRequest = await prisma.privateChatRequest.findUnique({
         where: {
           senderId_receiverId_streamId: {
@@ -259,7 +259,7 @@ export async function POST(
 
     // Atomically create message and (if needed) debit wallet + ledger
     const privateMessage = await prisma.$transaction(async (tx) => {
-      if (!isCreator) {
+      if (!isModel) {
         // Conditionally debit only if balance >= 1 to avoid negative balances
         const debit = await tx.wallet.updateMany({
           where: { userId: senderId, balance: { gte: new Prisma.Decimal(1) } },
@@ -302,7 +302,7 @@ export async function POST(
         return created;
       }
 
-      // Creator: create message only
+      // Model: create message only
       return tx.privateMessage.create({
         data: {
           senderId,

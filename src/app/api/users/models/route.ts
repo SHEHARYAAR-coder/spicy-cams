@@ -7,10 +7,10 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "";
 
-    const creators = await prisma.user.findMany({
+    const models = await prisma.user.findMany({
       where: {
         profile: {
-          isCreator: true,
+          isModel: true,
         },
         status: "ACTIVE",
         ...(search && {
@@ -73,34 +73,34 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      creators: creators.map((creator) => ({
-        id: creator.id,
-        email: creator.email,
-        displayName: creator.profile?.displayName || creator.email.split("@")[0],
-        avatarUrl: creator.profile?.avatarUrl,
-        bio: creator.profile?.bio,
-        category: creator.profile?.category,
-        language: creator.profile?.language,
-        hairColor: creator.profile?.hairColor,
-        physique: creator.profile?.physique,
-        breastSize: creator.profile?.breastSize,
-        displayedAge: creator.profile?.displayedAge,
-        spokenLanguages: creator.profile?.spokenLanguages || [],
-        relationship: creator.profile?.relationship,
-        ethnicity: creator.profile?.ethnicity,
-        displayedCity: creator.profile?.displayedCity,
-        myShows: creator.profile?.myShows || [],
-        followersCount: creator._count.followers,
-        streamsCount: creator._count.streams,
-        createdAt: creator.createdAt,
+      models: models.map((model) => ({
+        id: model.id,
+        email: model.email,
+        displayName: model.profile?.displayName || model.email.split("@")[0],
+        avatarUrl: model.profile?.avatarUrl,
+        bio: model.profile?.bio,
+        category: model.profile?.category,
+        language: model.profile?.language,
+        hairColor: model.profile?.hairColor,
+        physique: model.profile?.physique,
+        breastSize: model.profile?.breastSize,
+        displayedAge: model.profile?.displayedAge,
+        spokenLanguages: model.profile?.spokenLanguages || [],
+        relationship: model.profile?.relationship,
+        ethnicity: model.profile?.ethnicity,
+        displayedCity: model.profile?.displayedCity,
+        myShows: model.profile?.myShows || [],
+        followersCount: model._count.followers,
+        streamsCount: model._count.streams,
+        createdAt: model.createdAt,
       })),
     });
   } catch (error) {
-    console.error("Error fetching creators:", error);
+    console.error("Error fetching models:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch creators",
+        error: "Failed to fetch models",
       },
       { status: 500 }
     );

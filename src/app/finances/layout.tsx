@@ -37,8 +37,8 @@ export default async function FinancesLayoutWrapper({
     redirect("/login");
   }
 
-  // Allow both ADMIN and CREATOR to access finances
-  if (user.role !== UserRole.ADMIN && user.role !== UserRole.CREATOR) {
+  // model to access finances
+  if (user.role !== UserRole.ADMIN && user.role !== UserRole.MODEL) {
     redirect("/unauthorized");
   }
 

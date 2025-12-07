@@ -30,7 +30,7 @@ export async function POST(
     // Check if stream exists and is live
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      select: { id: true, status: true, creatorId: true },
+      select: { id: true, status: true, modelId: true },
     });
 
     if (!stream) {
@@ -58,13 +58,13 @@ export async function POST(
     }
 
     // Determine user role for chat
-    const isCreator = stream.creatorId === userId;
+    const isModel = stream.modelId === userId;
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
 
-    const chatRole = isCreator
+    const chatRole = isModel
       ? "creator"
       : user?.role === "MODERATOR" || user?.role === "ADMIN"
       ? "moderator"

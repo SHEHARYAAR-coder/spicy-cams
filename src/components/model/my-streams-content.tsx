@@ -246,7 +246,7 @@ export function MyStreamsContent({ streams }: MyStreamsContentProps) {
                     </Select>
                 </div>
 
-                <Link href="/creator/streams/new">
+                <Link href="/model/streams/new">
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all">
                         <Plus className="w-4 h-4 mr-2" />
                         Create Stream
@@ -271,7 +271,7 @@ export function MyStreamsContent({ streams }: MyStreamsContentProps) {
                                     : "Create your first stream to get started"}
                             </p>
                             {!searchQuery && statusFilter === "ALL" && (
-                                <Link href="/creator/streams/new">
+                                <Link href="/model/streams/new">
                                     <Button className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30 transition-all">
                                         <Plus className="w-4 h-4 mr-2" />
                                         Create Your First Stream

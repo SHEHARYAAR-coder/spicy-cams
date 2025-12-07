@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import CreatorProfileEditDialog from "./creator-profile-edit-dialog";
+import ModelProfileEditDialog from "./model-profile-edit-dialog";
 import MediaGalleryUpload from "./media-gallery-upload";
 
 export default function ProfileContent() {
@@ -109,8 +109,8 @@ export default function ProfileContent() {
           bio: userData.profile?.bio ?? null,
           category: userData.profile?.category ?? null,
           language: userData.profile?.language ?? null,
-          isCreator: true,
-          targetRole: "CREATOR",
+          isModel: true,
+          targetRole: "MODEL",
         }),
       });
 
@@ -199,11 +199,11 @@ export default function ProfileContent() {
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
-                  {userData?.role !== "CREATOR" && (
+                  {userData?.role !== "MODEL" && (
                     <Link href={"/upgrade"}>
                       <button className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold cursor-pointer">
                         <Crown className="w-4 h-4" />
-                        Upgrade to Creator
+                        Upgrade to Model
                       </button>
                     </Link>
                   )}
@@ -223,11 +223,11 @@ export default function ProfileContent() {
                       <DialogContent className="bg-gray-900 border border-purple-700">
                         <DialogHeader>
                           <DialogTitle className="text-white">
-                            Become a Creator
+                            Become a Model
                           </DialogTitle>
                         </DialogHeader>
                         <p className="text-sm text-gray-300">
-                          Switching to a creator role unlocks broadcast and
+                          Switching to a model role unlocks broadcast and
                           monetization tools. Confirm to upgrade your account.
                         </p>
                         {roleError && (
@@ -247,7 +247,7 @@ export default function ProfileContent() {
                             disabled={roleLoading}
                             className="bg-purple-600 hover:bg-purple-700 text-white"
                           >
-                            {roleLoading ? "Updating..." : "Switch to Creator"}
+                            {roleLoading ? "Updating..." : "Switch to Model"}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -262,9 +262,9 @@ export default function ProfileContent() {
                   </p>
                 </div>
               )}
-              {/* {userData.profile?.isCreator && (
+              {/* {userData.profile?.isModel && (
                 <span className="inline-block bg-purple-100/10 text-purple-300 text-xs px-2 py-1 rounded-full mt-1">
-                  Content Creator
+                  Content Model
                 </span>
               )} */}
               <p className="text-gray-400 text-sm">
@@ -335,7 +335,7 @@ export default function ProfileContent() {
     setEditLoading(false);
   };
 
-  const handleCreatorProfileSave = async (creatorData: any) => {
+  const handleModelProfileSave = async (modelData: any) => {
     const res = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -344,11 +344,11 @@ export default function ProfileContent() {
         bio: userData?.profile?.bio,
         category: userData?.profile?.category,
         language: userData?.profile?.language,
-        isCreator: userData?.profile?.isCreator,
-        ...creatorData,
+        isModel: userData?.profile?.isModel,
+        ...modelData,
       }),
     });
-    if (!res.ok) throw new Error("Failed to update creator profile");
+    if (!res.ok) throw new Error("Failed to update model profile");
     const updated = await res.json();
     setUserData(updated);
   };
@@ -362,7 +362,7 @@ export default function ProfileContent() {
         bio: userData?.profile?.bio,
         category: userData?.profile?.category,
         language: userData?.profile?.language,
-        isCreator: userData?.profile?.isCreator,
+        isModel: userData?.profile?.isModel,
         profileImages: images,
         profileVideos: videos,
       }),
@@ -539,13 +539,13 @@ export default function ProfileContent() {
   ]);
 
   const creatorInfo = useMemo(() => {
-    if (!userData?.profile?.isCreator) return null;
+    if (!userData?.profile?.isModel) return null;
 
     return (
       <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-white">
-            Creator Information
+            Model Information
           </h3>
           <button
             onClick={() => setCreatorEditDialogOpen(true)}
@@ -576,7 +576,7 @@ export default function ProfileContent() {
             </p>
           </div>
 
-          {/* New Creator Fields */}
+          {/* New Model Fields */}
           {userData.profile.hairColor && (
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Hair Color</label>
@@ -690,7 +690,7 @@ export default function ProfileContent() {
   }, [userData]);
 
   const mediaGallery = useMemo(() => {
-    if (!userData?.profile?.isCreator) return null;
+    if (!userData?.profile?.isModel) return null;
 
     return (
       <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
@@ -801,13 +801,13 @@ export default function ProfileContent() {
           {walletActivity}
           {accountSettings}
 
-          {/* Creator Profile Edit Dialog */}
-          {userData?.profile?.isCreator && (
-            <CreatorProfileEditDialog
+          {/* Model Profile Edit Dialog */}
+          {userData?.profile?.isModel && (
+            <ModelProfileEditDialog
               open={creatorEditDialogOpen}
               onOpenChange={setCreatorEditDialogOpen}
               profileData={userData.profile}
-              onSave={handleCreatorProfileSave}
+              onSave={handleModelProfileSave}
             />
           )}
         </>

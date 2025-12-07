@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 /**
  * GET /api/earnings
  *
- * Returns detailed earnings information for creators
+ * Returns detailed earnings information for models
  */
 export async function GET(_req: NextRequest) {
   try {
@@ -17,10 +17,10 @@ export async function GET(_req: NextRequest) {
     const userId = (session.user as { id: string }).id;
     const userRole = (session.user as { role: string }).role;
 
-    // Only creators can view earnings
-    if (userRole !== "CREATOR" && userRole !== "ADMIN") {
+    // Only models can view earnings
+    if (userRole !== "MODEL" && userRole !== "ADMIN") {
       return NextResponse.json(
-        { error: "Only creators can view earnings" },
+        { error: "Only models can view earnings" },
         { status: 403 }
       );
     }

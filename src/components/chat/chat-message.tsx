@@ -33,14 +33,14 @@ export function ChatMessage({
     const isOwnMessage = message.userId === currentUserId;
     const isPending = message.isPending || false;
     const roleColors = {
-        CREATOR: "bg-purple-500",
+        MODEL: "bg-purple-500",
         MODERATOR: "bg-green-500",
         ADMIN: "bg-red-500",
         VIEWER: "bg-gray-500",
     };
 
     const roleBadges = {
-        CREATOR: "Creator",
+        MODEL: "Model",
         MODERATOR: "Mod",
         ADMIN: "Admin",
         VIEWER: null,

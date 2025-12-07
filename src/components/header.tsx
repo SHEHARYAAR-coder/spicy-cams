@@ -160,11 +160,11 @@ export function Header() {
                   </DropdownMenuItem>
 
                   {(session.user as import("../../lib/auth-utils").SessionUser)
-                    .role === "CREATOR" && (
+                    .role === "MODEL" && (
                       <DropdownMenuItem asChild>
-                        <Link href="/creator" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                        <Link href="/model" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
                           <Settings className="w-4 h-4 mr-3 text-purple-400" />
-                          <span className="font-medium">Creator Studio</span>
+                          <span className="font-medium">Model Studio</span>
                         </Link>
                       </DropdownMenuItem>
                     )}

@@ -50,7 +50,7 @@ export async function PATCH(
       );
     }
 
-    // Verify the user is the receiver (creator)
+    // model)
     if (chatRequest.receiverId !== userId) {
       return NextResponse.json(
         { error: "Only the receiver can respond to this request" },

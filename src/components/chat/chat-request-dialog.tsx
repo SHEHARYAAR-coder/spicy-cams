@@ -14,14 +14,14 @@ import { MessageCircle, Send, Loader2 } from "lucide-react";
 interface ChatRequestDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    creatorName: string;
+    modelName: string;
     onSendRequest: (initialMessage?: string) => Promise<boolean>;
 }
 
 export function ChatRequestDialog({
     open,
     onOpenChange,
-    creatorName,
+    modelName,
     onSendRequest,
 }: ChatRequestDialogProps) {
     const [initialMessage, setInitialMessage] = useState("");
@@ -51,7 +51,7 @@ export function ChatRequestDialog({
                                 Send Chat Request
                             </DialogTitle>
                             <DialogDescription className="text-gray-400">
-                                Request to chat privately with {creatorName}
+                                Request to chat privately with {modelName}
                             </DialogDescription>
                         </div>
                     </div>
@@ -60,7 +60,7 @@ export function ChatRequestDialog({
                 <div className="space-y-4 py-4">
                     <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
                         <p className="text-sm text-purple-200 leading-relaxed">
-                            <strong className="text-purple-300">Note:</strong> The creator
+                            <strong className="text-purple-300">Note:</strong> The model
                             will receive your request and can choose to accept or decline it.
                             You&apos;ll be notified once they respond.
                         </p>
@@ -73,7 +73,7 @@ export function ChatRequestDialog({
                         <Textarea
                             value={initialMessage}
                             onChange={(e) => setInitialMessage(e.target.value)}
-                            placeholder={`Introduce yourself to ${creatorName}...`}
+                            placeholder={`Introduce yourself to ${modelName}...`}
                             maxLength={300}
                             rows={4}
                             className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500/20 resize-none"

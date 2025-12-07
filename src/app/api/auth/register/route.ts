@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient, UserStatus } from "@prisma/client"
+import { PrismaClient, UserStatus, UserRole } from "@prisma/client"
 import { hashPassword, generateVerificationToken } from "../../../../../lib/auth-utils"
 import { z } from "zod"
 import { sendVerificationEmail } from "@/lib/email"
@@ -10,12 +10,13 @@ const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   displayName: z.string().min(3, "Display name must be at least 3 characters").max(50, "Display name must be less than 50 characters"),
+  role: z.enum(["VIEWER", "MODEL"]).optional().default("VIEWER"),
 })
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { email, password, displayName } = registerSchema.parse(body)
+    const { email, password, displayName, role } = registerSchema.parse(body)
 
 
     // Check if a user already exists
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
         data: {
           email,
           passwordHash,
+          role: role as UserRole,
           status: UserStatus.PENDING_VERIFICATION,
           emailVerified: false,
           verificationToken,
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
       {
         message: "Registration successful. Please check your email to verify your account.",
         userId: user.id,
+        role: user.role,
       },
       { status: 201 }
     )

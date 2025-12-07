@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { FinancialOverview } from "@/components/admin/financial-overview";
-import { CreatorEarnings } from "@/components/creator/creator-earnings";
+import { ModelEarnings } from "@/components/model/model-earnings";
 
 export const metadata = {
   title: "Financial Overview",
@@ -19,8 +19,8 @@ export default async function FinancesPage() {
   const _userId = (session.user as { id: string; role?: string }).id;
   const userRole = (session.user as { id: string; role?: string }).role;
 
-  // If creator, show their earnings view
-  if (userRole === "CREATOR") {
+  // model, show their earnings view
+  if (userRole === "MODEL") {
     const userId = (session.user as { id: string }).id;
 
     // Get wallet balance
@@ -45,7 +45,7 @@ export default async function FinancesPage() {
     return (
       <div className="container mx-auto p-6">
         <h1 className="text-3xl font-bold mb-6 text-white">Earnings & Withdrawals</h1>
-        <CreatorEarnings
+        <ModelEarnings
           balance={Number(wallet?.balance || 0)}
           totalEarnings={totalEarnings}
         />

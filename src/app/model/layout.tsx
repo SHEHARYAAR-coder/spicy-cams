@@ -18,8 +18,8 @@ export default async function CreatorLayout({
     const userId = (session.user as { id: string; role?: string }).id;
     const userRole = (session.user as { id: string; role?: string }).role;
 
-    // Only creators and admins can access creator routes
-    if (userRole !== UserRole.CREATOR && userRole !== UserRole.ADMIN) {
+    // model routes
+    if (userRole !== UserRole.MODEL && userRole !== UserRole.ADMIN) {
         redirect("/dashboard");
     }
 

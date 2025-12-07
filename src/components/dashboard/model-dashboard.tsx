@@ -37,7 +37,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
       <Card className="bg-gray-800/50 border-gray-700 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-white">
-            Creator Dashboard - {userData.displayName || "Creator"}
+            Model Dashboard - {userData.displayName || "Model"}
           </CardTitle>
           <CardDescription className="text-gray-400">
             {userData.email}
@@ -53,7 +53,7 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
             />
           )}
           <div>
-            <p className="text-sm text-gray-300">Role: Creator</p>
+            <p className="text-sm text-gray-300">Role: Model</p>
           </div>
         </CardContent>
       </Card>
@@ -140,13 +140,13 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
           <a
-            href="/creator"
+            href="/model"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
             Go Live
           </a>
           <a
-            href="/creator/stream"
+            href="/model/stream"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
             Manage Streams

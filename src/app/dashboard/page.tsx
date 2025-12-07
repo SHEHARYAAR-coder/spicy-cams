@@ -2,7 +2,7 @@ import { auth } from "../../../lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ViewerDashboard } from "@/components/dashboard/viewer-dashboard";
-import { CreatorDashboard } from "@/components/dashboard/creator-dashboard";
+import { CreatorDashboard } from "@/components/dashboard/model-dashboard";
 import { ModeratorDashboard } from "@/components/dashboard/moderator-dashboard";
 import { AdminDashboard } from "@/components/dashboard/admin-dashboard";
 import { UserRole, UserStatus, User, Profile, Wallet, Stream, StreamSession, ChatMessage, Follow, LedgerEntry, ModerationAction } from "@prisma/client";
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
     case UserRole.VIEWER:
       return <ViewerDashboardContent user={user} />;
 
-    case UserRole.CREATOR:
+    case UserRole.MODEL:
       return <CreatorDashboardContent user={user} />;
 
     case UserRole.MODERATOR:
@@ -102,7 +102,7 @@ async function ViewerDashboardContent({ user }: { user: UserWithRelations }) {
   );
 }
 
-// Creator Dashboard Component
+// Model Dashboard Component
 async function CreatorDashboardContent({ user }: { user: UserWithRelations }) {
   const totalStreams = user.streams.length;
   const liveStreams = user.streams.filter(
@@ -145,7 +145,7 @@ async function CreatorDashboardContent({ user }: { user: UserWithRelations }) {
 
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6 text-white">Creator Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 text-white">Model Dashboard</h1>
       <CreatorDashboard userData={userData} />
     </>
   );
@@ -215,7 +215,7 @@ async function AdminDashboardContent({ user }: { user: UserWithRelations }) {
   });
 
   const totalCreators = await prisma.profile.count({
-    where: { isCreator: true },
+    where: { isModel: true },
   });
 
   const totalStreams = await prisma.stream.count();

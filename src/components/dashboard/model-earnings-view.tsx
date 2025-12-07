@@ -38,7 +38,7 @@ interface EarningsData {
     }>;
 }
 
-export function CreatorEarningsView() {
+export function ModelEarningsView() {
     const { data: session, status } = useSession();
     const _router = useRouter();
     const [earnings, setEarnings] = useState<EarningsData | null>(null);

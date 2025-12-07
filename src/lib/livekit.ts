@@ -87,7 +87,7 @@ export async function generateCreatorToken(roomName: string, identity: string) {
     room: roomName,
     roomJoin: true,
     canPublish: true,
-    canSubscribe: false, // Creators don't need to subscribe to others
+    canSubscribe: false, // models don't need to subscribe to others
   });
 
   return await token.toJwt();

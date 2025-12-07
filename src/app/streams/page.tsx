@@ -7,11 +7,11 @@ export const metadata = {
 };
 
 export default async function AdminStreamsPage() {
-  // Fetch all streams with creator details and analytics
+  // model details and analytics
   // Admin check is handled in layout.tsx
   const streams = await prisma.stream.findMany({
     include: {
-      creator: {
+      model: {
         include: {
           profile: true,
         },
@@ -47,10 +47,10 @@ export default async function AdminStreamsPage() {
     description: stream.description,
     category: stream.category,
     status: stream.status,
-    creatorId: stream.creatorId,
-    creatorName: stream.creator.profile?.displayName || stream.creator.email,
-    creatorEmail: stream.creator.email,
-    creatorAvatar: stream.creator.profile?.avatarUrl || null,
+    modelId: stream.modelId,
+    modelName: stream.model.profile?.displayName || stream.model.email,
+    modelEmail: stream.model.email,
+    modelAvatar: stream.model.profile?.avatarUrl || null,
     thumbnailUrl: stream.thumbnailUrl,
     livekitRoomName: stream.livekitRoomName,
     recordingEnabled: stream.recordingEnabled,

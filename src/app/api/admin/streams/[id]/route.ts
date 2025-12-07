@@ -184,7 +184,7 @@ export async function GET(
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
       include: {
-        creator: {
+        model: {
           include: {
             profile: true,
           },

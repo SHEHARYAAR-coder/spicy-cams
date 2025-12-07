@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ creatorId: string }> }
+  { params }: { params: Promise<{ modelId: string }> }
 ) {
   try {
-    const { creatorId } = await params;
+    const { modelId } = await params;
 
-    const creator = await prisma.user.findUnique({
+    const model = await prisma.user.findUnique({
       where: {
-        id: creatorId,
+        id: modelId,
       },
       select: {
         id: true,
@@ -20,7 +20,7 @@ export async function GET(
         createdAt: true,
         profile: {
           select: {
-            isCreator: true,
+            isModel: true,
             displayName: true,
             avatarUrl: true,
             bio: true,
@@ -75,22 +75,22 @@ export async function GET(
       },
     });
 
-    if (!creator) {
+    if (!model) {
       return NextResponse.json(
         {
           success: false,
-          error: "Creator not found",
+          error: "Model not found",
         },
         { status: 404 }
       );
     }
 
-    // Check if the user is actually a creator
-    if (!creator.profile?.isCreator) {
+    // Check if the user is actually a model
+    if (!model.profile?.isModel) {
       return NextResponse.json(
         {
           success: false,
-          error: "User is not a creator",
+          error: "User is not a model",
         },
         { status: 404 }
       );
@@ -98,44 +98,44 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      creator: {
-        id: creator.id,
-        email: creator.email,
-        role: creator.role,
-        status: creator.status,
+      model: {
+        id: model.id,
+        email: model.email,
+        role: model.role,
+        status: model.status,
         displayName:
-          creator.profile?.displayName || creator.email.split("@")[0],
-        avatarUrl: creator.profile?.avatarUrl,
-        bio: creator.profile?.bio,
-        category: creator.profile?.category,
-        language: creator.profile?.language,
-        hairColor: creator.profile?.hairColor,
-        physique: creator.profile?.physique,
-        breastSize: creator.profile?.breastSize,
-        pubicHair: creator.profile?.pubicHair,
-        displayedAge: creator.profile?.displayedAge,
-        spokenLanguages: creator.profile?.spokenLanguages || [],
-        relationship: creator.profile?.relationship,
-        ethnicity: creator.profile?.ethnicity,
-        piercings: creator.profile?.piercings,
-        tattoos: creator.profile?.tattoos,
-        displayedCity: creator.profile?.displayedCity,
-        myShows: creator.profile?.myShows || [],
-        profileDescription: creator.profile?.profileDescription,
-        profileImages: creator.profile?.profileImages || [],
-        profileVideos: creator.profile?.profileVideos || [],
-        followersCount: creator._count.followers,
-        streamsCount: creator._count.streams,
-        createdAt: creator.createdAt,
-        streams: creator.streams,
+          model.profile?.displayName || model.email.split("@")[0],
+        avatarUrl: model.profile?.avatarUrl,
+        bio: model.profile?.bio,
+        category: model.profile?.category,
+        language: model.profile?.language,
+        hairColor: model.profile?.hairColor,
+        physique: model.profile?.physique,
+        breastSize: model.profile?.breastSize,
+        pubicHair: model.profile?.pubicHair,
+        displayedAge: model.profile?.displayedAge,
+        spokenLanguages: model.profile?.spokenLanguages || [],
+        relationship: model.profile?.relationship,
+        ethnicity: model.profile?.ethnicity,
+        piercings: model.profile?.piercings,
+        tattoos: model.profile?.tattoos,
+        displayedCity: model.profile?.displayedCity,
+        myShows: model.profile?.myShows || [],
+        profileDescription: model.profile?.profileDescription,
+        profileImages: model.profile?.profileImages || [],
+        profileVideos: model.profile?.profileVideos || [],
+        followersCount: model._count.followers,
+        streamsCount: model._count.streams,
+        createdAt: model.createdAt,
+        streams: model.streams,
       },
     });
   } catch (error) {
-    console.error("Error fetching creator:", error);
+    console.error("Error fetching model:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to fetch creator",
+        error: "Failed to fetch model",
       },
       { status: 500 }
     );

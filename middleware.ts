@@ -2,13 +2,26 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 import { UserRole } from "@prisma/client";
+import { prisma } from "./lib/prisma";
 
 // Route configurations
 const PROTECTED_ROUTES: Record<string, UserRole[]> = {
   "/dashboard": [],
-  "/creator": [UserRole.CREATOR, UserRole.ADMIN],
+  "/model": [UserRole.MODEL, UserRole.ADMIN],
   "/admin": [UserRole.ADMIN],
 };
+
+// Routes that should be excluded from profile completion check
+const PROFILE_SETUP_EXCLUDED_ROUTES = [
+  "/m/profile-setup",
+  "/api",
+  "/_next",
+  "/login",
+  "/register",
+  "/logout",
+  "/verify",
+  "/unauthorized",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -48,6 +61,21 @@ export async function middleware(request: NextRequest) {
     ) {
       // User doesn't have required role
       return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+
+    // Check if MODEL user has completed their profile
+    if (
+      userRole === UserRole.MODEL &&
+      !PROFILE_SETUP_EXCLUDED_ROUTES.some((route) => pathname.startsWith(route))
+    ) {
+      const profile = await prisma.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { profileCompleted: true },
+      });
+
+      if (!profile?.profileCompleted) {
+        return NextResponse.redirect(new URL("/m/profile-setup", request.url));
+      }
     }
 
     // Check email verification for protected routes

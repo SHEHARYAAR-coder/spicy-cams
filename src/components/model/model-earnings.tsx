@@ -44,12 +44,12 @@ interface Withdrawal {
     reviewNote?: string;
 }
 
-interface CreatorEarningsProps {
+interface ModelEarningsProps {
     balance: number;
     totalEarnings: number;
 }
 
-export function CreatorEarnings({ balance, totalEarnings }: CreatorEarningsProps) {
+export function ModelEarnings({ balance, totalEarnings }: ModelEarningsProps) {
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
     const [loading, setLoading] = useState(true);
     const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         {
-          creator: {
+          model: {
             profile: { displayName: { contains: search, mode: "insensitive" } },
           },
         },
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         ...cursorCondition,
       },
       include: {
-        creator: {
+        model: {
           include: {
             profile: true,
           },
@@ -114,10 +114,10 @@ export async function GET(request: NextRequest) {
           status: stream.status,
           thumbnailUrl: stream.thumbnailUrl,
           participantCount,
-          creator: {
-            id: stream.creator.id,
-            name: stream.creator.profile?.displayName || stream.creator.email,
-            avatar: stream.creator.profile?.avatarUrl,
+          model: {
+            id: stream.model.id,
+            name: stream.model.profile?.displayName || stream.model.email,
+            avatar: stream.model.profile?.avatarUrl,
           },
           startedAt: stream.startedAt,
           endedAt: stream.endedAt,

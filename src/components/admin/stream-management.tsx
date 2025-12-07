@@ -54,10 +54,10 @@ interface Stream {
   description: string | null;
   category: string | null;
   status: string;
-  creatorId: string;
-  creatorName: string;
-  creatorEmail: string;
-  creatorAvatar: string | null;
+  modelId: string;
+  modelName: string;
+  modelEmail: string;
+  modelAvatar: string | null;
   thumbnailUrl: string | null;
   livekitRoomName: string | null;
   recordingEnabled: boolean;
@@ -93,8 +93,8 @@ export function StreamManagement({ streams }: StreamManagementProps) {
     return streams.filter((stream) => {
       const matchesSearch =
         stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stream.creatorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stream.creatorEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.modelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stream.modelEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
         stream.id.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus =
@@ -221,7 +221,7 @@ export function StreamManagement({ streams }: StreamManagementProps) {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by title, creator, email, or stream ID..."
+            placeholder="Search by title, model, email, or stream ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 bg-gray-800 border-gray-700 text-white"
@@ -247,7 +247,7 @@ export function StreamManagement({ streams }: StreamManagementProps) {
           <TableHeader>
             <TableRow className="bg-gray-800/70 border-gray-700 hover:bg-gray-800/70">
               <TableHead className="text-gray-300">Stream</TableHead>
-              <TableHead className="text-gray-300">Creator</TableHead>
+              <TableHead className="text-gray-300">Model</TableHead>
               <TableHead className="text-gray-300">Status</TableHead>
               <TableHead className="text-gray-300">Category</TableHead>
               <TableHead className="text-gray-300">Sessions</TableHead>
@@ -301,17 +301,17 @@ export function StreamManagement({ streams }: StreamManagementProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={stream.creatorAvatar || undefined} />
+                        <AvatarImage src={stream.modelAvatar || undefined} />
                         <AvatarFallback>
-                          {stream.creatorName.charAt(0).toUpperCase()}
+                          {stream.modelName.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <p className="text-sm text-white truncate">
-                          {stream.creatorName}
+                          {stream.modelName}
                         </p>
                         <p className="text-xs text-gray-400 truncate">
-                          {stream.creatorEmail}
+                          {stream.modelEmail}
                         </p>
                       </div>
                     </div>

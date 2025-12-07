@@ -283,7 +283,7 @@ export function usePrivateChat({
     [streamId, token, receiverId, fetchConversations]
   );
 
-  // Fetch pending chat requests (for creators)
+  // Fetch pending chat requests (for models)
   const fetchChatRequests = useCallback(async () => {
     if (!token || !enabled) return;
 

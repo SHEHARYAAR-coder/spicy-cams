@@ -23,15 +23,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if user is creator or admin
+    // model or admin
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: { profile: true },
     });
 
-    if (!user || (user.role !== "CREATOR" && user.role !== "ADMIN")) {
+    if (!user || (user.role !== "MODEL" && user.role !== "ADMIN")) {
       return NextResponse.json(
-        { error: "Only creators can create streams" },
+        { error: "Only models can create streams" },
         { status: 403 }
       );
     }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // Check if user already has a live stream
     const existingLiveStream = await prisma.stream.findFirst({
       where: {
-        creatorId: user.id,
+        modelId: user.id,
         status: { in: ["SCHEDULED", "LIVE", "PAUSED"] },
       },
     });
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     // Create stream record in database
     const stream = await prisma.stream.create({
       data: {
-        creatorId: user.id,
+        modelId: user.id,
         title,
         description: description || null,
         category,
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
         playbackUrl: "", // Will be set after LiveKit room creation
       },
       include: {
-        creator: {
+        model: {
           include: {
             profile: true,
           },
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Create LiveKit room
     try {
       const roomName = getRoomNameFromStreamId(stream.id);
-      await createRoom(roomName, { streamId: stream.id, creatorId: user.id });
+      await createRoom(roomName, { streamId: stream.id, modelId: user.id });
 
       // Update stream with ingest and playback URLs
       const updatedStream = await prisma.stream.update({
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           playbackUrl: `${process.env.LIVEKIT_WS_URL}/${roomName}`,
         },
         include: {
-          creator: {
+          model: {
             include: {
               profile: true,
             },
@@ -115,12 +115,12 @@ export async function POST(request: NextRequest) {
           ingestUrl: updatedStream.ingestUrl,
           playbackUrl: updatedStream.playbackUrl,
           roomName,
-          creator: {
-            id: updatedStream.creator.id,
+          model: {
+            id: updatedStream.model.id,
             name:
-              updatedStream.creator.profile?.displayName ||
-              updatedStream.creator.email,
-            avatar: updatedStream.creator.profile?.avatarUrl,
+              updatedStream.model.profile?.displayName ||
+              updatedStream.model.email,
+            avatar: updatedStream.model.profile?.avatarUrl,
           },
           createdAt: updatedStream.createdAt,
         },

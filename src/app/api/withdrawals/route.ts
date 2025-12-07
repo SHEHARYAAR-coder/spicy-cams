@@ -79,10 +79,10 @@ export async function POST(req: NextRequest) {
     const userId = (session.user as { id: string }).id;
     const userRole = (session.user as { role: string }).role;
 
-    // Only creators can request withdrawals
-    if (userRole !== "CREATOR" && userRole !== "ADMIN") {
+    // Only models can request withdrawals
+    if (userRole !== "MODEL" && userRole !== "ADMIN") {
       return NextResponse.json(
-        { error: "Only creators can request withdrawals" },
+        { error: "Only models can request withdrawals" },
         { status: 403 }
       );
     }

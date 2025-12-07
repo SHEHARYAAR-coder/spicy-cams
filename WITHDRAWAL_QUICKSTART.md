@@ -6,7 +6,7 @@ The withdrawal system is **fully implemented and operational**!
 
 ```
 ✅ Automatic billing (5 tokens/minute for viewers)
-✅ Automatic earnings ($13.20/minute for creators)
+✅ Automatic earnings ($13.20/minute for models)
 ✅ Withdrawal requests (min $50)
 ✅ Admin approval workflow
 ✅ Complete audit trail
@@ -16,7 +16,7 @@ The withdrawal system is **fully implemented and operational**!
 
 ## 🚀 Quick Access
 
-### For Creators
+### For Models
 
 - **View Earnings**: Navigate to `/finances`
 - **Request Withdrawal**: Click "Request Withdrawal" button
@@ -39,7 +39,7 @@ The withdrawal system is **fully implemented and operational**!
 | Role       | Rate                         | Billing                 |
 | ---------- | ---------------------------- | ----------------------- |
 | Viewer     | **5 tokens/minute**          | Auto-deduct every 60s   |
-| Creator    | **$13.20/minute** per viewer | Auto-credit every 60s   |
+| Model    | **$13.20/minute** per viewer | Auto-credit every 60s   |
 | Withdrawal | Minimum **$50**              | Admin approval required |
 
 ## 🎯 How It Works
@@ -49,11 +49,11 @@ The withdrawal system is **fully implemented and operational**!
 ```
 Every 60 seconds:
 - Viewer wallet: -5 tokens
-- Creator wallet: +$13.20
+- Model wallet: +$13.20
 - Ledger entries created
 ```
 
-### 2. Creator Requests Withdrawal
+### 2. Model Requests Withdrawal
 
 ```
 1. Go to /finances
@@ -80,7 +80,7 @@ Every 60 seconds:
 **GET /api/withdrawals**
 
 - Fetch withdrawal requests
-- Creators see their own, admins see all
+- Models see their own, admins see all
 
 **POST /api/withdrawals**
 
@@ -101,7 +101,7 @@ Every 60 seconds:
 
 **DELETE /api/withdrawals/[id]**
 
-- Cancel pending withdrawal (creator only)
+- Cancel pending withdrawal (model only)
 
 ### Database Schema
 
@@ -129,7 +129,7 @@ enum WithdrawalStatus {
 
 ### Components
 
-**Creator:**
+**Model:**
 
 - `CreatorEarnings` - Earnings dashboard and withdrawal interface
 
@@ -159,13 +159,13 @@ npx tsx scripts/test-withdrawal.ts
 
 **Components:**
 
-- `/src/components/creator/creator-earnings.tsx`
+- `/src/components/model/model-earnings.tsx`
 - `/src/components/admin/withdrawal-management.tsx`
 - `/src/components/stream/viewer-player.tsx`
 
 **Pages:**
 
-- `/src/app/finances/page.tsx` (Creator earnings)
+- `/src/app/finances/page.tsx` (Model earnings)
 - `/src/app/admin/withdrawals/page.tsx` (Admin management)
 
 **Database:**
@@ -183,7 +183,7 @@ npx tsx scripts/test-withdrawal.ts
 
 ## 🎨 UI Features
 
-**Creator Dashboard:**
+**Model Dashboard:**
 
 - Real-time balance display
 - Total earnings card
@@ -198,7 +198,7 @@ npx tsx scripts/test-withdrawal.ts
 - Total processed count
 - Approve/reject buttons
 - Review notes
-- Creator information
+- Model information
 - Amount validation
 
 **Viewer Interface:**
@@ -229,7 +229,7 @@ npx tsx scripts/test-withdrawal.ts
 3. **Email Notifications**
 
    - Add email service (SendGrid, Resend, etc.)
-   - Notify creators on status change
+   - Notify models on status change
    - Notify admins on new requests
 
 4. **Testing**

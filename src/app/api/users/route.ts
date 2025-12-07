@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
           select: {
             displayName: true,
             avatarUrl: true,
-            isCreator: true,
+            isModel: true,
           },
         },
         wallet: {
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
       emailVerified: user.emailVerified,
       displayName: user.profile?.displayName || null,
       avatarUrl: user.profile?.avatarUrl || null,
-      isCreator: user.profile?.isCreator || false,
+      isModel: user.profile?.isModel || false,
       balance: user.wallet?.balance || 0,
       streamsCount: user._count.streams,
       messagesCount: user._count.chatMessages,

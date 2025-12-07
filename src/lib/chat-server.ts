@@ -265,13 +265,13 @@ export async function canUserChat(
     return { canChat: false, reason: "You are muted in this stream" };
   }
 
-  // Creators are exempt from credit requirements in their own streams
+  // models are exempt from credit requirements in their own streams
   const stream = await prisma.stream.findUnique({
     where: { id: streamId },
-    select: { creatorId: true },
+    select: { modelId: true },
   });
 
-  if (stream && stream.creatorId === userId) {
+  if (stream && stream.modelId === userId) {
     return { canChat: true };
   }
 

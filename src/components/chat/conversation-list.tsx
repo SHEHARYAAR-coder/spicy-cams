@@ -20,7 +20,7 @@ export function ConversationList({
     className,
 }: ConversationListProps) {
     const roleColors = {
-        CREATOR: "bg-purple-500",
+        MODEL: "bg-purple-500",
         MODERATOR: "bg-green-500",
         ADMIN: "bg-red-500",
         VIEWER: "bg-gray-500",

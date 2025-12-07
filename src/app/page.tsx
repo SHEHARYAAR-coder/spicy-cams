@@ -32,7 +32,7 @@ interface Stream {
   tags?: string[];
   thumbnailUrl?: string;
   createdAt: Date;
-  creator: {
+  model: {
     id: string;
     name: string;
     image?: string;
@@ -71,19 +71,19 @@ export default function Home() {
   ];
 
   // Get user role from session
-  const sessionUser = session?.user as { isCreator?: boolean; role?: string; roles?: string[] } | undefined;
-  const isCreator = !!(
+  const sessionUser = session?.user as { isModel?: boolean; role?: string; roles?: string[] } | undefined;
+  const isModel = !!(
     sessionUser &&
-    (sessionUser.isCreator ||
-      sessionUser.role === "CREATOR" ||
+    (sessionUser.isModel ||
+      sessionUser.role === "MODEL" ||
       (Array.isArray(sessionUser.roles) &&
-        sessionUser.roles.includes("CREATOR")))
+        sessionUser.roles.includes("MODEL")))
   );
 
   // Filter categories based on user role
   const visibleCategories = categories.filter(category => {
-    // Hide "All Models" for creators
-    if (category.name === "All Models" && isCreator) {
+    // Hide "All Models" for models
+    if (category.name === "All Models" && isModel) {
       return false;
     }
     return true;
@@ -153,9 +153,9 @@ export default function Home() {
         const streamsWithDates = (data.streams || []).map((stream: Stream) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
-          creator: {
+          model: {
             ...stream.creator,
-            image: stream.creator.image, // Map avatar to image for consistency
+            image: stream.model.image, // Map avatar to image for consistency
           },
         }));
         setStreams(streamsWithDates);
@@ -183,7 +183,7 @@ export default function Home() {
       filtered = filtered.filter(
         (stream) =>
           stream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          stream.creator.name
+          stream.model.name
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
           stream.category?.toLowerCase().includes(searchQuery.toLowerCase())

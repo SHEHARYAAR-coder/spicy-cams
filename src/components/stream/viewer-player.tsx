@@ -54,7 +54,7 @@ interface ViewerPlayerProps {
     token: string;
     serverUrl: string;
     streamTitle?: string;
-    creatorName?: string;
+    modelName?: string;
     className?: string;
 }
 
@@ -63,7 +63,7 @@ export function ViewerPlayer({
     token,
     serverUrl,
     streamTitle,
-    creatorName,
+    modelName,
     className = ""
 }: ViewerPlayerProps) {
     return (
@@ -83,7 +83,7 @@ export function ViewerPlayer({
                 <ViewerVideoView
                     streamId={streamId}
                     streamTitle={streamTitle}
-                    creatorName={creatorName}
+                    modelName={modelName}
                 />
                 <RoomAudioRenderer />
             </LiveKitRoom>
@@ -94,12 +94,12 @@ export function ViewerPlayer({
 interface ViewerVideoViewProps {
     streamId: string;
     streamTitle?: string;
-    creatorName?: string;
+    modelName?: string;
 }
 
-function LiveViewerStats({ streamTitle, creatorName, startTime }: {
+function LiveViewerStats({ streamTitle, modelName, startTime }: {
     streamTitle?: string;
-    creatorName?: string;
+    modelName?: string;
     startTime?: Date;
 }) {
     const [viewDuration, setViewDuration] = useState(0);
@@ -133,8 +133,8 @@ function LiveViewerStats({ streamTitle, creatorName, startTime }: {
                 {streamTitle && (
                     <span className="font-medium truncate max-w-xs">{streamTitle}</span>
                 )}
-                {creatorName && (
-                    <span className="text-gray-300 truncate">by {creatorName}</span>
+                {modelName && (
+                    <span className="text-gray-300 truncate">by {modelName}</span>
                 )}
             </div>
 
@@ -148,7 +148,7 @@ function LiveViewerStats({ streamTitle, creatorName, startTime }: {
     );
 }
 
-function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoViewProps) {
+function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewProps) {
     const tracks = useTracks(
         [
             { source: Track.Source.Camera, withPlaceholder: true },
@@ -184,7 +184,7 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
         if (navigator.share) {
             navigator.share({
                 title: streamTitle || 'Live Stream',
-                text: `Watch ${creatorName || 'this'} live stream!`,
+                text: `Watch ${modelName || 'this'} live stream!`,
                 url: window.location.href,
             });
         } else {
@@ -246,7 +246,7 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                             setShowLowBalanceWarning(true);
                         }
 
-                        console.log(`✅ Billed ${data.tokensCharged} tokens for ${data.watchTimeSeconds}s viewing (Creator earned: $${data.creatorEarned})`);
+                        console.log(`✅ Billed ${data.tokensCharged} tokens for ${data.watchTimeSeconds}s viewing (Model earned: $${data.modelEarned})`);
                     }
                     setBillingError(null);
                 } else if (response.status === 402) {
@@ -346,7 +346,7 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
             <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4">
                 <LiveViewerStats
                     streamTitle={streamTitle}
-                    creatorName={creatorName}
+                    modelName={modelName}
                     startTime={new Date()}
                 />
             </div>
@@ -488,7 +488,7 @@ function ViewerVideoView({ streamId, streamTitle, creatorName }: ViewerVideoView
                             <p className="text-sm text-gray-500 max-w-md mx-auto">
                                 {connectionState === ConnectionState.Connecting
                                     ? 'Please wait while we connect you to the live stream'
-                                    : `${creatorName || 'The broadcaster'} will be with you shortly`}
+                                    : `${modelName || 'The broadcaster'} will be with you shortly`}
                             </p>
                         </div>
                     </div>

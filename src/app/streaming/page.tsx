@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { CreatorBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
+import { ModelBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
 import { MediaPermissions } from '@/components/stream/media-permissions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,7 @@ interface Stream {
   thumbnailUrl?: string;
   status: 'LIVE' | 'SCHEDULED' | 'ENDED';
   createdAt: Date;
-  creator: {
+  model: {
     id: string;
     name: string;
     image?: string;
@@ -164,12 +164,12 @@ export default function StreamingPage() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: Stream & { creator: { avatar?: string } }) => ({
+        const streamsWithDates = (data.streams || []).map((stream: Stream & { model: { avatar?: string } }) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
-          creator: {
+          model: {
             ...stream.creator,
-            image: stream.creator.avatar // Map avatar to image for consistency
+            image: stream.model.avatar // Map avatar to image for consistency
           }
         }));
         setStreams(streamsWithDates);
@@ -218,7 +218,7 @@ export default function StreamingPage() {
         const stream = responseData.stream;
         setSelectedStream(stream.id);
 
-        // Get creator token
+        // model token
         console.log('🔑 Requesting creator token for stream:', stream.id);
         const tokenResponse = await fetch(`/api/streams/${stream.id}/token`, {
           method: 'POST'
@@ -332,7 +332,7 @@ export default function StreamingPage() {
     );
   }
 
-  const isCreator = session.user && 'role' in session.user && session.user.role === 'CREATOR';
+  const isModel = session.user && 'role' in session.user && session.user.role === 'MODEL';
 
   // Debug logging
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
@@ -360,7 +360,7 @@ export default function StreamingPage() {
                   Browse Streams
                 </Button>
               )}
-              {(session.user && (((session.user as { role?: string }).role === 'CREATOR') || ((session.user as { role?: string }).role === 'ADMIN')) && mode !== 'broadcast') && (
+              {(session.user && (((session.user as { role?: string }).role === 'MODEL') || ((session.user as { role?: string }).role === 'ADMIN')) && mode !== 'broadcast') && (
                 <Button
                   onClick={() => setMode('create')}
                   variant={mode === 'create' ? 'default' : 'outline'}
@@ -403,7 +403,7 @@ export default function StreamingPage() {
                       <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                       <h3 className="text-xl text-white font-semibold mb-2">No streams available</h3>
                       <p className="text-gray-400 mb-4">Be the first to start streaming!</p>
-                      {isCreator && (
+                      {isModel && (
                         <Button onClick={() => setMode('create')} className="bg-purple-600 hover:bg-purple-700">
                           <Plus className="w-4 h-4 mr-2" />
                           Start Streaming
@@ -623,7 +623,7 @@ export default function StreamingPage() {
             </div>
           )}
 
-          {/* Creator Broadcast */}
+          {/* Model Broadcast */}
           {mode === 'broadcast' && selectedStream && streamToken && (
             <div className="h-full flex flex-col space-y-4">
               <div className="flex-none flex justify-between items-center">
@@ -642,7 +642,7 @@ export default function StreamingPage() {
                 {/* Video Section - Takes 2/3 width on large screens */}
                 <div className="lg:col-span-2 flex flex-col h-[40vh] lg:h-full">
                   <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
-                    <CreatorBroadcast
+                    <ModelBroadcast
                       streamId={selectedStream}
                       token={streamToken}
                       serverUrl={LIVEKIT_SERVER_URL}
@@ -689,7 +689,7 @@ export default function StreamingPage() {
                       token={streamToken}
                       serverUrl={LIVEKIT_SERVER_URL}
                       streamTitle={currentStreamData?.title}
-                      creatorName={currentStreamData?.creator?.name}
+                      modelName={currentStreamData?.creator?.name}
                       className="h-full w-full absolute inset-0"
                     />
                   </div>

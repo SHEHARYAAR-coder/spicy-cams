@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-secret-key";
 
-// GET /api/streams/[streamId]/chat-requests - Fetch pending chat requests (for creators)
+// GET /api/streams/[streamId]/chat-requests - Fetch pending chat requests (for models)
 // POST /api/streams/[streamId]/chat-requests - Send a new chat request (for viewers)
 
 export async function GET(
@@ -22,20 +22,20 @@ export async function GET(
 
     const userId = session.user.id;
 
-    // Get the stream to check if user is the creator
+    // model
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      select: { creatorId: true },
+      select: { modelId: true },
     });
 
     if (!stream) {
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    // Only creators can fetch pending requests for their stream
-    if (stream.creatorId !== userId) {
+    // Only models can fetch pending requests for their stream
+    if (stream.modelId !== userId) {
       return NextResponse.json(
-        { error: "Only creators can view chat requests" },
+        { error: "Only models can view chat requests" },
         { status: 403 }
       );
     }
@@ -115,7 +115,7 @@ export async function POST(
     // Verify stream exists
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      include: { creator: true },
+      include: { model: true },
     });
 
     if (!stream) {

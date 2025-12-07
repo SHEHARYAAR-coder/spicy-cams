@@ -188,13 +188,13 @@ export async function PATCH(
 
     try {
       // Process payout via Stripe
-      // Note: For production, you'll need to set up Stripe Connect for creators
+      // Note: For production, you'll need to set up Stripe Connect for models
       // For now, we'll mark as approved and store the payout ID
       
       const stripe = getStripe();
       
       // In a real implementation, you would:
-      // 1. Create a Stripe Connect account for the creator (if not exists)
+      // model (if not exists)
       // 2. Create a payout to their connected account
       // For this example, we'll simulate a payout and create a transfer
       
@@ -251,7 +251,7 @@ export async function PATCH(
       // const payout = await stripe.payouts.create({
       //   amount: Math.round(Number(withdrawal.amount) * 100), // Convert to cents
       //   currency: 'usd',
-      //   destination: withdrawal.user.stripeAccountId, // Require creators to connect Stripe
+      //   destination: withdrawal.user.stripeAccountId, // Require models to connect Stripe
       //   metadata: {
       //     withdrawalId: withdrawal.id,
       //     userId: withdrawal.userId,

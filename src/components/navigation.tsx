@@ -213,13 +213,13 @@ export function Header() {
                   </DropdownMenuItem>
 
                   {((session.user as import("../../lib/auth-utils").SessionUser)
-                    .role === "CREATOR" ||
+                    .role === "MODEL" ||
                     (session.user as import("../../lib/auth-utils").SessionUser)
                       .role === "ADMIN") && (
                       <DropdownMenuItem asChild>
-                        <Link href="/creator" className="cursor-pointer">
+                        <Link href="/model" className="cursor-pointer">
                           <Settings className="w-4 h-4 mr-2" />
-                          <span>Creator Studio</span>
+                          <span>Model Studio</span>
                         </Link>
                       </DropdownMenuItem>
                     )}

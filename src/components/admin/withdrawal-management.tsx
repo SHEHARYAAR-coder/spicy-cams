@@ -249,7 +249,7 @@ export function WithdrawalManagement() {
                 <CardHeader>
                     <CardTitle className="text-white">Withdrawal Requests</CardTitle>
                     <CardDescription className="text-gray-400">
-                        Review and approve creator withdrawal requests
+                        Review and approve model withdrawal requests
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -271,7 +271,7 @@ export function WithdrawalManagement() {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-gray-800/50 border-gray-700">
-                                                    <TableHead className="text-gray-300">Creator</TableHead>
+                                                    <TableHead className="text-gray-300">Model</TableHead>
                                                     <TableHead className="text-gray-300">Amount</TableHead>
                                                     <TableHead className="text-gray-300">Requested</TableHead>
                                                     <TableHead className="text-gray-300">Status</TableHead>
@@ -339,7 +339,7 @@ export function WithdrawalManagement() {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-gray-800/50 border-gray-700">
-                                                    <TableHead className="text-gray-300">Creator</TableHead>
+                                                    <TableHead className="text-gray-300">Model</TableHead>
                                                     <TableHead className="text-gray-300">Amount</TableHead>
                                                     <TableHead className="text-gray-300">Requested</TableHead>
                                                     <TableHead className="text-gray-300">Reviewed</TableHead>
@@ -401,7 +401,7 @@ export function WithdrawalManagement() {
                                 <>
                                     <div className="mt-4 space-y-2">
                                         <div className="flex justify-between">
-                                            <span>Creator:</span>
+                                            <span>Model:</span>
                                             <span className="font-medium text-white">
                                                 {selectedWithdrawal.user.profile?.displayName ||
                                                     selectedWithdrawal.user.email}

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
       include: {
-        creator: {
+        model: {
           include: {
             profile: true,
           },
@@ -73,10 +73,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         thumbnailUrl: stream.thumbnailUrl,
         playbackUrl: stream.playbackUrl,
         participantCount,
-        creator: {
-          id: stream.creator.id,
-          name: stream.creator.profile?.displayName || stream.creator.email,
-          avatar: stream.creator.profile?.avatarUrl,
+        model: {
+          id: stream.model.id,
+          name: stream.model.profile?.displayName || stream.model.email,
+          avatar: stream.model.profile?.avatarUrl,
         },
         startedAt: stream.startedAt,
         endedAt: stream.endedAt,
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PATCH - Update stream metadata (creator only)
+// model only)
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
@@ -107,19 +107,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     // Check if stream exists and user owns it
     const stream = await prisma.stream.findUnique({
       where: { id: streamId },
-      include: { creator: true },
+      include: { model: true },
     });
 
     if (!stream) {
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    // Check authorization (creator or admin)
+    // model or admin)
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     });
 
-    if (!user || (stream.creatorId !== user.id && user.role !== "ADMIN")) {
+    if (!user || (stream.modelId !== user.id && user.role !== "ADMIN")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -138,7 +138,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: { id: streamId },
       data: updateData,
       include: {
-        creator: {
+        model: {
           include: {
             profile: true,
           },
@@ -154,12 +154,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         status: updatedStream.status,
         thumbnailUrl: updatedStream.thumbnailUrl,
         playbackUrl: updatedStream.playbackUrl,
-        creator: {
-          id: updatedStream.creator.id,
+        model: {
+          id: updatedStream.model.id,
           name:
-            updatedStream.creator.profile?.displayName ||
-            updatedStream.creator.email,
-          avatar: updatedStream.creator.profile?.avatarUrl,
+            updatedStream.model.profile?.displayName ||
+            updatedStream.model.email,
+          avatar: updatedStream.model.profile?.avatarUrl,
         },
         startedAt: updatedStream.startedAt,
         endedAt: updatedStream.endedAt,
@@ -186,7 +186,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE - End stream and close room (creator/admin)
+// model/admin)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
@@ -205,12 +205,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    // Check authorization (creator or admin)
+    // model or admin)
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     });
 
-    if (!user || (stream.creatorId !== user.id && user.role !== "ADMIN")) {
+    if (!user || (stream.modelId !== user.id && user.role !== "ADMIN")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

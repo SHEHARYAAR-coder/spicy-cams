@@ -37,7 +37,7 @@ interface ProfileData {
   profileDescription?: string | null;
 }
 
-interface CreatorProfileEditDialogProps {
+interface ModelProfileEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profileData: ProfileData | null;
@@ -116,12 +116,12 @@ const SHOW_CATEGORIES = [
   "Other",
 ];
 
-export default function CreatorProfileEditDialog({
+export default function ModelProfileEditDialog({
   open,
   onOpenChange,
   profileData,
   onSave,
-}: CreatorProfileEditDialogProps) {
+}: ModelProfileEditDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -237,7 +237,7 @@ export default function CreatorProfileEditDialog({
       <DialogContent className="bg-gray-900 border border-purple-700 rounded-xl shadow-xl max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white text-2xl">
-            Edit Creator Profile
+            Edit Model Profile
           </DialogTitle>
         </DialogHeader>
 

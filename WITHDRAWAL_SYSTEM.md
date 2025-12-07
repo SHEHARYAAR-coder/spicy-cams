@@ -2,7 +2,7 @@
 
 ## Overview
 
-The withdrawal system allows creators to request payouts of their earnings. The system includes automatic billing for viewers, earnings tracking for creators, and an admin approval workflow for withdrawal requests.
+The withdrawal system allows models to request payouts of their earnings. The system includes automatic billing for viewers, earnings tracking for models, and an admin approval workflow for withdrawal requests.
 
 ## Billing System
 
@@ -12,15 +12,15 @@ The withdrawal system allows creators to request payouts of their earnings. The 
 - **Billing Interval**: Every 60 seconds
 - **Automatic Deduction**: Tokens are automatically deducted from viewer's wallet while watching a live stream
 
-### Creator Earnings
+### Model Earnings
 
 - **Rate**: $13.20 per minute per viewer
-- **Automatic Credit**: Earnings are automatically credited to creator's wallet
+- **Automatic Credit**: Earnings are automatically credited to model's wallet
 - **Tracking**: All earnings are tracked in ledger entries with type `STREAM_EARNINGS`
 
 ## Withdrawal Request Flow
 
-### For Creators
+### For Models
 
 1. **View Earnings**
 
@@ -43,7 +43,7 @@ The withdrawal system allows creators to request payouts of their earnings. The 
    - **FAILED**: Payout failed (technical issue)
 
 4. **Cancel Withdrawal**
-   - Creators can cancel PENDING requests
+   - Models can cancel PENDING requests
    - Cannot cancel once approved or processed
 
 ### For Admins
@@ -56,7 +56,7 @@ The withdrawal system allows creators to request payouts of their earnings. The 
 
 2. **Review Requests**
 
-   - View creator details (name, email)
+   - View model details (name, email)
    - See requested amount
    - Review request date
 
@@ -65,7 +65,7 @@ The withdrawal system allows creators to request payouts of their earnings. The 
    - Click "Approve" button
    - Optionally add approval note
    - System automatically:
-     - Deducts amount from creator's wallet
+     - Deducts amount from model's wallet
      - Creates ledger entry
      - Updates withdrawal status
      - (Future) Processes Stripe payout
@@ -73,7 +73,7 @@ The withdrawal system allows creators to request payouts of their earnings. The 
 4. **Reject Withdrawal**
    - Click "Reject" button
    - **Required**: Add rejection reason
-   - Creator is notified via review note
+   - Model is notified via review note
 
 ## API Endpoints
 
@@ -81,7 +81,7 @@ The withdrawal system allows creators to request payouts of their earnings. The 
 
 Fetch withdrawal requests
 
-- Creators: See their own requests
+- Models: See their own requests
 - Admins: See all requests
 
 ### POST /api/withdrawals
@@ -96,7 +96,7 @@ Create a new withdrawal request
 
 Get specific withdrawal details
 
-- Creators: Own requests only
+- Models: Own requests only
 - Admins: Any request
 
 ### PATCH /api/withdrawals/[withdrawalId]
@@ -112,7 +112,7 @@ Admin approval/rejection
 
 Cancel pending withdrawal
 
-- Creator can cancel own PENDING requests
+- Model can cancel own PENDING requests
 - Cannot cancel processed requests
 
 ## Database Schema
@@ -157,7 +157,7 @@ enum WithdrawalStatus {
 
 All financial transactions are tracked in the `ledger_entries` table:
 
-### Stream Earnings (Creator)
+### Stream Earnings (Model)
 
 ```json
 {
@@ -186,7 +186,7 @@ All financial transactions are tracked in the `ledger_entries` table:
 }
 ```
 
-### Withdrawal (Creator)
+### Withdrawal (Model)
 
 ```json
 {
@@ -207,13 +207,13 @@ All financial transactions are tracked in the `ledger_entries` table:
 
 - Placeholder payout ID generated
 - Withdrawal marked as APPROVED
-- Funds deducted from creator wallet
+- Funds deducted from model wallet
 
 ### Future Implementation (Stripe Connect)
 
-1. **Creator Onboarding**
+1. **Model Onboarding**
 
-   - Create Stripe Connect account for each creator
+   - Create Stripe Connect account for each model
    - Store `stripeAccountId` on user/profile
    - Complete KYC verification
 
@@ -223,10 +223,10 @@ All financial transactions are tracked in the `ledger_entries` table:
    const payout = await stripe.payouts.create({
      amount: Math.round(withdrawal.amount * 100), // Convert to cents
      currency: "usd",
-     destination: creator.stripeAccountId,
+     destination: model.stripeAccountId,
      metadata: {
        withdrawalId: withdrawal.id,
-       userId: creator.id,
+       userId: model.id,
      },
    });
    ```
@@ -241,7 +241,7 @@ All financial transactions are tracked in the `ledger_entries` table:
 
 1. **Authorization**
 
-   - Creators can only view/create their own withdrawals
+   - Models can only view/create their own withdrawals
    - Only admins can approve/reject
    - Role-based access control on all endpoints
 
@@ -260,9 +260,9 @@ All financial transactions are tracked in the `ledger_entries` table:
 
 ## UI Components
 
-### For Creators
+### For Models
 
-- **CreatorEarnings** (`/src/components/creator/creator-earnings.tsx`)
+- **CreatorEarnings** (`/src/components/model/model-earnings.tsx`)
   - Balance and earnings cards
   - Withdrawal request form
   - Withdrawal history table
@@ -280,7 +280,7 @@ All financial transactions are tracked in the `ledger_entries` table:
 
 ### Test Scenarios
 
-1. **Creator Request**
+1. **Model Request**
 
    - Create withdrawal with sufficient balance
    - Try withdrawal with insufficient balance
@@ -294,7 +294,7 @@ All financial transactions are tracked in the `ledger_entries` table:
    - Try processing already processed request
 
 3. **Edge Cases**
-   - Creator balance changes after request
+   - Model balance changes after request
    - Concurrent withdrawal requests
    - Network failures during payout
 
@@ -312,7 +312,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 ```typescript
 const MIN_WITHDRAWAL = 50; // Minimum withdrawal amount
 const TOKENS_PER_MINUTE = 5; // Viewer charge rate
-const CREATOR_EARNINGS_PER_MINUTE = 13.2; // Creator earnings rate
+const CREATOR_EARNINGS_PER_MINUTE = 13.2; // Model earnings rate
 ```
 
 ## Future Enhancements
@@ -324,7 +324,7 @@ const CREATOR_EARNINGS_PER_MINUTE = 13.2; // Creator earnings rate
 
 2. **Tax Reporting**
 
-   - Generate 1099 forms for creators
+   - Generate 1099 forms for models
    - Track annual earnings
 
 3. **Multiple Payout Methods**

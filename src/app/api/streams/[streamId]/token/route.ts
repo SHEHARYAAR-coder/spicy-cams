@@ -29,7 +29,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const [stream, user] = await Promise.all([
       prisma.stream.findUnique({
         where: { id: streamId },
-        include: { creator: true },
+        include: { model: true },
       }),
       prisma.user.findUnique({
         where: { id: session.user.id },
@@ -62,9 +62,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     let token: string;
     let role: "creator" | "viewer";
 
-    // Determine if user is the creator
-    if (stream.creatorId === user.id) {
-      // Creator gets publish permissions
+    // model
+    if (stream.modelId === user.id) {
+      // Model gets publish permissions
       token = await generateCreatorToken(roomName, user.id);
       role = "creator";
     } else {
