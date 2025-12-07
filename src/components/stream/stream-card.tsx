@@ -38,10 +38,10 @@ interface StreamCardProps {
 }
 
 export function StreamCard({
-                               stream,
-                               onJoinStream,
-                               className = ""
-                           }: StreamCardProps) {
+    stream,
+    onJoinStream,
+    className = ""
+}: StreamCardProps) {
     const [participantCount, setParticipantCount] = useState(stream.participantCount || 0);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -151,7 +151,7 @@ export function StreamCard({
                             <Star
                                 key={star}
                                 className={`w-3 h-3 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
-                                }`}
+                                    }`}
                             />
                         ))}
                     </div>
@@ -174,7 +174,7 @@ export function StreamCard({
 
                 {/* Hover Overlay */}
                 <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
-                }`}>
+                    }`}>
                     <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
                         <Play className="w-8 h-8 text-white ml-1" />
                     </div>
@@ -190,13 +190,13 @@ export function StreamCard({
                     <Avatar className="w-6 h-6">
                         <AvatarImage src={stream.model.image} />
                         <AvatarFallback className="text-xs">
-                            {stream.model.name.charAt(0).toUpperCase()}
+                            {stream.model.name?.charAt(0).toUpperCase() || 'M'}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <p className="text-sm font-medium text-gray-200 truncate">
-                                {stream.model.name}
+                                {stream.model.name || 'Unknown Model'}
                             </p>
                             <span className="text-xs text-gray-400 bg-gray-700 px-1 rounded">
                                 {18 + Math.floor(Math.random() * 12)}

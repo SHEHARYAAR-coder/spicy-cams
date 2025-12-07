@@ -441,7 +441,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                   trackRef={track}
                   className="w-full h-full object-cover"
                 />
-               
+
               </div>
             ))}
           </div>
@@ -491,112 +491,125 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         )}
       </div>
 
-      {/* Stream Controls Menu */}
-      <div className="absolute bottom-6 left-6 z-20">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+      {/* Main Stream Controls - Always Visible */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center">
+        <div className="bg-black/80 backdrop-blur-lg rounded-full px-6 py-3 border border-gray-700 shadow-xl">
+          <div className="flex items-center gap-4">
+            {/* Microphone Toggle */}
             <Button
-              variant="outline"
-              size="icon"
-              className="bg-black/60 backdrop-blur-lg border-gray-600 text-white hover:bg-black/80 hover:text-white h-10 w-10"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white w-56">
-            <DropdownMenuItem
-              onClick={toggleCamera}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
-            >
-              {isCameraEnabled ? (
-                <Video className="w-4 h-4 text-green-400" />
-              ) : (
-                <VideoOff className="w-4 h-4 text-red-400" />
-              )}
-              <span>
-                {isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
-              </span>
-            </DropdownMenuItem>
-
-            {/* Camera Selection Submenu */}
-            {availableCameras.length > 1 && isCameraEnabled && (
-              <>
-                <DropdownMenuSeparator className="bg-gray-700" />
-                <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Camera</div>
-                {availableCameras.map((camera) => (
-                  <DropdownMenuItem
-                    key={camera.deviceId}
-                    onClick={() => switchCamera(camera.deviceId)}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-6"
-                  >
-                    <Camera className={`w-3.5 h-3.5 ${selectedCamera === camera.deviceId ? 'text-purple-400' : 'text-gray-400'}`} />
-                    <span className="text-sm truncate">
-                      {camera.label || `Camera ${availableCameras.indexOf(camera) + 1}`}
-                    </span>
-                    {selectedCamera === camera.deviceId && (
-                      <span className="ml-auto text-xs text-purple-400">✓</span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-
-            <DropdownMenuSeparator className="bg-gray-700" />
-
-            <DropdownMenuItem
               onClick={toggleMicrophone}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+              variant="ghost"
+              size="icon"
+              className={`h-12 w-12 rounded-full ${isMicEnabled
+                ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
+              title={isMicEnabled ? 'Mute Microphone' : 'Unmute Microphone'}
             >
               {isMicEnabled ? (
-                <Mic className="w-4 h-4 text-green-400" />
+                <Mic className="w-5 h-5" />
               ) : (
-                <MicOff className="w-4 h-4 text-red-400" />
+                <MicOff className="w-5 h-5" />
               )}
-              <span>
-                {isMicEnabled ? 'Turn Off Microphone' : 'Turn On Microphone'}
-              </span>
-            </DropdownMenuItem>
+            </Button>
 
-            {/* Microphone Selection Submenu */}
-            {availableMicrophones.length > 1 && isMicEnabled && (
-              <>
-                <DropdownMenuSeparator className="bg-gray-700" />
-                <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Microphone</div>
-                {availableMicrophones.map((microphone) => (
-                  <DropdownMenuItem
-                    key={microphone.deviceId}
-                    onClick={() => switchMicrophone(microphone.deviceId)}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-6"
-                  >
-                    <Mic className={`w-3.5 h-3.5 ${selectedMicrophone === microphone.deviceId ? 'text-blue-400' : 'text-gray-400'}`} />
-                    <span className="text-sm truncate">
-                      {microphone.label || `Microphone ${availableMicrophones.indexOf(microphone) + 1}`}
-                    </span>
-                    {selectedMicrophone === microphone.deviceId && (
-                      <span className="ml-auto text-xs text-blue-400">✓</span>
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
+            {/* Camera Toggle */}
+            <Button
+              onClick={toggleCamera}
+              variant="ghost"
+              size="icon"
+              className={`h-12 w-12 rounded-full ${isCameraEnabled
+                ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
+              title={isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
+            >
+              {isCameraEnabled ? (
+                <Video className="w-5 h-5" />
+              ) : (
+                <VideoOff className="w-5 h-5" />
+              )}
+            </Button>
 
-            <DropdownMenuSeparator className="bg-gray-700" />
-
-            <DropdownMenuItem
+            {/* Screen Share Toggle */}
+            <Button
               onClick={toggleScreenShare}
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800"
+              variant="ghost"
+              size="icon"
+              className={`h-12 w-12 rounded-full ${isScreenSharing
+                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-gray-700 hover:bg-gray-600 text-white'
+                }`}
+              title={isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
             >
               {isScreenSharing ? (
-                <MonitorOff className="w-4 h-4 text-orange-400" />
+                <MonitorOff className="w-5 h-5" />
               ) : (
-                <Monitor className="w-4 h-4 text-blue-400" />
+                <Monitor className="w-5 h-5" />
               )}
-              <span>
-                {isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </Button>
+
+            {/* Settings Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white ml-2"
+                  title="More Options"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white w-56 mb-2">
+                {/* Camera Selection Submenu */}
+                {availableCameras.length > 1 && isCameraEnabled && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Camera</div>
+                    {availableCameras.map((camera) => (
+                      <DropdownMenuItem
+                        key={camera.deviceId}
+                        onClick={() => switchCamera(camera.deviceId)}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-4"
+                      >
+                        <Camera className={`w-3.5 h-3.5 ${selectedCamera === camera.deviceId ? 'text-purple-400' : 'text-gray-400'}`} />
+                        <span className="text-sm truncate">
+                          {camera.label || `Camera ${availableCameras.indexOf(camera) + 1}`}
+                        </span>
+                        {selectedCamera === camera.deviceId && (
+                          <span className="ml-auto text-xs text-purple-400">✓</span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator className="bg-gray-700" />
+                  </>
+                )}
+
+                {/* Microphone Selection Submenu */}
+                {availableMicrophones.length > 1 && isMicEnabled && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs text-gray-400 font-semibold">Switch Microphone</div>
+                    {availableMicrophones.map((microphone) => (
+                      <DropdownMenuItem
+                        key={microphone.deviceId}
+                        onClick={() => switchMicrophone(microphone.deviceId)}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 pl-4"
+                      >
+                        <Mic className={`w-3.5 h-3.5 ${selectedMicrophone === microphone.deviceId ? 'text-blue-400' : 'text-gray-400'}`} />
+                        <span className="text-sm truncate">
+                          {microphone.label || `Microphone ${availableMicrophones.indexOf(microphone) + 1}`}
+                        </span>
+                        {selectedMicrophone === microphone.deviceId && (
+                          <span className="ml-auto text-xs text-blue-400">✓</span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
       </div>
 
       {/* Quality Indicator */}

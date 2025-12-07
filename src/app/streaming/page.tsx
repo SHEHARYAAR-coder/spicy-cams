@@ -164,12 +164,13 @@ export default function StreamingPage() {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: Stream & { model: { avatar?: string } }) => ({
+        const streamsWithDates = (data.streams || []).map((stream: any) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           model: {
-            ...stream.creator,
-            image: stream.model.avatar // Map avatar to image for consistency
+            id: stream.model?.id || stream.creator?.id || '',
+            name: stream.model?.name || stream.creator?.name || 'Unknown',
+            image: stream.model?.avatar || stream.model?.image || stream.creator?.avatar || stream.creator?.image
           }
         }));
         setStreams(streamsWithDates);
