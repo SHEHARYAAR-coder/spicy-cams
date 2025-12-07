@@ -232,27 +232,19 @@ export function PrivateChatContainer({
     }
 
     return (
-        <Card className={cn("flex flex-col h-[400px] bg-gray-900 border-gray-700", className)}>
+        <Card className={cn("flex flex-col h-full bg-gray-900", className)}>
             {!selectedPartnerId ? (
                 // Conversation list view
                 <>
-                    <div className="border-b border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm">
-                        <h3 className="font-semibold text-sm flex items-center gap-3 text-white">
-                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                            <MessageCircle className="w-5 h-5 text-purple-400" />
-                            Private Messages
-                        </h3>
-                    </div>
-
                     {loading && conversations.length === 0 && chatRequests.length === 0 ? (
-                        <div className="flex-1 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-300">
-                            <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
-                                <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-2" />
-                                <p className="text-sm text-gray-300">Loading conversations...</p>
+                        <div className="flex-1 flex items-center justify-center animate-in fade-in duration-300">
+                            <div className="text-center p-6">
+                                <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto mb-2" />
+                                <p className="text-xs text-gray-400">Loading...</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="flex-1 overflow-y-auto bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="flex-1 overflow-y-auto animate-in fade-in duration-300">
                             {/* Show pending chat requests for models */}
                             {creatorInfo && session?.user?.id === creatorInfo.id && chatRequests.length > 0 && (
                                 <div className="p-3">
@@ -402,59 +394,42 @@ export function PrivateChatContainer({
             ) : (
                 // Individual conversation view
                 <>
-                    {/* Header */}
-                    <div className="border-b border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm flex items-center gap-3">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-                            onClick={() => setSelectedPartnerId(null)}
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                        </Button>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-sm text-white">
-                                {selectedPartner?.partnerName || "Private Chat"}
-                            </h3>
-                            {selectedPartner && (
-                                <p className="text-xs text-purple-300 capitalize flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                                    {selectedPartner.partnerRole.toLowerCase()}
-                                </p>
-                            )}
-                        </div>
-                    </div>
+                    {/* Back button overlay */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedPartnerId(null)}
+                        className="absolute top-2 left-2 z-10 h-8 w-8 p-0 hover:bg-gray-800/80 bg-gray-900/60 backdrop-blur-sm rounded-full"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
 
                     {/* Messages */}
                     <div
                         ref={messagesContainerRef}
-                        className="flex-1 overflow-y-auto bg-gray-900/50 backdrop-blur-sm p-3 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 min-h-0"
+                        className="flex-1 overflow-y-auto p-3 pt-12 min-h-0"
                     >
                         {loading ? (
-                            <div className="flex items-center justify-center h-full min-h-[200px] animate-in fade-in duration-300">
-                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
-                                    <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-300">Loading messages...</p>
+                            <div className="flex items-center justify-center h-full min-h-[200px]">
+                                <div className="text-center p-6">
+                                    <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto mb-2" />
+                                    <p className="text-xs text-gray-400">Loading messages...</p>
                                 </div>
                             </div>
                         ) : requestStatus === "PENDING" ? (
                             <div className="flex items-center justify-center h-full min-h-[200px]">
-                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-purple-500/30 max-w-xs mx-auto">
-                                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Clock className="w-8 h-8 text-purple-400 animate-pulse" />
-                                    </div>
-                                    <p className="text-sm text-gray-300 font-medium mb-1">Request Pending</p>
-                                    <p className="text-xs text-gray-500">Waiting for {selectedPartner?.partnerName || "model"} to accept your chat request</p>
+                                <div className="text-center p-6 max-w-[240px]">
+                                    <Clock className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                                    <p className="text-xs text-gray-400 mb-1">Request Pending</p>
+                                    <p className="text-xs text-gray-600">Waiting for {selectedPartner?.partnerName || "model"} to accept</p>
                                 </div>
                             </div>
                         ) : requestStatus === "REJECTED" ? (
                             <div className="flex items-center justify-center h-full min-h-[200px]">
-                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-red-500/30 max-w-xs mx-auto">
-                                    <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <XCircle className="w-8 h-8 text-red-400" />
-                                    </div>
-                                    <p className="text-sm text-gray-300 font-medium mb-1">Request Declined</p>
-                                    <p className="text-xs text-gray-500 mb-4">Your chat request was declined</p>
+                                <div className="text-center p-6 max-w-[240px]">
+                                    <XCircle className="w-10 h-10 text-red-400/50 mx-auto mb-3" />
+                                    <p className="text-xs text-gray-400 mb-1">Request Declined</p>
+                                    <p className="text-xs text-gray-600 mb-4">Your chat request was declined</p>
                                     <Button
                                         size="sm"
                                         onClick={() => setShowRequestDialog(true)}
@@ -466,29 +441,27 @@ export function PrivateChatContainer({
                             </div>
                         ) : requestStatus === "EXPIRED" ? (
                             <div className="flex items-center justify-center h-full min-h-[200px]">
-                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-orange-500/30 max-w-xs mx-auto">
-                                    <div className="w-16 h-16 bg-orange-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Clock className="w-8 h-8 text-orange-400" />
-                                    </div>
-                                    <p className="text-sm text-gray-300 font-medium mb-1">Request Expired</p>
-                                    <p className="text-xs text-gray-500 mb-4">Your chat request has expired after 7 days</p>
+                                <div className="text-center p-6 max-w-[240px]">
+                                    <Clock className="w-10 h-10 text-orange-400/50 mx-auto mb-3" />
+                                    <p className="text-xs text-gray-400 mb-1">Request Expired</p>
+                                    <p className="text-xs text-gray-600 mb-4">Request expired after 7 days</p>
                                     <Button
                                         size="sm"
                                         onClick={() => setShowRequestDialog(true)}
-                                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                                        className="bg-purple-600 hover:bg-purple-700 text-white h-8 text-xs"
                                     >
                                         Send New Request
                                     </Button>
                                 </div>
                             </div>
                         ) : messages.length === 0 ? (
-                            <div className="flex items-center justify-center h-full min-h-[200px]">
-                                <div className="text-center bg-gray-800/50 backdrop-blur-sm rounded-lg p-8 border border-gray-700 max-w-xs mx-auto">
-                                    <div className="w-16 h-16 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <MessageCircle className="w-8 h-8 text-purple-400" />
+                            <div className="flex items-center justify-center h-full min-h-[240px]">
+                                <div className="text-center p-6 max-w-[280px] mx-auto">
+                                    <div className="w-20 h-20 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-5 border border-purple-500/20">
+                                        <MessageCircle className="w-10 h-10 text-purple-400" />
                                     </div>
-                                    <p className="text-sm text-gray-300 font-medium mb-1">No messages yet</p>
-                                    <p className="text-xs text-gray-500">Start the conversation!</p>
+                                    <p className="text-lg text-white mb-2 font-semibold">No messages yet</p>
+                                    <p className="text-sm text-gray-300">Start the conversation!</p>
                                 </div>
                             </div>
                         ) : (
@@ -514,30 +487,27 @@ export function PrivateChatContainer({
                     </div>
 
                     {/* Message input */}
-                    <form onSubmit={handleSendMessage} className="border-t border-gray-700 p-4 bg-gray-800/50 backdrop-blur-sm flex-shrink-0">
+                    <form onSubmit={handleSendMessage} className="h-[120px] border-t border-gray-800/50 p-3 flex-shrink-0">
                         {error && (
-                            <div className="text-sm text-red-300 bg-red-900/20 border border-red-500/30 p-3 rounded-lg mb-3 backdrop-blur-sm">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                                    <span>{error}</span>
-                                </div>
+                            <div className="text-xs text-red-400 bg-red-900/20 border border-red-500/30 p-2 rounded mb-2">
+                                {error}
                             </div>
                         )}
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 mb-2">
                             <Input
                                 value={messageInput}
                                 onChange={(e) => setMessageInput(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                placeholder="Type a private message..."
+                                placeholder="Type a message..."
                                 disabled={sending || requestStatus === "PENDING" || requestStatus === "REJECTED" || requestStatus === "EXPIRED"}
                                 maxLength={500}
-                                className="flex-1 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 backdrop-blur-sm"
+                                className="flex-1 bg-gray-800/50 border-gray-700/50 text-white text-sm placeholder:text-gray-500 focus:border-purple-500/50 h-9"
                             />
                             <Button
                                 type="submit"
                                 size="sm"
                                 disabled={!messageInput.trim() || sending || requestStatus === "PENDING" || requestStatus === "REJECTED" || requestStatus === "EXPIRED"}
-                                className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg shadow-purple-600/25 transition-all duration-200 disabled:bg-gray-700 disabled:shadow-none"
+                                className="bg-purple-600 hover:bg-purple-700 text-white h-9 w-9 p-0"
                             >
                                 {sending ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -546,14 +516,8 @@ export function PrivateChatContainer({
                                 )}
                             </Button>
                         </div>
-                        <div className="text-xs text-gray-400 mt-2 flex items-center gap-2">
-                            <span className={`px-2 py-1 rounded ${messageInput.length > 400
-                                ? "text-orange-400 bg-orange-900/20"
-                                : "text-gray-400"
-                                }`}>
-                                {messageInput.length}/500 characters
-                            </span>
-                            <div className="flex-1 h-px bg-gradient-to-r from-gray-700 to-transparent"></div>
+                        <div className="text-xs text-gray-500">
+                            {messageInput.length}/500
                         </div>
                     </form>
                 </>

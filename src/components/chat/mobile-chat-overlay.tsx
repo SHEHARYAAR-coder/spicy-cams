@@ -55,18 +55,15 @@ export function MobileChatOverlay({ streamId, canModerate = false }: MobileChatO
                         <div className="w-12 h-1.5 bg-gray-600 rounded-full" />
                     </div>
 
-                    {/* Header with Close Button */}
-                    <div className="flex items-center justify-between px-4 pb-3 border-b border-gray-700">
-                        <h3 className="text-lg font-semibold text-white">Chat</h3>
-                        <Button
-                            onClick={() => setIsOpen(false)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
-                        >
-                            <X className="w-5 h-5" />
-                        </Button>
-                    </div>
+                    {/* Close Button - Positioned absolutely */}
+                    <Button
+                        onClick={() => setIsOpen(false)}
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-3 right-3 z-20 h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full"
+                    >
+                        <X className="w-5 h-5" />
+                    </Button>
 
                     {/* Chat Content */}
                     <div className="flex-1 overflow-hidden">

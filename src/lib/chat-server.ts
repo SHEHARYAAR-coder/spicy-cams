@@ -275,6 +275,16 @@ export async function canUserChat(
     return { canChat: true };
   }
 
+  // Check if user is a model (models don't need credits for any chat)
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true },
+  });
+
+  if (user && user.role === 'MODEL') {
+    return { canChat: true };
+  }
+
   // Check wallet balance
   const wallet = await prisma.wallet.findUnique({
     where: { userId },

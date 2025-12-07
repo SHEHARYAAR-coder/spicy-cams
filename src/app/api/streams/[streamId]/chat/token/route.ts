@@ -44,25 +44,30 @@ export async function POST(
       );
     }
 
-    // Check if user can chat (balance, ban, mute checks)
-    const chatCheck = await canUserChat(userId, streamId);
-
-    if (!chatCheck.canChat) {
-      return NextResponse.json(
-        {
-          canChat: false,
-          reason: chatCheck.reason,
-        },
-        { status: 403 }
-      );
-    }
-
-    // Determine user role for chat
+    // Determine user role first
     const isModel = stream.modelId === userId;
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { role: true },
     });
+
+    // Models don't need to pass chat checks (no credit requirement)
+    const isModelRole = user?.role === "MODEL" || isModel;
+
+    // Check if user can chat (balance, ban, mute checks) - skip for models
+    if (!isModelRole) {
+      const chatCheck = await canUserChat(userId, streamId);
+
+      if (!chatCheck.canChat) {
+        return NextResponse.json(
+          {
+            canChat: false,
+            reason: chatCheck.reason,
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     const chatRole = isModel
       ? "creator"

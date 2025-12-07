@@ -198,48 +198,38 @@ interface ChatContainerProps {
     }
 
     return (
-        <div className={`relative flex flex-col h-full bg-gray-900 border border-gray-700 rounded-lg overflow-hidden ${className || ''}`}>
-            {/* Fixed Header - 56px */}
-            <div className="absolute top-0 left-0 right-0 h-14 border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm z-10 flex-shrink-0">
+        <div className={`relative flex flex-col h-full bg-gray-900 overflow-hidden ${className || ''}`}>
+            {/* Compact Header */}
+            <div className="absolute top-0 left-0 right-0 h-12 bg-gray-800/80 backdrop-blur-md z-10 flex-shrink-0">
                 <div className="h-full px-3 sm:px-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
-                            <h3 className="font-semibold text-xs sm:text-sm text-white">Live Chat</h3>
-                        </div>
+                    <div className="flex items-center gap-2 min-w-0">
                         {connected ? (
-                            <div className="flex items-center gap-1">
-                                <Wifi className={`h-3 w-3 flex-shrink-0 ${connectionQuality === 'good' ? 'text-green-400' :
-                                        connectionQuality === 'poor' ? 'text-orange-400' :
-                                            'text-red-400'
-                                    }`} />
-                                <span className={`text-xs font-medium hidden sm:inline ${connectionQuality === 'good' ? 'text-green-400' :
-                                        connectionQuality === 'poor' ? 'text-orange-400' :
-                                            'text-red-400'
-                                    }`}>
-                                    {connectionQuality === 'good' ? 'Connected' :
-                                        connectionQuality === 'poor' ? 'Poor' :
-                                            'Connecting...'}
-                                </span>
-                            </div>
+                            <Wifi className={`h-3.5 w-3.5 flex-shrink-0 ${connectionQuality === 'good' ? 'text-green-400' :
+                                    connectionQuality === 'poor' ? 'text-orange-400' :
+                                        'text-red-400'
+                                }`} />
                         ) : (
-                            <div className="flex items-center gap-1">
-                                <WifiOff className="h-3 w-3 text-red-400 flex-shrink-0" />
-                                <span className="text-xs text-red-400 font-medium hidden sm:inline">Disconnected</span>
-                            </div>
+                            <WifiOff className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
                         )}
+                        <span className="text-xs text-gray-400 font-medium hidden sm:inline">
+                            {connected ? 
+                                (connectionQuality === 'good' ? 'Connected' :
+                                connectionQuality === 'poor' ? 'Unstable' : 'Connecting...') 
+                                : 'Offline'
+                            }
+                        </span>
                     </div>
-                    <div className="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded flex-shrink-0">
+                    <div className="text-xs text-gray-400 bg-gray-700/60 px-2 py-0.5 rounded-full flex-shrink-0">
                         {messages.length}
                     </div>
                 </div>
             </div>
 
-            {/* Scrollable Messages Area - fills space between header and input */}
+            {/* Scrollable Messages Area */}
             <div
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
-                className="absolute top-14 left-0 right-0 bottom-[140px] overflow-y-auto px-2 sm:px-3 py-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent"
+                className="absolute top-12 left-0 right-0 bottom-[120px] overflow-y-auto px-2 sm:px-3 py-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent"
                 style={{ scrollBehavior: 'smooth' }}
             >
                 {/* Load more indicator */}
@@ -281,13 +271,13 @@ interface ChatContainerProps {
 
                 {/* Empty state */}
                 {messages.length === 0 && !messagesLoading && (
-                    <div className="flex items-center justify-center h-full">
-                        <div className="text-center p-4">
-                            <div className="w-12 h-12 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <MessageCircle className="w-6 h-6 text-purple-400" />
+                    <div className="flex items-center justify-center h-full min-h-[240px]">
+                        <div className="text-center p-6 max-w-[280px] mx-auto">
+                            <div className="w-20 h-20 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-5 border border-purple-500/20">
+                                <MessageCircle className="w-10 h-10 text-purple-400" />
                             </div>
-                            <p className="text-sm text-gray-300 mb-1 font-medium">No messages yet</p>
-                            <p className="text-xs text-gray-500">Be the first to say something!</p>
+                            <p className="text-lg text-white mb-2 font-semibold">No messages yet</p>
+                            <p className="text-sm text-gray-300">Be the first to say something!</p>
                         </div>
                     </div>
                 )}
@@ -299,14 +289,14 @@ interface ChatContainerProps {
             {showScrollButton && (
                 <button
                     onClick={scrollToBottom}
-                    className="absolute bottom-[150px] right-3 z-20 h-8 w-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg flex items-center justify-center transition-all duration-200"
+                    className="absolute bottom-[130px] right-3 z-20 h-8 w-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg flex items-center justify-center transition-all duration-200"
                 >
                     <ChevronUp className="h-4 w-4" />
                 </button>
             )}
 
-            {/* Fixed Input Area - 140px from bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-[140px] border-t border-gray-700 bg-gray-800/50 backdrop-blur-sm flex-shrink-0">
+            {/* Fixed Input Area */}
+            <div className="absolute bottom-0 left-0 right-0 h-[120px] bg-gray-800/80 backdrop-blur-md flex-shrink-0">
                 {/* Error display */}
                 {error && (
                     <div className="absolute top-0 left-0 right-0 px-3 pt-2">
