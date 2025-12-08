@@ -48,6 +48,7 @@ import {
   AlertCircle,
   Mic,
   MicOff,
+  Loader2,
   PhoneOff,
   Eye,
   Wifi,
@@ -150,42 +151,55 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
 
   // Auto-enable camera and microphone when connected (only once on initial connection)
   const [hasAutoEnabled, setHasAutoEnabled] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   
   useEffect(() => {
     const enableDevices = async () => {
-      if (connectionState === ConnectionState.Connected && localParticipant && !hasAutoEnabled) {
+      if (connectionState === ConnectionState.Connected && localParticipant && !hasAutoEnabled && !isInitializing) {
+        setIsInitializing(true);
         try {
-          console.log('Connection established, enabling camera and microphone...');
+          console.log('🎥 Connection established, enabling camera and microphone...');
 
           // Small delay to ensure connection is stable
           await new Promise(resolve => setTimeout(resolve, 1000));
 
           // Enable camera with high quality settings
+          console.log('📹 Enabling camera...');
           await localParticipant.setCameraEnabled(true);
           setIsCameraEnabled(true);
           console.log('✅ Camera enabled successfully');
 
+          // Small delay between devices
+          await new Promise(resolve => setTimeout(resolve, 500));
+
           // Enable microphone
+          console.log('🎤 Enabling microphone...');
           await localParticipant.setMicrophoneEnabled(true);
           setIsMicEnabled(true);
           console.log('✅ Microphone enabled successfully');
 
           // Mark as auto-enabled so it doesn't run again
           setHasAutoEnabled(true);
+          setIsInitializing(false);
 
         } catch (error) {
           console.error('❌ Failed to enable camera/microphone:', error);
+          setIsInitializing(false);
+          
           // Try again after a short delay
           setTimeout(async () => {
-            try {
-              await localParticipant.setCameraEnabled(true);
-              await localParticipant.setMicrophoneEnabled(true);
-              setIsCameraEnabled(true);
-              setIsMicEnabled(true);
-              setHasAutoEnabled(true);
-              console.log('✅ Retry successful');
-            } catch (retryError) {
-              console.error('❌ Retry failed:', retryError);
+            if (!hasAutoEnabled) {
+              try {
+                console.log('🔄 Retrying device initialization...');
+                await localParticipant.setCameraEnabled(true);
+                await localParticipant.setMicrophoneEnabled(true);
+                setIsCameraEnabled(true);
+                setIsMicEnabled(true);
+                setHasAutoEnabled(true);
+                console.log('✅ Retry successful');
+              } catch (retryError) {
+                console.error('❌ Retry failed:', retryError);
+              }
             }
           }, 2000);
         }
@@ -193,7 +207,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     };
 
     enableDevices();
-  }, [connectionState, localParticipant, hasAutoEnabled]);
+  }, [connectionState, localParticipant, hasAutoEnabled, isInitializing]);
 
 
 
@@ -205,32 +219,48 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     }));
   }, [participants.length]);
 
-  // Update device states based on tracks
+  // Update device states based on tracks - only update if tracks exist
   useEffect(() => {
     const cameraTrack = tracks.find(track => track.source === Track.Source.Camera);
     const screenShareTrack = tracks.find(track => track.source === Track.Source.ScreenShare);
 
-    if (cameraTrack) {
+    // Only update camera state if we have a camera track (don't clear it during initialization)
+    if (cameraTrack && hasAutoEnabled) {
       setIsCameraEnabled(cameraTrack.publication.isEnabled);
     }
 
     if (screenShareTrack) {
       setIsScreenSharing(screenShareTrack.publication.isEnabled);
     }
-  }, [tracks]);
+  }, [tracks, hasAutoEnabled]);
 
   const handleStartBroadcast = async () => {
-    if (!localParticipant) return;
+    if (!localParticipant) {
+      console.error('❌ Cannot start broadcast: No local participant');
+      return;
+    }
 
     try {
-      console.log('Manually starting broadcast...');
+      console.log('🚀 Manually starting broadcast...');
+      console.log('Connection state:', connectionState);
+      console.log('Local participant:', localParticipant.identity);
+      
+      // Enable camera first
+      console.log('Enabling camera...');
       await localParticipant.setCameraEnabled(true);
-      await localParticipant.setMicrophoneEnabled(true);
       setIsCameraEnabled(true);
+      console.log('✅ Camera enabled');
+      
+      // Then enable microphone
+      console.log('Enabling microphone...');
+      await localParticipant.setMicrophoneEnabled(true);
       setIsMicEnabled(true);
-      console.log('Manual broadcast started successfully');
+      console.log('✅ Microphone enabled');
+      
+      console.log('✅ Manual broadcast started successfully');
     } catch (error) {
-      console.error('Failed to start broadcast manually:', error);
+      console.error('❌ Failed to start broadcast manually:', error);
+      alert(`Failed to start broadcast: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -360,20 +390,20 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     <div
       className={`relative ${isFullscreen ? 'h-screen' : 'h-full'} bg-black overflow-hidden rounded-lg`}
     >
-      {/* Top Stats Bar */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-4">
+      {/* Top Stats Bar - More compact on mobile */}
+      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-2 sm:p-4">
         <div className="flex justify-between items-center text-white">
-          <div className="flex items-center gap-4 sm:gap-6">
-            <div className="flex items-center gap-2 bg-red-600/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-500/30">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-bold text-sm sm:text-base">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-red-600/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-red-500/30">
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="font-bold text-xs sm:text-sm">
                 {isLive ? 'LIVE' : 'OFFLINE'}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Eye className="w-4 h-4" />
-              <span className="font-semibold text-sm">{streamStats.viewers}</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+              <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="font-semibold text-xs sm:text-sm">{streamStats.viewers}</span>
               <span className="text-gray-300 text-xs hidden sm:inline">viewers</span>
             </div>
 
@@ -452,45 +482,67 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
             ))}
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-            <div className="text-center text-white">
-              <div className="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-gray-600">
-                <Video className="w-16 h-16 text-gray-400" />
-              </div>
-              <h3 className="text-3xl font-bold mb-3">Ready to Go Live</h3>
-              <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                Click the button below to start broadcasting to your viewers
-              </p>
+          <div className="h-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
+            <div className="text-center text-white max-w-md w-full">
+              {isInitializing ? (
+                <>
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-4 border-purple-600 animate-pulse">
+                    <Video className="w-12 h-12 sm:w-16 sm:h-16 text-purple-400" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">Initializing...</h3>
+                  <p className="text-gray-400 text-sm sm:text-lg mb-6 sm:mb-8 px-4">
+                    Setting up your camera and microphone
+                  </p>
+                  <div className="flex justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-4 border-gray-600">
+                    <Video className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-3">Ready to Go Live</h3>
+                  <p className="text-gray-400 text-sm sm:text-lg mb-6 sm:mb-8 px-4">
+                    Click the button below to start broadcasting to your viewers
+                  </p>
 
-              <div className="flex items-center justify-center gap-6 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${isCameraEnabled ? 'bg-green-500' : 'bg-gray-500'}`} />
-                  <span className="text-sm">Camera</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${isMicEnabled ? 'bg-green-500' : 'bg-gray-500'}`} />
-                  <span className="text-sm">Microphone</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${connectionState === ConnectionState.Connected ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-sm">Connection</span>
-                </div>
-              </div>
+                  <div className="flex items-center justify-center gap-3 sm:gap-6 mb-6 sm:mb-8 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${isCameraEnabled ? 'bg-green-500' : 'bg-gray-500'}`} />
+                      <span className="text-xs sm:text-sm">Camera</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${isMicEnabled ? 'bg-green-500' : 'bg-gray-500'}`} />
+                      <span className="text-xs sm:text-sm">Microphone</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full ${connectionState === ConnectionState.Connected ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span className="text-xs sm:text-sm">Connection</span>
+                    </div>
+                  </div>
 
               <Button
                 onClick={handleStartBroadcast}
                 size="lg"
-                className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-xl"
+                className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-lg active:scale-95 transition-transform"
                 disabled={connectionState !== ConnectionState.Connected}
               >
-                <Play className="w-6 h-6 mr-2" />
+                <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
                 Start Broadcasting
               </Button>
 
               {connectionState !== ConnectionState.Connected && (
-                <p className="text-yellow-500 text-sm mt-4">
+                <p className="text-yellow-500 text-sm mt-4 animate-pulse">
                   Waiting for connection...
                 </p>
+              )}
+              {connectionState === ConnectionState.Connected && (
+                <p className="text-green-500 text-sm mt-4">
+                  Ready to broadcast! Tap the button above.
+                </p>
+              )}
+                </>
               )}
             </div>
           </div>
@@ -498,15 +550,15 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       </div>
 
       {/* Main Stream Controls - Always Visible */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center">
-        <div className="bg-black/80 backdrop-blur-lg rounded-full px-6 py-3 border border-gray-700 shadow-xl">
-          <div className="flex items-center gap-4">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-20 flex justify-center px-4">
+        <div className="bg-black/90 backdrop-blur-lg rounded-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-700 shadow-xl w-full sm:w-auto max-w-sm sm:max-w-none">
+          <div className="flex items-center justify-center gap-3 sm:gap-4">
             {/* Microphone Toggle */}
             <Button
               onClick={toggleMicrophone}
               variant="ghost"
               size="icon"
-              className={`h-12 w-12 rounded-full ${isMicEnabled
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isMicEnabled
                 ? 'bg-gray-700 hover:bg-gray-600 text-white'
                 : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
@@ -524,7 +576,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
               onClick={toggleCamera}
               variant="ghost"
               size="icon"
-              className={`h-12 w-12 rounded-full ${isCameraEnabled
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isCameraEnabled
                 ? 'bg-gray-700 hover:bg-gray-600 text-white'
                 : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
@@ -542,7 +594,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
               onClick={toggleScreenShare}
               variant="ghost"
               size="icon"
-              className={`h-12 w-12 rounded-full ${isScreenSharing
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isScreenSharing
                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
                 : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
@@ -561,7 +613,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white ml-2"
+                  className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white ml-1 sm:ml-2 active:scale-95 transition-transform"
                   title="More Options"
                 >
                   <Settings className="w-5 h-5" />
@@ -619,10 +671,11 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       </div>
 
       {/* Quality Indicator */}
-      <div className="absolute bottom-6 right-6 z-10 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg text-white text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full" />
-          <span>1080p HD</span>
+      <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 z-10 bg-black/60 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-white text-xs sm:text-sm">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full" />
+          <span className="hidden sm:inline">1080p HD</span>
+          <span className="sm:hidden">HD</span>
         </div>
       </div>
     </div>
