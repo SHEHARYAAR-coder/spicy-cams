@@ -53,6 +53,7 @@ import {
   Eye,
   Wifi,
   Play,
+  Pause,
   MoreVertical,
   Menu,
   Camera,
@@ -148,6 +149,8 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     duration: 0,
     quality: 'HD'
   });
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTogglingPause, setIsTogglingPause] = useState(false);
 
   // Auto-enable camera and microphone when connected (only once on initial connection)
   const [hasAutoEnabled, setHasAutoEnabled] = useState(false);
@@ -297,6 +300,67 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     }
   };
 
+  const togglePause = async () => {
+    if (isTogglingPause) return;
+    
+    setIsTogglingPause(true);
+    try {
+      const newPausedState = !isPaused;
+      
+      // Update pause state in database
+      const response = await fetch(`/api/streams/${streamId}/pause`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: newPausedState }),
+      });
+
+      if (response.ok) {
+        setIsPaused(newPausedState);
+        
+        // If pausing, disable camera and mic but keep connection
+        if (newPausedState) {
+          if (isCameraEnabled) {
+            await localParticipant?.setCameraEnabled(false);
+          }
+          if (isMicEnabled) {
+            await localParticipant?.setMicrophoneEnabled(false);
+          }
+        } else {
+          // If resuming, re-enable camera and mic
+          await localParticipant?.setCameraEnabled(true);
+          setIsCameraEnabled(true);
+          await localParticipant?.setMicrophoneEnabled(true);
+          setIsMicEnabled(true);
+        }
+      } else {
+        console.error('Failed to update pause state');
+      }
+    } catch (error) {
+      console.error('Failed to toggle pause:', error);
+    } finally {
+      setIsTogglingPause(false);
+    }
+  };
+
+  // Check pause state on mount and periodically
+  useEffect(() => {
+    const checkPauseState = async () => {
+      try {
+        const response = await fetch(`/api/streams/${streamId}/pause`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsPaused(data.paused);
+        }
+      } catch (error) {
+        console.error('Failed to check pause state:', error);
+      }
+    };
+
+    checkPauseState();
+    const interval = setInterval(checkPauseState, 5000); // Check every 5 seconds
+    return () => clearInterval(interval);
+  }, [streamId]);
+
   // Get available cameras and microphones
   useEffect(() => {
     const getDevices = async () => {
@@ -394,10 +458,14 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-2 sm:p-4">
         <div className="flex justify-between items-center text-white">
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex items-center gap-1.5 sm:gap-2 bg-red-600/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-red-500/30">
-              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 animate-pulse" />
+            <div className={`flex items-center gap-1.5 sm:gap-2 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border ${isPaused
+              ? 'bg-yellow-600/20 border-yellow-500/30'
+              : 'bg-red-600/20 border-red-500/30'
+              }`}>
+              <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${isPaused ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'
+                }`} />
               <span className="font-bold text-xs sm:text-sm">
-                {isLive ? 'LIVE' : 'OFFLINE'}
+                {isPaused ? 'PAUSED' : isLive ? 'LIVE' : 'OFFLINE'}
               </span>
             </div>
 
@@ -469,6 +537,39 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
 
       {/* Main Video Display */}
       <div className="absolute inset-0">
+        {/* Pause Overlay */}
+        {isPaused && (
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center text-white">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-600 animate-pulse">
+                <Pause className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500" />
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold mb-3">Stream Paused</h3>
+              <p className="text-gray-300 text-sm sm:text-lg mb-8 px-4">
+                Your stream is paused. Viewers are waiting for you to resume.
+              </p>
+              <Button
+                onClick={togglePause}
+                disabled={isTogglingPause}
+                size="lg"
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg"
+              >
+                {isTogglingPause ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Resuming...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-5 h-5 mr-2" />
+                    Resume Stream
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+        
         {tracks.length > 0 ? (
           <div className="h-full w-full relative">
             {tracks.map((track) => (
@@ -553,16 +654,40 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 z-20 flex justify-center px-4">
         <div className="bg-black/90 backdrop-blur-lg rounded-full px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-700 shadow-xl w-full sm:w-auto max-w-sm sm:max-w-none">
           <div className="flex items-center justify-center gap-3 sm:gap-4">
+            {/* Pause/Resume Button */}
+            <Button
+              onClick={togglePause}
+              variant="ghost"
+              size="icon"
+              disabled={isTogglingPause}
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isPaused
+                ? 'bg-yellow-600 hover:bg-yellow-700 text-white animate-pulse'
+                : 'bg-gray-700 hover:bg-gray-600 text-white'
+                }`}
+              title={isPaused ? 'Resume Stream' : 'Pause Stream'}
+            >
+              {isTogglingPause ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : isPaused ? (
+                <Play className="w-5 h-5" />
+              ) : (
+                <Pause className="w-5 h-5" />
+              )}
+            </Button>
+
             {/* Microphone Toggle */}
             <Button
               onClick={toggleMicrophone}
               variant="ghost"
               size="icon"
-              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isMicEnabled
-                ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                : 'bg-red-600 hover:bg-red-700 text-white'
+              disabled={isPaused}
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isPaused
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                : isMicEnabled
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
-              title={isMicEnabled ? 'Mute Microphone' : 'Unmute Microphone'}
+              title={isPaused ? 'Stream Paused' : isMicEnabled ? 'Mute Microphone' : 'Unmute Microphone'}
             >
               {isMicEnabled ? (
                 <Mic className="w-5 h-5" />
@@ -576,11 +701,14 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
               onClick={toggleCamera}
               variant="ghost"
               size="icon"
-              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isCameraEnabled
-                ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                : 'bg-red-600 hover:bg-red-700 text-white'
+              disabled={isPaused}
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isPaused
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                : isCameraEnabled
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
-              title={isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
+              title={isPaused ? 'Stream Paused' : isCameraEnabled ? 'Turn Off Camera' : 'Turn On Camera'}
             >
               {isCameraEnabled ? (
                 <Video className="w-5 h-5" />
@@ -594,11 +722,14 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
               onClick={toggleScreenShare}
               variant="ghost"
               size="icon"
-              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isScreenSharing
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-gray-700 hover:bg-gray-600 text-white'
+              disabled={isPaused}
+              className={`h-11 w-11 sm:h-12 sm:w-12 rounded-full active:scale-95 transition-transform ${isPaused
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                : isScreenSharing
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
-              title={isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
+              title={isPaused ? 'Stream Paused' : isScreenSharing ? 'Stop Screen Share' : 'Share Screen'}
             >
               {isScreenSharing ? (
                 <MonitorOff className="w-5 h-5" />

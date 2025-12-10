@@ -97,10 +97,11 @@ interface ViewerVideoViewProps {
     modelName?: string;
 }
 
-function LiveViewerStats({ streamTitle, modelName, startTime }: {
+function LiveViewerStats({ streamTitle, modelName, startTime, isPaused }: {
     streamTitle?: string;
     modelName?: string;
     startTime?: Date;
+    isPaused?: boolean;
 }) {
     const [viewDuration, setViewDuration] = useState(0);
 
@@ -126,9 +127,9 @@ function LiveViewerStats({ streamTitle, modelName, startTime }: {
     return (
         <div className="flex items-center justify-between w-full text-white">
             <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                    <span className="font-semibold text-red-500">LIVE</span>
+                <div className={`flex items-center space-x-2 ${isPaused ? 'text-yellow-500' : 'text-red-500'}`}>
+                    <div className={`w-3 h-3 rounded-full ${isPaused ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'}`} />
+                    <span className="font-semibold">{isPaused ? 'PAUSED' : 'LIVE'}</span>
                 </div>
                 {streamTitle && (
                     <span className="font-medium truncate max-w-xs">{streamTitle}</span>
@@ -169,6 +170,7 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
     const [balance, setBalance] = useState<number | null>(null);
     const [showLowBalanceWarning, setShowLowBalanceWarning] = useState(false);
     const [billingError, setBillingError] = useState<string | null>(null);
+    const [isPaused, setIsPaused] = useState(false);
 
     const toggleAudio = () => {
         setIsAudioMuted(!isAudioMuted);
@@ -214,10 +216,30 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
+    // Check if stream is paused
+    useEffect(() => {
+        const checkPauseState = async () => {
+            try {
+                const response = await fetch(`/api/streams/${streamId}/pause`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsPaused(data.paused);
+                }
+            } catch (error) {
+                console.error('Failed to check pause state:', error);
+            }
+        };
+
+        checkPauseState();
+        // Check every 3 seconds for pause state updates
+        const interval = setInterval(checkPauseState, 3000);
+        return () => clearInterval(interval);
+    }, [streamId]);
+
     // Billing mechanism - charge every 60 seconds
     useEffect(() => {
-        // Only bill if connected to stream
-        if (connectionState !== ConnectionState.Connected) {
+        // Only bill if connected to stream and stream is not paused
+        if (connectionState !== ConnectionState.Connected || isPaused) {
             return;
         }
 
@@ -276,7 +298,7 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
             clearTimeout(initialTimer);
             clearInterval(interval);
         };
-    }, [streamId, connectionState]);
+    }, [streamId, connectionState, isPaused]);
 
     // Fetch initial balance
     useEffect(() => {
@@ -348,6 +370,7 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                     streamTitle={streamTitle}
                     modelName={modelName}
                     startTime={new Date()}
+                    isPaused={isPaused}
                 />
             </div>
 
@@ -444,9 +467,30 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                 </div>
             )}
 
+            {/* Stream Paused Overlay */}
+            {isPaused && (
+                <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-25 flex items-center justify-center">
+                    <div className="text-center text-white px-4">
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-600 animate-pulse">
+                            <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500" />
+                        </div>
+                        <h3 className="text-2xl sm:text-3xl font-bold mb-3">Stream Paused</h3>
+                        <p className="text-gray-300 text-sm sm:text-lg mb-4 max-w-md mx-auto">
+                            {modelName || 'The broadcaster'} has temporarily paused the stream.
+                        </p>
+                        <p className="text-yellow-500 text-sm sm:text-base font-semibold mb-6">
+                            Please wait, the stream will resume shortly...
+                        </p>
+                        <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
+                            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                            <span>You'll continue watching when the stream resumes</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Main Video Display */}
-            <div className="w-full h-full relative flex items-center justify-center">
-                {displayTrack && displayTrack.publication?.isSubscribed ? (
+            <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication?.isSubscribed ? (
                     <>
                         <VideoTrack
                             trackRef={displayTrack}
