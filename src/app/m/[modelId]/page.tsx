@@ -87,7 +87,7 @@ export default function ModelProfilePage() {
       if (response.ok) {
         const data = await response.json();
         const modelWithDates = {
-          ...data.creator,
+          ...data.model,
           createdAt: new Date(data.model.createdAt),
           streams: (data.model.streams || []).map((stream: any) => ({
             ...stream,
@@ -150,13 +150,13 @@ export default function ModelProfilePage() {
 
   const handlePreviousImage = () => {
     if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex - 1 + model.profileImages.length) % model.profileImages.length);
+      setSelectedImageIndex((selectedImageIndex - 1 + creator.profileImages.length) % creator.profileImages.length);
     }
   };
 
   const handleNextImage = () => {
     if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex + 1) % model.profileImages.length);
+      setSelectedImageIndex((selectedImageIndex + 1) % creator.profileImages.length);
     }
   };
 
@@ -225,9 +225,9 @@ export default function ModelProfilePage() {
           {/* Simulated Cover Image */}
           <div className="h-[300px] w-full relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950" />
-            {model.avatarUrl ? (
+            {creator.avatarUrl ? (
               <Image
-                src={model.avatarUrl}
+                src={creator.avatarUrl}
                 alt="Cover"
                 fill
                 className="object-cover opacity-40 blur-xl scale-110"
@@ -244,10 +244,10 @@ export default function ModelProfilePage() {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-pink-500 to-violet-600 rounded-full opacity-75 blur group-hover:opacity-100 transition duration-1000"></div>
                 <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full border-4 border-gray-950 overflow-hidden bg-gray-800 shadow-2xl">
-                  {model.avatarUrl ? (
+                  {creator.avatarUrl ? (
                     <Image
-                      src={model.avatarUrl}
-                      alt={model.displayName}
+                      src={creator.avatarUrl}
+                      alt={creator.displayName}
                       fill
                       className="object-cover"
                     />
@@ -257,7 +257,7 @@ export default function ModelProfilePage() {
                     </div>
                   )}
                 </div>
-                {model.status === "LIVE" && (
+                {creator.status === "LIVE" && (
                   <div className="absolute bottom-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-4 border-gray-950 shadow-lg animate-pulse">
                     LIVE
                   </div>
@@ -268,16 +268,16 @@ export default function ModelProfilePage() {
               <div className="flex-1 pb-2 w-full md:w-auto text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
                   <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight drop-shadow-lg">
-                    {model.displayName}
+                    {creator.displayName}
                   </h1>
-                  {model.displayedAge && (
+                  {creator.displayedAge && (
                     <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-gray-600 text-gray-300 bg-gray-800/50">
-                      {model.displayedAge}
+                      {creator.displayedAge}
                     </Badge>
                   )}
-                  {model.category && (
+                  {creator.category && (
                     <Badge className="w-fit mx-auto md:mx-0 bg-purple-600 text-white border-0">
-                      {model.category}
+                      {creator.category}
                     </Badge>
                   )}
                 </div>
@@ -285,23 +285,23 @@ export default function ModelProfilePage() {
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 text-sm mb-6">
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
-                      {model.followersCount.toLocaleString()}
+                      {creator.followersCount.toLocaleString()}
                     </span>{" "}
                     Followers
                   </div>
                   <div className="w-1 h-1 bg-gray-600 rounded-full" />
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
-                      {model.streamsCount}
+                      {creator.streamsCount}
                     </span>{" "}
                     Streams
                   </div>
-                  {model.displayedCity && (
+                  {creator.displayedCity && (
                     <>
                       <div className="w-1 h-1 bg-gray-600 rounded-full" />
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        {model.displayedCity}
+                        {creator.displayedCity}
                       </div>
                     </>
                   )}
@@ -312,8 +312,8 @@ export default function ModelProfilePage() {
                   <Button
                     onClick={handleFollowToggle}
                     className={`min-w-[140px] transition-all duration-300 ${isFollowing
-                        ? "bg-gray-700 hover:bg-gray-600 text-white"
-                        : "bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                      ? "bg-gray-700 hover:bg-gray-600 text-white"
+                      : "bg-purple-600 hover:bg-purple-700 text-white font-semibold"
                       }`}
                   >
                     <Heart
@@ -352,15 +352,15 @@ export default function ModelProfilePage() {
                     About Me
                   </h3>
                   <p className="text-gray-400 leading-relaxed text-sm">
-                    {model.bio || "No bio available."}
+                    {creator.bio || "No bio available."}
                   </p>
                 </div>
 
-                {model.spokenLanguages.length > 0 && (
+                {creator.spokenLanguages.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Languages</h4>
                     <div className="flex flex-wrap gap-2">
-                      {model.spokenLanguages.map((lang) => (
+                      {creator.spokenLanguages.map((lang) => (
                         <div key={lang} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-600/20 border border-purple-500/30 text-xs text-purple-300">
                           <Globe className="w-3 h-3" />
                           {lang}
@@ -372,24 +372,24 @@ export default function ModelProfilePage() {
 
                 {/* Stats / Bento Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                  <AttributeBox label="Ethnicity" value={model.ethnicity} />
-                  <AttributeBox label="Hair" value={model.hairColor} />
-                  <AttributeBox label="Body" value={model.physique} />
+                  <AttributeBox label="Ethnicity" value={creator.ethnicity} />
+                  <AttributeBox label="Hair" value={creator.hairColor} />
+                  <AttributeBox label="Body" value={creator.physique} />
                   <AttributeBox label="Eye Color" value="--" />
-                  <AttributeBox label="Tattoos" value={model.tattoos} />
+                  <AttributeBox label="Tattoos" value={creator.tattoos} />
                   <AttributeBox label="Joined" value={new Date(creator.createdAt).getFullYear().toString()} icon={<Calendar className="w-3 h-3" />} />
                 </div>
               </div>
 
               {/* My Shows */}
-              {model.myShows.length > 0 && (
+              {creator.myShows.length > 0 && (
                 <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700 rounded-3xl p-6">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-4">
                     <Activity className="w-4 h-4 text-pink-500" />
                     My Shows
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {model.myShows.map((show) => (
+                    {creator.myShows.map((show) => (
                       <Badge
                         key={show}
                         variant="outline"
@@ -407,16 +407,16 @@ export default function ModelProfilePage() {
             <div className="lg:col-span-8 space-y-8">
 
               {/* Profile Description (Long) */}
-              {model.profileDescription && (
+              {creator.profileDescription && (
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
                   <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
-                    {model.profileDescription}
+                    {creator.profileDescription}
                   </p>
                 </div>
               )}
 
               {/* Media Gallery */}
-              {(creator.profileImages.length > 0 || model.profileVideos.length > 0) && (
+              {(creator.profileImages.length > 0 || creator.profileVideos.length > 0) && (
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
                   <h2 className="text-2xl font-bold flex items-center gap-3 mb-6">
                     <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
@@ -426,11 +426,11 @@ export default function ModelProfilePage() {
                   </h2>
 
                   {/* Images Section */}
-                  {model.profileImages.length > 0 && (
+                  {creator.profileImages.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold text-white mb-4">Photos</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {model.profileImages.map((imageUrl, index) => (
+                        {creator.profileImages.map((imageUrl, index) => (
                           <div
                             key={index}
                             className="relative group aspect-square overflow-hidden rounded-xl bg-gray-900 cursor-pointer"
@@ -438,7 +438,7 @@ export default function ModelProfilePage() {
                           >
                             <Image
                               src={imageUrl}
-                              alt={`${model.displayName} photo ${index + 1}`}
+                              alt={`${creator.displayName} photo ${index + 1}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                             />
@@ -455,11 +455,11 @@ export default function ModelProfilePage() {
                   )}
 
                   {/* Videos Section */}
-                  {model.profileVideos.length > 0 && (
+                  {creator.profileVideos.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-4">Videos</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {model.profileVideos.map((videoUrl, index) => (
+                        {creator.profileVideos.map((videoUrl, index) => (
                           <div
                             key={index}
                             className="relative group rounded-xl overflow-hidden bg-gray-900"
@@ -490,9 +490,9 @@ export default function ModelProfilePage() {
                   {/* Optional View All button could go here */}
                 </div>
 
-                {model.streams.length > 0 ? (
+                {creator.streams.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {model.streams.map((stream) => (
+                    {creator.streams.map((stream) => (
                       <div key={stream.id} className="group relative">
                         {/* Custom wrapper for StreamCard to add hover effects */}
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-600 rounded-xl opacity-0 group-hover:opacity-30 transition duration-300 blur-sm"></div>
@@ -501,9 +501,9 @@ export default function ModelProfilePage() {
                             stream={{
                               ...stream,
                               model: {
-                                id: model.id,
-                                name: model.displayName,
-                                image: model.avatarUrl,
+                                id: creator.id,
+                                name: creator.displayName,
+                                image: creator.avatarUrl,
                               },
                             }}
                             onJoinStream={handleJoinStream}
@@ -543,11 +543,11 @@ export default function ModelProfilePage() {
 
           {/* Image Counter */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-800/80 px-4 py-2 rounded-full text-white text-sm z-10">
-            {selectedImageIndex + 1} / {model.profileImages.length}
+            {selectedImageIndex + 1} / {creator.profileImages.length}
           </div>
 
           {/* Previous Button */}
-          {model.profileImages.length > 1 && (
+          {creator.profileImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -560,7 +560,7 @@ export default function ModelProfilePage() {
           )}
 
           {/* Next Button */}
-          {model.profileImages.length > 1 && (
+          {creator.profileImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -579,8 +579,8 @@ export default function ModelProfilePage() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={model.profileImages[selectedImageIndex]}
-              alt={`${model.displayName} photo ${selectedImageIndex + 1}`}
+              src={creator.profileImages[selectedImageIndex]}
+              alt={`${creator.displayName} photo ${selectedImageIndex + 1}`}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>
