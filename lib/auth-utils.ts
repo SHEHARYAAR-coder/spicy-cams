@@ -10,6 +10,7 @@ export interface SessionUser {
   name?: string;
   role?: string;
   emailVerified?: boolean;
+  image?: string | null;
 }
 
 /**

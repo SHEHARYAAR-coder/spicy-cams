@@ -69,14 +69,14 @@ export function Header() {
 
   return (
     <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
-      <div className="mx-auto px-6 lg:px-8">
+      <div className="mx-auto px-6 py-2 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
               <img 
                 src="/logo/logo.png" 
                 alt="SpicyCams Logo" 
-                className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                className="h-22 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
               />
             </Link>
           </div>
@@ -179,69 +179,54 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-3">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium"
-                    >
-                      Sign In
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[200px]">
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/v/login"
-                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
-                      >
-                        <User className="w-4 h-4 mr-3 text-purple-400" />
-                        <span className="font-medium">Sign In as Viewer</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/m/login"
-                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
-                      >
-                        <Video className="w-4 h-4 mr-3 text-purple-400" />
-                        <span className="font-medium">Sign In as Model</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Sign In Buttons */}
+                <Link href="/v/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium border border-gray-700/50 hover:border-gray-600"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Sign In as Viewer</span>
+                    <span className="sm:hidden">Viewer Sign In</span>
+                  </Button>
+                </Link>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 transition-all duration-300 font-medium"
-                    >
-                      Sign Up
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[200px]">
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/v/register"
-                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
-                      >
-                        <User className="w-4 h-4 mr-3 text-purple-400" />
-                        <span className="font-medium">Sign Up as Viewer</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href="/m/register"
-                        className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
-                      >
-                        <Video className="w-4 h-4 mr-3 text-purple-400" />
-                        <span className="font-medium">Sign Up as Model</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Link href="/m/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium border border-gray-700/50 hover:border-gray-600"
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Sign In as Model</span>
+                    <span className="sm:hidden">Model Sign In</span>
+                  </Button>
+                </Link>
+
+                {/* Sign Up Buttons */}
+                <Link href="/v/register">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 transition-all duration-300 font-medium"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Sign Up as Viewer</span>
+                    <span className="sm:hidden">Viewer Sign Up</span>
+                  </Button>
+                </Link>
+
+                <Link href="/m/register">
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white shadow-lg shadow-pink-500/30 transition-all duration-300 font-medium"
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Sign Up as Model</span>
+                    <span className="sm:hidden">Model Sign Up</span>
+                  </Button>
+                </Link>
               </div>
             )}
           </div>

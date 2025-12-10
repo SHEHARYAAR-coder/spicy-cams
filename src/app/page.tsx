@@ -222,85 +222,129 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <div className="flex min-h-screen">
         {/* Sidebar (offset below sticky header) - Hidden on mobile */}
-        <div className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-700/50 p-4 overflow-y-auto scrollbar-hide z-40 shadow-xl">
-          {/* Main Categories */}
-          <div className="mb-6">
-            {visibleCategories.map((category) => {
-              const IconComponent = category.icon;
+        <div className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-40 shadow-2xl">
+          <div className="p-5 space-y-6">
+            {/* Main Categories Section */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-3">
+                Main Menu
+              </h3>
+              {visibleCategories.map((category) => {
+                const IconComponent = category.icon;
+                const isActive = selectedCategory === category.name;
 
-              return (
-                <button
-                  key={category.name}
-                  onClick={() => handleCategoryClick(category.name)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg mb-2 transition-all neon-hover ${selectedCategory === category.name
-                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30"
-                    : "text-gray-300 hover:bg-gray-800/80"
+                return (
+                  <button
+                    key={category.name}
+                    onClick={() => handleCategoryClick(category.name)}
+                    className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
+                      isActive
+                        ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.02]"
+                        : "text-gray-300 hover:bg-gray-800/60 hover:text-white hover:translate-x-1"
                     }`}
-                >
-                  <IconComponent
-                    className={`w-5 h-5 ${selectedCategory === category.name
-                      ? "neon-purple-icon"
-                      : "neon-target-icon"
-                      }`}
-                  />
-                  <span
-                    className={`font-medium ${selectedCategory === category.name
-                      ? "neon-purple-text"
-                      : "neon-target-text"
-                      }`}
                   >
-                    {category.name}
-                  </span>
-                  {category.name === "All Girls Cams" && (
-                    <div className="w-2 h-2 bg-purple-400 rounded-full ml-auto" />
-                  )}
-                  {category.name === "Private Messages" && (
-                    <div className="w-2 h-2 bg-green-400 rounded-full ml-auto animate-pulse" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Category Pages */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
-              Categories
-            </h3>
-            <div className="space-y-1">
-              {categoryCounts.map((filter) => (
-                <button
-                  key={filter.name}
-                  onClick={() => setSelectedCategory(filter.name)}
-                  className={`w-full flex items-center justify-between p-2 rounded text-sm transition-all neon-hover ${selectedCategory === filter.name
-                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                    : "text-gray-300 hover:bg-gray-800/80"
-                    }`}
-                >
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={`${selectedCategory === filter.name
-                        ? "neon-purple-text"
-                        : "neon-target-text"
-                        }`}
-                    >
-                      {filter.name}
-                    </span>
-                    {filter.hot && (
-                      <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5 neon-red-badge">
-                        hot
-                      </Badge>
+                    {/* Background Glow Effect */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent blur-xl" />
                     )}
-                  </span>
-                  <span className="text-gray-400 text-xs">{filter.count}</span>
-                </button>
-              ))}
+                    
+                    <IconComponent
+                      className={`w-5 h-5 relative z-10 transition-transform duration-200 ${
+                        isActive ? "scale-110" : "group-hover:scale-110"
+                      }`}
+                    />
+                    <span className={`font-semibold text-sm relative z-10 flex-1 text-left`}>
+                      {category.name}
+                    </span>
+                    
+                    {/* Status Indicators */}
+                    {category.name === "All Girls Cams" && (
+                      <div className="relative z-10 flex items-center gap-1">
+                        <span className="text-xs font-medium text-purple-200">LIVE</span>
+                        <div className="w-2 h-2 bg-purple-300 rounded-full shadow-lg shadow-purple-400/50" />
+                      </div>
+                    )}
+                    {category.name === "Private Messages" && (
+                      <div className="relative z-10 flex items-center gap-1">
+                        <span className="text-xs font-medium text-green-200">NEW</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-800" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-gray-900 px-3 text-xs text-gray-600">Categories</span>
+              </div>
+            </div>
+
+            {/* Category Pages Section */}
+            <div className="space-y-1.5">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-3">
+                Browse by Category
+              </h3>
+              <div className="space-y-1">
+                {categoryCounts.map((filter) => {
+                  const isActive = selectedCategory === filter.name;
+                  
+                  return (
+                    <button
+                      key={filter.name}
+                      onClick={() => setSelectedCategory(filter.name)}
+                      className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                        isActive
+                          ? "bg-purple-600/90 text-white shadow-md shadow-purple-500/20"
+                          : "text-gray-400 hover:bg-gray-800/50 hover:text-gray-200"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {/* Category Dot Indicator */}
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            isActive ? "bg-white shadow-sm" : "bg-gray-600 group-hover:bg-gray-400"
+                          }`}
+                        />
+                        <span className={`font-medium ${isActive ? "font-semibold" : ""}`}>
+                          {filter.name}
+                        </span>
+                        {filter.hot && (
+                          <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] px-1.5 py-0 border-0 shadow-sm">
+                            HOT
+                          </Badge>
+                        )}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-xs font-medium tabular-nums ${
+                            isActive ? "text-purple-100" : "text-gray-500 group-hover:text-gray-400"
+                          }`}
+                        >
+                          {filter.count}
+                        </span>
+                        {isActive && (
+                          <div className="w-1 h-1 bg-purple-200 rounded-full animate-pulse" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Spacer */}
+            <div className="h-4" />
           </div>
         </div>
 
         {/* Main Content - Full width on mobile, offset on desktop */}
-        <div className="flex-1 flex flex-col lg:ml-64">
+        <div className="flex-1 flex flex-col lg:ml-72">
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
