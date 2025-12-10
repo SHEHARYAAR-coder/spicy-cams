@@ -300,8 +300,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       // Log successful sign-ins for audit purposes
       console.log(
-        `User ${user.email} signed in successfully with ${
-          account?.provider || "credentials"
+        `User ${user.email} signed in successfully with ${account?.provider || "credentials"
         }`
       );
     },

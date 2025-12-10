@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { User, Edit2, Crown } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
+import CoverUpload from "@/components/ui/cover-upload";
 import Link from "next/link";
 import {
   Dialog,
@@ -25,6 +26,7 @@ export default function ProfileContent() {
   const [userData, setUserData] = React.useState<any>(null);
   const [loading, setLoading] = React.useState(true);
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
+  const [isEditingCover, setIsEditingCover] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [roleLoading, setRoleLoading] = useState(false);
   const [roleError, setRoleError] = useState<string | null>(null);
@@ -92,6 +94,23 @@ export default function ProfileContent() {
     [userData]
   );
 
+  // Handle cover change
+  const handleCoverChange = useCallback(
+    (newCoverUrl: string | null) => {
+      if (userData) {
+        setUserData({
+          ...userData,
+          profile: {
+            ...userData.profile,
+            coverUrl: newCoverUrl,
+          },
+        });
+      }
+      setIsEditingCover(false);
+    },
+    [userData]
+  );
+
   const handleRoleChange = useCallback(async () => {
     if (!userData) return;
 
@@ -137,49 +156,92 @@ export default function ProfileContent() {
     if (!userData) return null;
 
     return (
-      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
-        <div className="flex items-center gap-6">
-          <div className="relative">
-            {isEditingAvatar ? (
-              <AvatarUpload
-                currentAvatarUrl={userData.profile?.avatarUrl}
-                displayName={userData.profile?.displayName}
-                email={userData.email}
-                size="xl"
-                onAvatarChange={handleAvatarChange}
-                className="items-center"
+      <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm overflow-hidden mb-6">
+        {/* Cover Photo Section */}
+        <div className="relative">
+          {isEditingCover ? (
+            <div className="p-4">
+              <CoverUpload
+                currentCoverUrl={userData.profile?.coverUrl}
+                onCoverChange={handleCoverChange}
               />
-            ) : (
-              <div className="relative group">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-3xl font-semibold overflow-hidden">
-                  {userData.profile?.avatarUrl ? (
-                    <img
-                      src={userData.profile.avatarUrl}
-                      alt="Profile"
-                      className="w-24 h-24 rounded-full object-cover"
-                    />
-                  ) : (
-                    `${userData.profile?.displayName?.[0] ||
-                    userData.email?.[0] ||
-                    "U"
-                    }`
-                  )}
-                </div>
-                <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white"></div>
-
-                {/* Edit avatar button */}
-                <button
-                  onClick={() => setIsEditingAvatar(true)}
-                  className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Change avatar"
-                >
-                  <Edit2 className="w-6 h-6 text-white" />
-                </button>
+            </div>
+          ) : (
+            <div className="relative group">
+              {/* Cover Photo */}
+              <div className="w-full h-48 md:h-64 bg-gradient-to-br from-purple-900/50 to-purple-700/50 overflow-hidden">
+                {userData.profile?.coverUrl ? (
+                  <img
+                    src={userData.profile.coverUrl}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-gray-400 text-sm">No cover photo</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {!isEditingAvatar && (
+              {/* Edit Cover Button Overlay */}
+              <button
+                onClick={() => setIsEditingCover(true)}
+                className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 opacity-0 group-hover:opacity-100"
+                title="Change cover photo"
+              >
+                <Edit2 className="w-4 h-4" />
+                Edit Cover
+              </button>
+            </div>
+          )}
+
+          {/* Profile Picture - Positioned to overlap cover */}
+          <div className="absolute -bottom-12 left-8">
+            <div className="relative">
+              {isEditingAvatar ? (
+                <AvatarUpload
+                  currentAvatarUrl={userData.profile?.avatarUrl}
+                  displayName={userData.profile?.displayName}
+                  email={userData.email}
+                  size="xl"
+                  onAvatarChange={handleAvatarChange}
+                  className="items-center"
+                />
+              ) : (
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white text-3xl font-semibold overflow-hidden border-4 border-gray-800">
+                    {userData.profile?.avatarUrl ? (
+                      <img
+                        src={userData.profile.avatarUrl}
+                        alt="Profile"
+                        className="w-24 h-24 rounded-full object-cover"
+                      />
+                    ) : (
+                      `${userData.profile?.displayName?.[0] ||
+                      userData.email?.[0] ||
+                      "U"
+                      }`
+                    )}
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-gray-800"></div>
+
+                  {/* Edit avatar button */}
+                  <button
+                    onClick={() => setIsEditingAvatar(true)}
+                    className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Change avatar"
+                  >
+                    <Edit2 className="w-6 h-6 text-white" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Info Section */}
+        <div className="pt-16 px-8 pb-8">
+          {!isEditingAvatar && !isEditingCover && (
             <div className="flex-1">
               <div className="flex justify-between items-center gap-3">
                 <div className="flex justify-center items-center gap-3">
@@ -207,52 +269,6 @@ export default function ProfileContent() {
                       </button>
                     </Link>
                   )}
-                  {/* {userData.role === "VIEWER" && (
-                    <Dialog
-                      open={roleDialogOpen}
-                      onOpenChange={(open) => {
-                        setRoleError(null);
-                        setRoleDialogOpen(open);
-                      }}
-                    >
-                      <DialogTrigger asChild>
-                        <button className="px-4 py-2 border border-purple-600 text-purple-300 hover:bg-purple-600/10 rounded-lg transition-colors font-semibold">
-                          Change Role
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-gray-900 border border-purple-700">
-                        <DialogHeader>
-                          <DialogTitle className="text-white">
-                            Become a Model
-                          </DialogTitle>
-                        </DialogHeader>
-                        <p className="text-sm text-gray-300">
-                          Switching to a model role unlocks broadcast and
-                          monetization tools. Confirm to upgrade your account.
-                        </p>
-                        {roleError && (
-                          <p className="text-sm text-red-400">{roleError}</p>
-                        )}
-                        <DialogFooter className="mt-6">
-                          <DialogClose asChild>
-                            <Button
-                              variant="outline"
-                              className="border-gray-700 text-gray-300 hover:bg-gray-800"
-                            >
-                              Cancel
-                            </Button>
-                          </DialogClose>
-                          <Button
-                            onClick={handleRoleChange}
-                            disabled={roleLoading}
-                            className="bg-purple-600 hover:bg-purple-700 text-white"
-                          >
-                            {roleLoading ? "Updating..." : "Switch to Model"}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  )} */}
                 </div>
               </div>
               {userData.profile?.bio && (
@@ -262,11 +278,6 @@ export default function ProfileContent() {
                   </p>
                 </div>
               )}
-              {/* {userData.profile?.isModel && (
-                <span className="inline-block bg-purple-100/10 text-purple-300 text-xs px-2 py-1 rounded-full mt-1">
-                  Content Model
-                </span>
-              )} */}
               <p className="text-gray-400 text-sm">
                 Status:{" "}
                 <span className="capitalize">
@@ -275,24 +286,29 @@ export default function ProfileContent() {
               </p>
             </div>
           )}
-        </div>
 
-        {isEditingAvatar && (
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={() => setIsEditingAvatar(false)}
-              className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
+          {(isEditingAvatar || isEditingCover) && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => {
+                  setIsEditingAvatar(false);
+                  setIsEditingCover(false);
+                }}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }, [
     userData,
     isEditingAvatar,
+    isEditingCover,
     handleAvatarChange,
+    handleCoverChange,
     session,
     roleDialogOpen,
     roleLoading,

@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Hash password
     const passwordHash = await hashPassword(password)
-    
+
     // Generate verification token
     const verificationToken = generateVerificationToken()
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now

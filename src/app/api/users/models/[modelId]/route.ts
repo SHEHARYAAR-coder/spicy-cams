@@ -23,6 +23,7 @@ export async function GET(
             isModel: true,
             displayName: true,
             avatarUrl: true,
+            coverUrl: true,
             bio: true,
             category: true,
             language: true,
@@ -106,6 +107,7 @@ export async function GET(
         displayName:
           model.profile?.displayName || model.email.split("@")[0],
         avatarUrl: model.profile?.avatarUrl,
+        coverUrl: model.profile?.coverUrl,
         bio: model.profile?.bio,
         category: model.profile?.category,
         language: model.profile?.language,

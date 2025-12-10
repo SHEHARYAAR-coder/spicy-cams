@@ -172,9 +172,10 @@ model Profile {
   myShows            String[] @default([]) @map("my_shows") // Category selections
   profileDescription String?  @map("profile_description") @db.Text // 350 character limit
 
-    // Media Gallery
-  profileImages     String[]  @default([]) @map("profile_images") // Array of image URLs
-  profileVideos     String[]  @default([]) @map("profile_videos") // Array of video URLs
+  // Media Gallery
+  profileImages String[] @default([]) @map("profile_images") // Array of image URLs
+  profileVideos String[] @default([]) @map("profile_videos") // Array of video URLs
+  coverUrl      String?  @map("cover_url") // Cover photo URL
 
   // Verification Documents (for MODEL role)
   idFrontUrl         String? @map("id_front_url") // ID front photo URL
@@ -198,9 +199,9 @@ model Profile {
 // ============================================
 
 model Stream {
-  id        String   @id @default(cuid())
-  modelId   String   @map("model_id")
-  title     String
+  id           String   @id @default(cuid())
+  modelId      String   @map("model_id")
+  title        String
   description  String?  @db.Text
   category     String?
   tags         String[] @default([])
@@ -544,14 +545,14 @@ model StreamAnalytics {
 // ============================================
 
 model WithdrawalRequest {
-  id        String           @id @default(cuid())
-  userId    String           @map("user_id")
-  amount    Decimal          @db.Decimal(10, 2)
-  currency  String           @default("USD")
-  status    WithdrawalStatus @default(PENDING)
+  id       String           @id @default(cuid())
+  userId   String           @map("user_id")
+  amount   Decimal          @db.Decimal(10, 2)
+  currency String           @default("USD")
+  status   WithdrawalStatus @default(PENDING)
 
   // Stripe payout details
-  stripePayoutId String? @unique @map("stripe_payout_id")
+  stripePayoutId  String? @unique @map("stripe_payout_id")
   stripeAccountId String? @map("stripe_account_id")
 
   // Admin review

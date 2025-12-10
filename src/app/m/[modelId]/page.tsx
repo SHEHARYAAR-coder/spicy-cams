@@ -45,6 +45,7 @@ interface Model {
   status: string;
   displayName: string;
   avatarUrl?: string;
+  coverUrl?: string;
   bio?: string;
   category?: string;
   language?: string;
@@ -222,10 +223,19 @@ export default function ModelProfilePage() {
 
         {/* Hero / Cover Section */}
         <div className="relative">
-          {/* Simulated Cover Image */}
+          {/* Cover Image */}
           <div className="h-[300px] w-full relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-950/50 to-gray-950" />
-            {creator.avatarUrl ? (
+            {/* Stronger gradient overlay for better text visibility */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-gray-950/70 to-gray-950 z-10" />
+            {creator.coverUrl ? (
+              <Image
+                src={creator.coverUrl}
+                alt={`${creator.displayName} cover`}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : creator.avatarUrl ? (
               <Image
                 src={creator.avatarUrl}
                 alt="Cover"
@@ -238,7 +248,7 @@ export default function ModelProfilePage() {
           </div>
 
           {/* Profile Header Content */}
-          <div className="container mx-auto px-4 -mt-32 relative">
+          <div className="container mx-auto px-4 -mt-32 relative z-20">
             <div className="flex flex-col md:flex-row items-end md:items-end gap-6 md:gap-8">
               {/* Avatar */}
               <div className="relative group">
@@ -267,29 +277,39 @@ export default function ModelProfilePage() {
               {/* Name & Quick Actions */}
               <div className="flex-1 pb-2 w-full md:w-auto text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2">
-                  <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight drop-shadow-lg">
+                  <h1
+                    className="text-4xl md:text-5xl font-bold text-white tracking-tight"
+                    style={{
+                      textShadow: '0 2px 10px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6), 0 4px 6px rgba(0,0,0,0.9)'
+                    }}
+                  >
                     {creator.displayName}
                   </h1>
                   {creator.displayedAge && (
-                    <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-gray-600 text-gray-300 bg-gray-800/50">
+                    <Badge variant="outline" className="w-fit mx-auto md:mx-0 border-gray-500 text-white bg-gray-900/80 backdrop-blur-sm shadow-lg">
                       {creator.displayedAge}
                     </Badge>
                   )}
                   {creator.category && (
-                    <Badge className="w-fit mx-auto md:mx-0 bg-purple-600 text-white border-0">
+                    <Badge className="w-fit mx-auto md:mx-0 bg-purple-600 text-white border-0 shadow-lg">
                       {creator.category}
                     </Badge>
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-400 text-sm mb-6">
+                <div
+                  className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-gray-200 text-sm mb-6 px-4 py-2 rounded-lg bg-black/30 backdrop-blur-sm w-fit mx-auto md:mx-0"
+                  style={{
+                    textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+                  }}
+                >
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
                       {creator.followersCount.toLocaleString()}
                     </span>{" "}
                     Followers
                   </div>
-                  <div className="w-1 h-1 bg-gray-600 rounded-full" />
+                  <div className="w-1 h-1 bg-gray-400 rounded-full" />
                   <div className="flex items-center gap-1">
                     <span className="text-white font-bold">
                       {creator.streamsCount}
@@ -298,7 +318,7 @@ export default function ModelProfilePage() {
                   </div>
                   {creator.displayedCity && (
                     <>
-                      <div className="w-1 h-1 bg-gray-600 rounded-full" />
+                      <div className="w-1 h-1 bg-gray-400 rounded-full" />
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {creator.displayedCity}
@@ -311,7 +331,7 @@ export default function ModelProfilePage() {
                 <div className="flex items-center justify-center md:justify-start gap-3">
                   <Button
                     onClick={handleFollowToggle}
-                    className={`min-w-[140px] transition-all duration-300 ${isFollowing
+                    className={`min-w-[140px] transition-all duration-300 shadow-lg ${isFollowing
                       ? "bg-gray-700 hover:bg-gray-600 text-white"
                       : "bg-purple-600 hover:bg-purple-700 text-white font-semibold"
                       }`}
@@ -324,12 +344,12 @@ export default function ModelProfilePage() {
                   </Button>
                   <Button
                     onClick={handleMessage}
-                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                    className="bg-pink-600 hover:bg-pink-700 text-white shadow-lg"
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Message
                   </Button>
-                  <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+                  <Button variant="ghost" size="icon" className="text-gray-200 hover:text-white bg-black/30 hover:bg-black/50 backdrop-blur-sm shadow-lg">
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
