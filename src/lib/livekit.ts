@@ -1,4 +1,4 @@
-import { RoomServiceClient, AccessToken, Room } from "livekit-server-sdk";
+import { RoomServiceClient, AccessToken } from "livekit-server-sdk";
 
 export function validateLiveKitConfig() {
   const config = {
@@ -36,7 +36,7 @@ export function getRoomNameFromStreamId(streamId: string): string {
 
 export async function createRoom(
   roomName: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, string | number | boolean>
 ) {
   const client = getRoomClient();
 

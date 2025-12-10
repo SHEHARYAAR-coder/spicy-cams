@@ -132,7 +132,7 @@ export function usePrivateChat({
       if (isInitialLoadRef.current && (!cached || cached.length === 0)) {
         setLoading(true);
       }
-      
+
       setError(null);
 
       try {
@@ -148,30 +148,25 @@ export function usePrivateChat({
         if (response.ok) {
           const data = await response.json();
           const newMessages = data.messages || [];
-          
+
           // Check if there's a request status in the response
           if (data.requestStatus) {
             setRequestStatus(data.requestStatus);
           }
-          
-          // Filter out duplicates
-          const filteredMessages = newMessages.filter(
-            (msg: PrivateMessage) => !messageSeenRef.current.has(msg.id)
-          );
-          
+
           // Add to seen set
-          newMessages.forEach((msg: PrivateMessage) => 
+          newMessages.forEach((msg: PrivateMessage) =>
             messageSeenRef.current.add(msg.id)
           );
 
           setMessages(newMessages);
-          
+
           // Cache the messages
           setCachedPrivateMessages(streamId, partnerId, newMessages);
 
           // Refresh conversations to update unread counts (silently)
           fetchConversations();
-          
+
           isInitialLoadRef.current = false;
         } else {
           const data = await response.json();
@@ -232,16 +227,16 @@ export function usePrivateChat({
 
         if (response.ok) {
           const data = await response.json();
-          
+
           // Replace optimistic message with real one
           if (targetReceiverId === receiverId) {
             setMessages((prev) => {
               const filtered = prev.filter((msg) => msg.id !== tempId);
               const updated = [...filtered, data.message];
-              
+
               // Cache updated messages
               setCachedPrivateMessages(streamId, targetReceiverId, updated);
-              
+
               return updated;
             });
           } else {
@@ -258,23 +253,23 @@ export function usePrivateChat({
         } else {
           const data = await response.json();
           setError(data.error || "Failed to send message");
-          
+
           // Remove optimistic message on failure
           if (targetReceiverId === receiverId) {
             setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
           }
-          
+
           return false;
         }
       } catch (error) {
         setError("Failed to send message");
         console.error("Error sending message:", error);
-        
+
         // Remove optimistic message on error
         if (targetReceiverId === receiverId) {
           setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
         }
-        
+
         return false;
       } finally {
         setSending(false);
@@ -333,7 +328,7 @@ export function usePrivateChat({
         );
 
         if (response.ok) {
-          const data = await response.json();
+          await response.json();
           setRequestStatus("PENDING");
           return true;
         } else {
@@ -372,19 +367,19 @@ export function usePrivateChat({
 
         if (response.ok) {
           const data = await response.json();
-          
+
           // Remove the accepted request from the list immediately
           setChatRequests(prev => prev.filter(req => req.id !== requestId));
-          
+
           // Update request status if this is the current conversation
           if (data.request?.senderId === receiverId) {
             setRequestStatus("ACCEPTED");
           }
-          
+
           // Force refresh conversations to get the new conversation
           await fetchConversations(false);
           await fetchChatRequests();
-          
+
           return true;
         } else {
           const data = await response.json();
@@ -474,6 +469,7 @@ export function usePrivateChat({
     }
 
     return () => stopPolling();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, token, startPolling, stopPolling, fetchConversations, fetchChatRequests]);
 
   // Effect to fetch messages when receiverId changes

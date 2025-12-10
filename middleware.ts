@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "./lib/auth";
 import { UserRole } from "@prisma/client";
-import { prisma } from "./lib/prisma";
+import { prisma } from "./src/lib/prisma";
 
 // Route configurations
 const PROTECTED_ROUTES: Record<string, UserRole[]> = {

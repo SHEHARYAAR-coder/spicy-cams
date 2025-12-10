@@ -40,6 +40,24 @@ interface Stream {
   participantCount?: number;
 }
 
+// API response has 'avatar' instead of 'image'
+interface StreamApiResponse {
+  id: string;
+  title: string;
+  description: string;
+  status: "LIVE" | "SCHEDULED" | "ENDED";
+  category?: string;
+  tags?: string[];
+  thumbnailUrl?: string;
+  createdAt: string;
+  model: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  participantCount?: number;
+}
+
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -150,12 +168,13 @@ export default function Home() {
       const response = await fetch("/api/streams/list");
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: Stream) => ({
+        const streamsWithDates = (data.streams || []).map((stream: StreamApiResponse) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           model: {
-            ...stream.creator,
-            image: stream.model.image, // Map avatar to image for consistency
+            id: stream.model.id,
+            name: stream.model.name,
+            image: stream.model.avatar, // Map avatar to image for consistency
           },
         }));
         setStreams(streamsWithDates);
@@ -237,26 +256,24 @@ export default function Home() {
                   <button
                     key={category.name}
                     onClick={() => handleCategoryClick(category.name)}
-                    className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${
-                      isActive
-                        ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.02]"
-                        : "text-gray-300 hover:bg-gray-800/60 hover:text-white hover:translate-x-1"
-                    }`}
+                    className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${isActive
+                      ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.02]"
+                      : "text-gray-300 hover:bg-gray-800/60 hover:text-white hover:translate-x-1"
+                      }`}
                   >
                     {/* Background Glow Effect */}
                     {isActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent blur-xl" />
                     )}
-                    
+
                     <IconComponent
-                      className={`w-5 h-5 relative z-10 transition-transform duration-200 ${
-                        isActive ? "scale-110" : "group-hover:scale-110"
-                      }`}
+                      className={`w-5 h-5 relative z-10 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"
+                        }`}
                     />
                     <span className={`font-semibold text-sm relative z-10 flex-1 text-left`}>
                       {category.name}
                     </span>
-                    
+
                     {/* Status Indicators */}
                     {category.name === "All Girls Cams" && (
                       <div className="relative z-10 flex items-center gap-1">
@@ -293,23 +310,21 @@ export default function Home() {
               <div className="space-y-1">
                 {categoryCounts.map((filter) => {
                   const isActive = selectedCategory === filter.name;
-                  
+
                   return (
                     <button
                       key={filter.name}
                       onClick={() => setSelectedCategory(filter.name)}
-                      className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
-                        isActive
-                          ? "bg-purple-600/90 text-white shadow-md shadow-purple-500/20"
-                          : "text-gray-400 hover:bg-gray-800/50 hover:text-gray-200"
-                      }`}
+                      className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${isActive
+                        ? "bg-purple-600/90 text-white shadow-md shadow-purple-500/20"
+                        : "text-gray-400 hover:bg-gray-800/50 hover:text-gray-200"
+                        }`}
                     >
                       <span className="flex items-center gap-2">
                         {/* Category Dot Indicator */}
                         <div
-                          className={`w-1.5 h-1.5 rounded-full transition-all ${
-                            isActive ? "bg-white shadow-sm" : "bg-gray-600 group-hover:bg-gray-400"
-                          }`}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${isActive ? "bg-white shadow-sm" : "bg-gray-600 group-hover:bg-gray-400"
+                            }`}
                         />
                         <span className={`font-medium ${isActive ? "font-semibold" : ""}`}>
                           {filter.name}
@@ -322,9 +337,8 @@ export default function Home() {
                       </span>
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-xs font-medium tabular-nums ${
-                            isActive ? "text-purple-100" : "text-gray-500 group-hover:text-gray-400"
-                          }`}
+                          className={`text-xs font-medium tabular-nums ${isActive ? "text-purple-100" : "text-gray-500 group-hover:text-gray-400"
+                            }`}
                         >
                           {filter.count}
                         </span>
