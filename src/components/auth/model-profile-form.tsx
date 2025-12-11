@@ -20,7 +20,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, X, Loader2, Upload, Camera, CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react";
+import { Crown, X, Loader2, Upload, Camera, CheckCircle2, ArrowLeft, ArrowRight, Image as ImageIcon, Video } from "lucide-react";
 
 // Constants for dropdown options
 const HAIR_COLORS = [
@@ -113,6 +113,8 @@ export default function ModelProfileForm({
     const idFrontInputRef = useRef<HTMLInputElement>(null);
     const idBackInputRef = useRef<HTMLInputElement>(null);
     const facePhotoInputRef = useRef<HTMLInputElement>(null);
+    const imageUploadRef = useRef<HTMLInputElement>(null);
+    const videoUploadRef = useRef<HTMLInputElement>(null);
 
     // Step 1: Profile form state
     const [hairColor, setHairColor] = useState("");
@@ -136,6 +138,12 @@ export default function ModelProfileForm({
     const [idBackPreview, setIdBackPreview] = useState<string | null>(null);
     const [facePhoto, setFacePhoto] = useState<File | null>(null);
     const [facePhotoPreview, setFacePhotoPreview] = useState<string | null>(null);
+
+    // Step 3: Media gallery state
+    const [profileImages, setProfileImages] = useState<string[]>([]);
+    const [profileVideos, setProfileVideos] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<string>("");
 
     const handleToggleLanguage = (lang: string) => {
         setSpokenLanguages((prev) =>
@@ -185,12 +193,86 @@ export default function ModelProfileForm({
             }
 
             setCurrentStep(2);
+        } else if (currentStep === 2) {
+            // Validate verification documents
+            if (!idFrontImage || !idBackImage || !facePhoto) {
+                setError("Please upload all required verification documents");
+                return;
+            }
+            setCurrentStep(3);
         }
     };
 
     const handlePrevStep = () => {
         setError(null);
-        setCurrentStep(1);
+        if (currentStep > 1) {
+            setCurrentStep(currentStep - 1);
+        }
+    };
+
+    // Handle media file upload
+    const handleMediaUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        type: "image" | "video"
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        setUploadProgress(`Uploading ${type}...`);
+
+        try {
+            const uploadedUrls: string[] = [];
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("type", type);
+
+                const response = await fetch("/api/profile/upload-media", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to upload ${file.name}`);
+                }
+
+                const data = await response.json();
+                uploadedUrls.push(data.url);
+                setUploadProgress(
+                    `Uploaded ${i + 1} of ${files.length} ${type}(s)...`
+                );
+            }
+
+            // Update the arrays
+            if (type === "image") {
+                setProfileImages([...profileImages, ...uploadedUrls]);
+            } else {
+                setProfileVideos([...profileVideos, ...uploadedUrls]);
+            }
+
+            setUploadProgress("Upload complete!");
+            setTimeout(() => setUploadProgress(""), 2000);
+        } catch (error) {
+            console.error("Upload error:", error);
+            setError(`Failed to upload ${type}. Please try again.`);
+        } finally {
+            setUploading(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleRemoveMedia = (url: string, type: "image" | "video") => {
+        if (type === "image") {
+            setProfileImages(profileImages.filter((img) => img !== url));
+        } else {
+            setProfileVideos(profileVideos.filter((vid) => vid !== url));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -198,7 +280,7 @@ export default function ModelProfileForm({
         setLoading(true);
         setError(null);
 
-        // Validate verification documents on step 2
+        // Validate verification documents
         if (!idFrontImage || !idBackImage || !facePhoto) {
             setError("Please upload all required verification documents");
             setLoading(false);
@@ -212,7 +294,6 @@ export default function ModelProfileForm({
             formData.append("idBack", idBackImage);
             formData.append("facePhoto", facePhoto);
 
-            // Note: You'll need to create this API endpoint
             const uploadResponse = await fetch("/api/verification/upload", {
                 method: "POST",
                 body: formData,
@@ -224,7 +305,7 @@ export default function ModelProfileForm({
 
             const { idFrontUrl, idBackUrl, facePhotoUrl } = await uploadResponse.json();
 
-            // Submit profile data with verification URLs
+            // Submit profile data with verification URLs and media
             const response = await fetch("/api/profile", {
                 method: "PUT",
                 headers: {
@@ -251,6 +332,9 @@ export default function ModelProfileForm({
                     facePhotoUrl,
                     verificationStatus: "pending",
                     profileCompleted: true, // Mark profile as completed
+                    // Media gallery
+                    profileImages,
+                    profileVideos,
                     // Upgrade to model
                     targetRole: "MODEL",
                     isModel: true,
@@ -290,9 +374,11 @@ export default function ModelProfileForm({
                         <CardDescription className="text-gray-400">
                             {currentStep === 1
                                 ? (isOnboarding
-                                    ? "Step 1 of 2: Tell us about yourself"
+                                    ? "Step 1 of 3: Tell us about yourself"
                                     : "Fill out your model profile to unlock premium features")
-                                : "Step 2 of 2: Verify your identity"
+                                : currentStep === 2
+                                    ? "Step 2 of 3: Verify your identity"
+                                    : "Step 3 of 3: Upload profile media"
                             }
                         </CardDescription>
 
@@ -304,12 +390,21 @@ export default function ModelProfileForm({
                                 }`}>
                                 {currentStep === 1 ? '1' : <CheckCircle2 className="w-6 h-6" />}
                             </div>
-                            <div className={`w-16 h-1 ${currentStep === 2 ? 'bg-purple-500' : 'bg-gray-600'}`} />
+                            <div className={`w-16 h-1 ${currentStep >= 2 ? 'bg-purple-500' : 'bg-gray-600'}`} />
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${currentStep === 2
+                                ? 'border-purple-500 bg-purple-500 text-white'
+                                : currentStep > 2
+                                    ? 'border-green-500 bg-green-500 text-white'
+                                    : 'border-gray-600 bg-gray-700 text-gray-400'
+                                }`}>
+                                {currentStep === 2 ? '2' : currentStep > 2 ? <CheckCircle2 className="w-6 h-6" /> : '2'}
+                            </div>
+                            <div className={`w-16 h-1 ${currentStep === 3 ? 'bg-purple-500' : 'bg-gray-600'}`} />
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 ${currentStep === 3
                                 ? 'border-purple-500 bg-purple-500 text-white'
                                 : 'border-gray-600 bg-gray-700 text-gray-400'
                                 }`}>
-                                2
+                                3
                             </div>
                         </div>
                     </CardHeader>
@@ -598,7 +693,7 @@ export default function ModelProfileForm({
                                         <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
                                 </>
-                            ) : (
+                            ) : currentStep === 2 ? (
                                 // Step 2: Verification Documents
                                 <>
                                     <div className="space-y-6">
@@ -744,8 +839,167 @@ export default function ModelProfileForm({
                                             Back
                                         </Button>
                                         <Button
+                                            type="button"
+                                            onClick={handleNextStep}
+                                            disabled={!idFrontImage || !idBackImage || !facePhoto}
+                                            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg disabled:opacity-50"
+                                        >
+                                            Continue to Media Upload
+                                            <ArrowRight className="ml-2 w-5 h-5" />
+                                        </Button>
+                                    </div>
+                                </>
+                            ) : (
+                                // Step 3: Media Gallery Upload
+                                <>
+                                    <div className="space-y-6">
+                                        <div className="text-center mb-6">
+                                            <h3 className="text-xl font-semibold text-white mb-2">Profile Media Gallery</h3>
+                                            <p className="text-gray-400 text-sm">
+                                                Upload images and videos to showcase on your public profile (Optional)
+                                            </p>
+                                        </div>
+
+                                        {/* Upload Section */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Image Upload */}
+                                            <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-purple-500/50 transition-colors">
+                                                <input
+                                                    ref={imageUploadRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={(e) => handleMediaUpload(e, "image")}
+                                                    className="hidden"
+                                                    disabled={uploading}
+                                                />
+                                                <div
+                                                    onClick={() => imageUploadRef.current?.click()}
+                                                    className="cursor-pointer flex flex-col items-center gap-2"
+                                                >
+                                                    <ImageIcon className="w-12 h-12 text-gray-400" />
+                                                    <p className="text-sm text-gray-400">
+                                                        Click to upload images
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Video Upload */}
+                                            <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center hover:border-purple-500/50 transition-colors">
+                                                <input
+                                                    ref={videoUploadRef}
+                                                    type="file"
+                                                    accept="video/*"
+                                                    multiple
+                                                    onChange={(e) => handleMediaUpload(e, "video")}
+                                                    className="hidden"
+                                                    disabled={uploading}
+                                                />
+                                                <div
+                                                    onClick={() => videoUploadRef.current?.click()}
+                                                    className="cursor-pointer flex flex-col items-center gap-2"
+                                                >
+                                                    <Video className="w-12 h-12 text-gray-400" />
+                                                    <p className="text-sm text-gray-400">
+                                                        Click to upload videos
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">MP4, WebM up to 50MB</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Upload Progress */}
+                                        {uploadProgress && (
+                                            <div className="text-center text-sm text-purple-400">
+                                                {uploadProgress}
+                                            </div>
+                                        )}
+
+                                        {/* Images Gallery */}
+                                        {profileImages.length > 0 && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-white mb-3">
+                                                    Images ({profileImages.length})
+                                                </h4>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    {profileImages.map((url, index) => (
+                                                        <div key={index} className="relative group">
+                                                            <img
+                                                                src={url}
+                                                                alt={`Gallery image ${index + 1}`}
+                                                                className="w-full h-40 object-cover rounded-lg"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveMedia(url, "image")}
+                                                                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove image"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Videos Gallery */}
+                                        {profileVideos.length > 0 && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold text-white mb-3">
+                                                    Videos ({profileVideos.length})
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {profileVideos.map((url, index) => (
+                                                        <div key={index} className="relative group">
+                                                            <video
+                                                                src={url}
+                                                                className="w-full h-60 object-cover rounded-lg"
+                                                                controls
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveMedia(url, "video")}
+                                                                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                title="Remove video"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {profileImages.length === 0 && profileVideos.length === 0 && !uploading && (
+                                            <div className="text-center py-8 text-gray-500">
+                                                No media uploaded yet. Upload images and videos to showcase on your profile.
+                                            </div>
+                                        )}
+
+                                        <div className="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4 mt-4">
+                                            <p className="text-blue-300 text-sm">
+                                                <strong>Note:</strong> You can skip this step and add media later from your profile page.
+                                                These images and videos will be visible on your public profile.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Navigation Buttons */}
+                                    <div className="flex gap-4">
+                                        <Button
+                                            type="button"
+                                            onClick={handlePrevStep}
+                                            variant="outline"
+                                            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600 py-6 text-lg"
+                                        >
+                                            <ArrowLeft className="mr-2 w-5 h-5" />
+                                            Back
+                                        </Button>
+                                        <Button
                                             type="submit"
-                                            disabled={loading || success || !idFrontImage || !idBackImage || !facePhoto}
+                                            disabled={loading || success}
                                             className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg disabled:opacity-50"
                                         >
                                             {loading ? (
