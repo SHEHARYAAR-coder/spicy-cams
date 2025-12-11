@@ -62,9 +62,9 @@ export default function ForgotPasswordForm() {
                 <div className="absolute inset-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="/forget_password.jpeg"
+                        src="/auth/forget.PNG"
                         alt="Forgot Password Background"
-                        className="w-full h-full object-cover opacity-20"
+                        className="w-full h-full object-cover opacity-60"
                     />
                 </div>
 

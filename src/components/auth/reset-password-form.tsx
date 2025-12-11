@@ -78,9 +78,9 @@ export default function ResetPasswordForm() {
                 <div className="absolute inset-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="/reset_password.jpeg"
+                        src="/auth/reset.PNG"
                         alt="Reset Password Background"
-                        className="w-full h-full object-cover opacity-20"
+                        className="w-full h-full object-cover opacity-60"
                     />
                 </div>
 
