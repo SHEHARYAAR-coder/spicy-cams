@@ -151,9 +151,9 @@ export default function LoginForm({ userType }: LoginFormProps) {
                 <div className="absolute inset-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="/login.jpeg"
+                        src="/auth/login.PNG"
                         alt="Login Background"
-                        className="w-full h-full object-cover opacity-20"
+                        className="w-full h-full object-cover opacity-60"
                     />
                 </div>
 

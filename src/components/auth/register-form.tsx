@@ -210,9 +210,9 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
                 <div className="absolute inset-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                        src="/signup.jpeg"
+                        src="/auth/signup.PNG"
                         alt="Signup Background"
-                        className="w-full h-full object-cover opacity-20"
+                        className="w-full h-full object-cover opacity-60"
                     />
                 </div>
 
