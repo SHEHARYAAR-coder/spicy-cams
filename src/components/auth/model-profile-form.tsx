@@ -215,11 +215,10 @@ export default function ModelProfileForm({
         e: React.ChangeEvent<HTMLInputElement>,
         type: "image" | "video"
     ) => {
-        e.preventDefault();
-        e.stopPropagation();
-
         const files = e.target.files;
         if (!files || files.length === 0) return;
+
+        console.log(`Starting upload of ${files.length} ${type}(s)`);
 
         setUploading(true);
         setUploadProgress(`Uploading ${type}...`);
@@ -229,6 +228,8 @@ export default function ModelProfileForm({
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                console.log(`Uploading ${type}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
                 const formData = new FormData();
                 formData.append("file", file);
                 formData.append("type", type);
@@ -239,10 +240,13 @@ export default function ModelProfileForm({
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to upload ${file.name}`);
+                    const errorText = await response.text();
+                    console.error(`Upload failed for ${file.name}:`, errorText);
+                    throw new Error(`Failed to upload ${file.name}: ${errorText}`);
                 }
 
                 const data = await response.json();
+                console.log(`Upload successful: ${data.url}`);
                 uploadedUrls.push(data.url);
                 setUploadProgress(
                     `Uploaded ${i + 1} of ${files.length} ${type}(s)...`
@@ -251,9 +255,13 @@ export default function ModelProfileForm({
 
             // Update the arrays
             if (type === "image") {
-                setProfileImages([...profileImages, ...uploadedUrls]);
+                const newImages = [...profileImages, ...uploadedUrls];
+                console.log("Updated profile images:", newImages);
+                setProfileImages(newImages);
             } else {
-                setProfileVideos([...profileVideos, ...uploadedUrls]);
+                const newVideos = [...profileVideos, ...uploadedUrls];
+                console.log("Updated profile videos:", newVideos);
+                setProfileVideos(newVideos);
             }
 
             setUploadProgress("Upload complete!");
@@ -275,8 +283,8 @@ export default function ModelProfileForm({
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement> | React.FormEvent) => {
+        if (e) e.preventDefault();
         setLoading(true);
         setError(null);
 
@@ -424,7 +432,7 @@ export default function ModelProfileForm({
                             </Alert>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                             {currentStep === 1 ? (
                                 // Step 1: Profile Information
                                 <>
@@ -874,7 +882,11 @@ export default function ModelProfileForm({
                                                     disabled={uploading}
                                                 />
                                                 <div
-                                                    onClick={() => imageUploadRef.current?.click()}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        imageUploadRef.current?.click();
+                                                    }}
                                                     className="cursor-pointer flex flex-col items-center gap-2"
                                                 >
                                                     <ImageIcon className="w-12 h-12 text-gray-400" />
@@ -897,7 +909,11 @@ export default function ModelProfileForm({
                                                     disabled={uploading}
                                                 />
                                                 <div
-                                                    onClick={() => videoUploadRef.current?.click()}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        videoUploadRef.current?.click();
+                                                    }}
                                                     className="cursor-pointer flex flex-col items-center gap-2"
                                                 >
                                                     <Video className="w-12 h-12 text-gray-400" />
@@ -998,7 +1014,8 @@ export default function ModelProfileForm({
                                             Back
                                         </Button>
                                         <Button
-                                            type="submit"
+                                            type="button"
+                                            onClick={handleSubmit}
                                             disabled={loading || success}
                                             className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg disabled:opacity-50"
                                         >
