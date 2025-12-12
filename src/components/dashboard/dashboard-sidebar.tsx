@@ -83,7 +83,7 @@ export function DashboardSidebar({
       },
       {
         label: "Inbox",
-        href: "/v/inbox",
+        href: "/inbox",
         icon: Mail,
         roles: ["VIEWER"],
       },
@@ -116,7 +116,7 @@ export function DashboardSidebar({
       },
       {
         label: "Inbox",
-        href: "/m/inbox",
+        href: "/inbox",
         icon: Mail,
         roles: ["MODEL"],
       },
