@@ -81,6 +81,18 @@ export function DashboardSidebar({
         icon: Wallet,
         roles: ["VIEWER"],
       },
+      {
+        label: "Inbox",
+        href: "/v/inbox",
+        icon: Mail,
+        roles: ["VIEWER"],
+      },
+      {
+        label: "Support",
+        href: "/support",
+        icon: HelpCircle,
+        roles: ["VIEWER"],
+      },
     ];
 
     const creatorItems = [
@@ -110,7 +122,7 @@ export function DashboardSidebar({
       },
       {
         label: "Support",
-        href: "/m/support",
+        href: "/support",
         icon: HelpCircle,
         roles: ["MODEL"],
       },
@@ -316,7 +328,7 @@ export function DashboardSidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-700">
+      {/* <div className="p-4 border-t border-gray-700">
         <Link
           href="/profile"
           title={collapsed ? "Settings" : undefined}
@@ -329,7 +341,7 @@ export function DashboardSidebar({
           <Settings className="w-5 h-5" />
           {!collapsed && <span>Settings</span>}
         </Link>
-      </div>
+      </div> */}
     </>
   );
 
