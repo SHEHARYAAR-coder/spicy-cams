@@ -43,8 +43,10 @@ export function Header() {
     "/reset-password",
     "/verify",
     "/upgrade",
-    "/v/",
-    "/m/",
+    "/v/login",
+    "/v/register",
+    "/m/login",
+    "/m/register"
   ];
   const shouldHideHeader = hideHeaderPaths.some((path) =>
     pathname?.startsWith(path)

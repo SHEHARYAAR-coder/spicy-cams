@@ -21,6 +21,11 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  BarChart3,
+  CreditCard,
+  Mail,
+  HelpCircle,
 } from "lucide-react";
 import { UserRole } from "@prisma/client";
 import { useState } from "react";
@@ -80,15 +85,33 @@ export function DashboardSidebar({
 
     const creatorItems = [
       {
-        label: "My Streams",
-        href: "/model/streams",
-        icon: Activity,
+        label: "Content",
+        href: "/m/content",
+        icon: FileText,
         roles: ["MODEL"],
       },
       {
-        label: "Browse Streams",
-        href: "/streaming",
-        icon: Video,
+        label: "Statistics",
+        href: "/m/statistics",
+        icon: BarChart3,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Payment Info",
+        href: "/m/payment-info",
+        icon: CreditCard,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Inbox",
+        href: "/m/inbox",
+        icon: Mail,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Support",
+        href: "/m/support",
+        icon: HelpCircle,
         roles: ["MODEL"],
       },
     ];
