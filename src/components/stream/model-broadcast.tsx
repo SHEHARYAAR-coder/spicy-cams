@@ -65,6 +65,7 @@ interface ModelBroadcastProps {
   token: string;
   serverUrl: string;
   streamTitle: string;
+  selectedCameraId?: string;
   onStreamEnd?: () => void;
   className?: string;
 }
@@ -74,6 +75,7 @@ export function ModelBroadcast({
   token,
   serverUrl,
   streamTitle,
+  selectedCameraId,
   onStreamEnd,
   className = ""
 }: ModelBroadcastProps) {
@@ -91,6 +93,7 @@ export function ModelBroadcast({
         <CreatorVideoView
           streamId={streamId}
           streamTitle={streamTitle}
+          selectedCameraId={selectedCameraId}
           onStreamEnd={onStreamEnd}
         />
         <RoomAudioRenderer />
@@ -125,10 +128,11 @@ function LiveTimer({ startTime }: { startTime: Date }) {
 interface CreatorVideoViewProps {
   streamId: string;
   streamTitle: string;
+  selectedCameraId?: string;
   onStreamEnd?: () => void;
 }
 
-function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoViewProps) {
+function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd }: CreatorVideoViewProps) {
   const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare]);
   const participants = useParticipants();
   const connectionState = useConnectionState();
@@ -155,7 +159,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
   // Auto-enable camera and microphone when connected (only once on initial connection)
   const [hasAutoEnabled, setHasAutoEnabled] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
-  
+
   useEffect(() => {
     const enableDevices = async () => {
       if (connectionState === ConnectionState.Connected && localParticipant && !hasAutoEnabled && !isInitializing) {
@@ -166,9 +170,10 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
           // Small delay to ensure connection is stable
           await new Promise(resolve => setTimeout(resolve, 1000));
 
-          // Enable camera with high quality settings
+          // Enable camera with high quality settings and selected device
           console.log('📹 Enabling camera...');
-          await localParticipant.setCameraEnabled(true);
+          const cameraOptions = selectedCameraId ? { deviceId: selectedCameraId } : undefined;
+          await localParticipant.setCameraEnabled(true, cameraOptions);
           setIsCameraEnabled(true);
           console.log('✅ Camera enabled successfully');
 
@@ -188,13 +193,14 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         } catch (error) {
           console.error('❌ Failed to enable camera/microphone:', error);
           setIsInitializing(false);
-          
+
           // Try again after a short delay
           setTimeout(async () => {
             if (!hasAutoEnabled) {
               try {
                 console.log('🔄 Retrying device initialization...');
-                await localParticipant.setCameraEnabled(true);
+                const cameraOptions = selectedCameraId ? { deviceId: selectedCameraId } : undefined;
+                await localParticipant.setCameraEnabled(true, cameraOptions);
                 await localParticipant.setMicrophoneEnabled(true);
                 setIsCameraEnabled(true);
                 setIsMicEnabled(true);
@@ -247,19 +253,20 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
       console.log('🚀 Manually starting broadcast...');
       console.log('Connection state:', connectionState);
       console.log('Local participant:', localParticipant.identity);
-      
+
       // Enable camera first
       console.log('Enabling camera...');
-      await localParticipant.setCameraEnabled(true);
+      const cameraOptions = selectedCameraId ? { deviceId: selectedCameraId } : undefined;
+      await localParticipant.setCameraEnabled(true, cameraOptions);
       setIsCameraEnabled(true);
       console.log('✅ Camera enabled');
-      
+
       // Then enable microphone
       console.log('Enabling microphone...');
       await localParticipant.setMicrophoneEnabled(true);
       setIsMicEnabled(true);
       console.log('✅ Microphone enabled');
-      
+
       console.log('✅ Manual broadcast started successfully');
     } catch (error) {
       console.error('❌ Failed to start broadcast manually:', error);
@@ -271,7 +278,8 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
     if (!localParticipant) return;
     try {
       const newState = !isCameraEnabled;
-      await localParticipant.setCameraEnabled(newState);
+      const cameraOptions = selectedCameraId ? { deviceId: selectedCameraId } : undefined;
+      await localParticipant.setCameraEnabled(newState, cameraOptions);
       setIsCameraEnabled(newState);
     } catch (error) {
       console.error('Failed to toggle camera:', error);
@@ -302,11 +310,11 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
 
   const togglePause = async () => {
     if (isTogglingPause) return;
-    
+
     setIsTogglingPause(true);
     try {
       const newPausedState = !isPaused;
-      
+
       // Update pause state in database
       const response = await fetch(`/api/streams/${streamId}/pause`, {
         method: 'POST',
@@ -316,7 +324,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
 
       if (response.ok) {
         setIsPaused(newPausedState);
-        
+
         // If pausing, disable camera and mic but keep connection
         if (newPausedState) {
           if (isCameraEnabled) {
@@ -326,8 +334,9 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
             await localParticipant?.setMicrophoneEnabled(false);
           }
         } else {
-          // If resuming, re-enable camera and mic
-          await localParticipant?.setCameraEnabled(true);
+          // If resuming, re-enable camera and mic with selected device
+          const cameraOptions = selectedCameraId ? { deviceId: selectedCameraId } : undefined;
+          await localParticipant?.setCameraEnabled(true, cameraOptions);
           setIsCameraEnabled(true);
           await localParticipant?.setMicrophoneEnabled(true);
           setIsMicEnabled(true);
@@ -506,27 +515,62 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
         </div>
       </div>
 
-      {/* End Stream Confirmation Dialog */}
+      {/* End Stream Confirmation Dialog - Enhanced */}
       <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
-        <DialogContent className="bg-gray-900 border-gray-700 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-xl">End Live Stream?</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              Are you sure you want to end this stream? This action cannot be undone and all viewers will be disconnected.
-            </DialogDescription>
+        <DialogContent className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border-2 border-gray-700/50 text-white max-w-md shadow-2xl">
+          <DialogHeader className="space-y-4">
+            {/* Icon with gradient background */}
+            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center shadow-lg shadow-red-900/50 ring-4 ring-red-500/20">
+              <PhoneOff className="w-10 h-10 text-white" />
+            </div>
+
+            <div className="text-center space-y-2">
+              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                End Live Stream?
+              </DialogTitle>
+              <DialogDescription className="text-gray-400 text-base leading-relaxed px-2">
+                Are you sure you want to end this stream? This action cannot be undone and all viewers will be disconnected.
+              </DialogDescription>
+            </div>
+
+            {/* Stream Stats */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-1">
+                    <Eye className="w-4 h-4" />
+                    <span>Viewers</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{streamStats.viewers}</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-1">
+                    <Clock className="w-4 h-4" />
+                    <span>Status</span>
+                  </div>
+                  <div className="text-sm font-semibold">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-red-600/20 text-red-400 rounded-full border border-red-500/30">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      LIVE
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+
+          <DialogFooter className="gap-3 sm:gap-3 mt-2">
             <Button
               variant="outline"
               onClick={() => setShowEndDialog(false)}
-              className="border-gray-600 text-white hover:bg-gray-800"
+              className="flex-1 border-2 border-gray-600 text-white hover:bg-gray-800 hover:border-gray-500 transition-all duration-200 h-11 font-semibold"
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleEndStream}
-              className="bg-red-600 hover:bg-red-700"
+              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-900/30 transition-all duration-200 h-11 font-semibold"
             >
               <PhoneOff className="w-4 h-4 mr-2" />
               End Stream
@@ -569,7 +613,7 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
             </div>
           </div>
         )}
-        
+
         {tracks.length > 0 ? (
           <div className="h-full w-full relative">
             {tracks.map((track) => (
@@ -623,26 +667,26 @@ function CreatorVideoView({ streamId, streamTitle, onStreamEnd }: CreatorVideoVi
                     </div>
                   </div>
 
-              <Button
-                onClick={handleStartBroadcast}
-                size="lg"
-                className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-lg active:scale-95 transition-transform"
-                disabled={connectionState !== ConnectionState.Connected}
-              >
-                <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-                Start Broadcasting
-              </Button>
+                  <Button
+                    onClick={handleStartBroadcast}
+                    size="lg"
+                    className="bg-red-600 hover:bg-red-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-xl shadow-lg active:scale-95 transition-transform"
+                    disabled={connectionState !== ConnectionState.Connected}
+                  >
+                    <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                    Start Broadcasting
+                  </Button>
 
-              {connectionState !== ConnectionState.Connected && (
-                <p className="text-yellow-500 text-sm mt-4 animate-pulse">
-                  Waiting for connection...
-                </p>
-              )}
-              {connectionState === ConnectionState.Connected && (
-                <p className="text-green-500 text-sm mt-4">
-                  Ready to broadcast! Tap the button above.
-                </p>
-              )}
+                  {connectionState !== ConnectionState.Connected && (
+                    <p className="text-yellow-500 text-sm mt-4 animate-pulse">
+                      Waiting for connection...
+                    </p>
+                  )}
+                  {connectionState === ConnectionState.Connected && (
+                    <p className="text-green-500 text-sm mt-4">
+                      Ready to broadcast! Tap the button above.
+                    </p>
+                  )}
                 </>
               )}
             </div>

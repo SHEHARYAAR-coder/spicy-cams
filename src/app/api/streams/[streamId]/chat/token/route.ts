@@ -37,9 +37,10 @@ export async function POST(
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
     }
 
-    if (stream.status !== "LIVE") {
+    // Allow chat for LIVE and SCHEDULED streams, but not ENDED streams
+    if (stream.status === "ENDED") {
       return NextResponse.json(
-        { error: "Stream is not live" },
+        { error: "Stream has ended" },
         { status: 400 }
       );
     }
@@ -72,8 +73,8 @@ export async function POST(
     const chatRole = isModel
       ? "creator"
       : user?.role === "MODERATOR" || user?.role === "ADMIN"
-      ? "moderator"
-      : "viewer";
+        ? "moderator"
+        : "viewer";
 
     // Generate chat token (JWT)
     const token = jwt.sign(
