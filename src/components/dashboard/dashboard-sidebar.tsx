@@ -21,6 +21,11 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  BarChart3,
+  CreditCard,
+  Mail,
+  HelpCircle,
 } from "lucide-react";
 import { UserRole } from "@prisma/client";
 import { useState } from "react";
@@ -76,19 +81,49 @@ export function DashboardSidebar({
         icon: Wallet,
         roles: ["VIEWER"],
       },
+      {
+        label: "Inbox",
+        href: "/inbox",
+        icon: Mail,
+        roles: ["VIEWER"],
+      },
+      {
+        label: "Support",
+        href: "/support",
+        icon: HelpCircle,
+        roles: ["VIEWER"],
+      },
     ];
 
     const creatorItems = [
       {
-        label: "My Streams",
-        href: "/model/streams",
-        icon: Activity,
+        label: "Content",
+        href: "/m/content",
+        icon: FileText,
         roles: ["MODEL"],
       },
       {
-        label: "Browse Streams",
-        href: "/streaming",
-        icon: Video,
+        label: "Statistics",
+        href: "/m/statistics",
+        icon: BarChart3,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Payment Info",
+        href: "/m/payment-info",
+        icon: CreditCard,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Inbox",
+        href: "/inbox",
+        icon: Mail,
+        roles: ["MODEL"],
+      },
+      {
+        label: "Support",
+        href: "/support",
+        icon: HelpCircle,
         roles: ["MODEL"],
       },
     ];
@@ -293,7 +328,7 @@ export function DashboardSidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-700">
+      {/* <div className="p-4 border-t border-gray-700">
         <Link
           href="/profile"
           title={collapsed ? "Settings" : undefined}
@@ -306,7 +341,7 @@ export function DashboardSidebar({
           <Settings className="w-5 h-5" />
           {!collapsed && <span>Settings</span>}
         </Link>
-      </div>
+      </div> */}
     </>
   );
 
