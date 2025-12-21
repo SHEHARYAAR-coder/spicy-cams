@@ -85,7 +85,7 @@ export default function Home() {
   const categories = [
     { name: "All Girls Cams", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
-    { name: "All Models", icon: Star, count: 0 },
+    // { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
   ];
 
@@ -369,135 +369,135 @@ export default function Home() {
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
-              <div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">
-                <div className="flex flex-wrap items-center gap-2 md:gap-4">
-                  {/* Regions Filter */}
-                  <div className="flex items-center gap-2 text-sm md:text-base">
-                    <MapPin className="w-4 h-4 text-purple-400" />
-                    <select
-                      value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
-                    >
-                      {regions.map((region) => (
-                        <option key={region} value={region}>
-                          {region}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/*<div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">*/}
+              {/*  <div className="flex flex-wrap items-center gap-2 md:gap-4">*/}
+              {/*    /!* Regions Filter *!/*/}
+              {/*    <div className="flex items-center gap-2 text-sm md:text-base">*/}
+              {/*      <MapPin className="w-4 h-4 text-purple-400" />*/}
+              {/*      <select*/}
+              {/*        value={selectedRegion}*/}
+              {/*        onChange={(e) => setSelectedRegion(e.target.value)}*/}
+              {/*        className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"*/}
+              {/*      >*/}
+              {/*        {regions.map((region) => (*/}
+              {/*          <option key={region} value={region}>*/}
+              {/*            {region}*/}
+              {/*          </option>*/}
+              {/*        ))}*/}
+              {/*      </select>*/}
+              {/*    </div>*/}
 
-                  {/* Age Filter */}
-                  <div className="flex items-center gap-2 text-sm md:text-base">
-                    <Calendar className="w-4 h-4 text-purple-400" />
-                    <select
-                      value={selectedAge}
-                      onChange={(e) => setSelectedAge(e.target.value)}
-                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
-                    >
-                      {ages.map((age) => (
-                        <option key={age} value={age}>
-                          {age}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/*    /!* Age Filter *!/*/}
+              {/*    <div className="flex items-center gap-2 text-sm md:text-base">*/}
+              {/*      <Calendar className="w-4 h-4 text-purple-400" />*/}
+              {/*      <select*/}
+              {/*        value={selectedAge}*/}
+              {/*        onChange={(e) => setSelectedAge(e.target.value)}*/}
+              {/*        className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"*/}
+              {/*      >*/}
+              {/*        {ages.map((age) => (*/}
+              {/*          <option key={age} value={age}>*/}
+              {/*            {age}*/}
+              {/*          </option>*/}
+              {/*        ))}*/}
+              {/*      </select>*/}
+              {/*    </div>*/}
 
-                  {/* Ethnicity Filter */}
-                  <div className="flex items-center gap-2 text-sm md:text-base">
-                    <Users className="w-4 h-4 text-purple-400" />
-                    <select
-                      value={selectedEthnicity}
-                      onChange={(e) => setSelectedEthnicity(e.target.value)}
-                      className="bg-purple-600 border border-purple-500 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
-                    >
-                      {ethnicities.map((ethnicity) => (
-                        <option key={ethnicity} value={ethnicity}>
-                          {ethnicity}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/*    /!* Ethnicity Filter *!/*/}
+              {/*    <div className="flex items-center gap-2 text-sm md:text-base">*/}
+              {/*      <Users className="w-4 h-4 text-purple-400" />*/}
+              {/*      <select*/}
+              {/*        value={selectedEthnicity}*/}
+              {/*        onChange={(e) => setSelectedEthnicity(e.target.value)}*/}
+              {/*        className="bg-purple-600 border border-purple-500 rounded px-3 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400"*/}
+              {/*      >*/}
+              {/*        {ethnicities.map((ethnicity) => (*/}
+              {/*          <option key={ethnicity} value={ethnicity}>*/}
+              {/*            {ethnicity}*/}
+              {/*          </option>*/}
+              {/*        ))}*/}
+              {/*      </select>*/}
+              {/*    </div>*/}
 
-                  {/* Features Filter */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"
-                  >
-                    <Star className="w-4 h-4" />
-                    <span className="hidden lg:inline ml-1">Features</span>
-                  </Button>
+              {/*    /!* Features Filter *!/*/}
+              {/*    <Button*/}
+              {/*      variant="outline"*/}
+              {/*      size="sm"*/}
+              {/*      className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"*/}
+              {/*    >*/}
+              {/*      <Star className="w-4 h-4" />*/}
+              {/*      <span className="hidden lg:inline ml-1">Features</span>*/}
+              {/*    </Button>*/}
 
-                  {/* Fetishes Filter */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"
-                  >
-                    <Heart className="w-4 h-4" />
-                    <span className="hidden lg:inline ml-1">Fetishes</span>
-                  </Button>
+              {/*    /!* Fetishes Filter *!/*/}
+              {/*    <Button*/}
+              {/*      variant="outline"*/}
+              {/*      size="sm"*/}
+              {/*      className="border-gray-600 text-gray-900 hover:bg-gray-700 hover:text-purple-300 hidden md:flex"*/}
+              {/*    >*/}
+              {/*      <Heart className="w-4 h-4" />*/}
+              {/*      <span className="hidden lg:inline ml-1">Fetishes</span>*/}
+              {/*    </Button>*/}
 
-                  {/* Language Filter */}
-                  <div className="hidden md:flex items-center gap-2 text-sm md:text-base">
-                    <Languages className="w-4 h-4 text-purple-400" />
-                    <select
-                      value={selectedLanguage}
-                      onChange={(e) => setSelectedLanguage(e.target.value)}
-                      className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"
-                    >
-                      {languages.map((language) => (
-                        <option key={language} value={language}>
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/*    /!* Language Filter *!/*/}
+              {/*    <div className="hidden md:flex items-center gap-2 text-sm md:text-base">*/}
+              {/*      <Languages className="w-4 h-4 text-purple-400" />*/}
+              {/*      <select*/}
+              {/*        value={selectedLanguage}*/}
+              {/*        onChange={(e) => setSelectedLanguage(e.target.value)}*/}
+              {/*        className="bg-gray-800/80 border border-gray-600/50 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 hover:bg-gray-800"*/}
+              {/*      >*/}
+              {/*        {languages.map((language) => (*/}
+              {/*          <option key={language} value={language}>*/}
+              {/*            {language}*/}
+              {/*          </option>*/}
+              {/*        ))}*/}
+              {/*      </select>*/}
+              {/*    </div>*/}
 
-                  {/* Search Bar */}
-                  <div className="ml-auto flex items-center gap-2">
-                    <div className="relative flex items-center">
-                      {/* Expandable Search Container */}
-                      <div
-                        className={`relative flex items-center transition-all duration-500 ease-in-out rounded-full backdrop-blur-sm ${isSearchOpen
-                          ? "w-64 md:w-96 bg-gray-800/95 border-2 border-purple-500 shadow-lg shadow-purple-500/30"
-                          : "w-10 h-10 bg-gray-800/80 border border-gray-600 hover:border-gray-500"
-                          }`}
-                      >
-                        {/* Search Input */}
-                        <Input
-                          type="text"
-                          placeholder="Search models, categories..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className={`h-10 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-400 text-sm md:text-base transition-all duration-500 rounded-full ${isSearchOpen
-                            ? "pl-5 pr-14 opacity-100 visible"
-                            : "w-0 pl-0 pr-0 opacity-0 invisible"
-                            }`}
-                          autoFocus={isSearchOpen}
-                        />
+              {/*    /!* Search Bar *!/*/}
+              {/*    <div className="ml-auto flex items-center gap-2">*/}
+              {/*      <div className="relative flex items-center">*/}
+              {/*        /!* Expandable Search Container *!/*/}
+              {/*        <div*/}
+              {/*          className={`relative flex items-center transition-all duration-500 ease-in-out rounded-full backdrop-blur-sm ${isSearchOpen*/}
+              {/*            ? "w-64 md:w-96 bg-gray-800/95 border-2 border-purple-500 shadow-lg shadow-purple-500/30"*/}
+              {/*            : "w-10 h-10 bg-gray-800/80 border border-gray-600 hover:border-gray-500"*/}
+              {/*            }`}*/}
+              {/*        >*/}
+              {/*          /!* Search Input *!/*/}
+              {/*          <Input*/}
+              {/*            type="text"*/}
+              {/*            placeholder="Search models, categories..."*/}
+              {/*            value={searchQuery}*/}
+              {/*            onChange={(e) => setSearchQuery(e.target.value)}*/}
+              {/*            className={`h-10 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-white placeholder:text-gray-400 text-sm md:text-base transition-all duration-500 rounded-full ${isSearchOpen*/}
+              {/*              ? "pl-5 pr-14 opacity-100 visible"*/}
+              {/*              : "w-0 pl-0 pr-0 opacity-0 invisible"*/}
+              {/*              }`}*/}
+              {/*            autoFocus={isSearchOpen}*/}
+              {/*          />*/}
 
-                        {/* Search Icon Button */}
-                        <Button
-                          type="button"
-                          size="icon"
-                          onClick={() => setIsSearchOpen(!isSearchOpen)}
-                          className={`absolute right-1 rounded-full transition-all duration-300 z-10 shadow-none ${isSearchOpen
-                            ? "bg-transparent hover:bg-gray-700/50 border-0 h-8 w-8"
-                            : "bg-transparent h-8 w-8 border-0"
-                            }`}
-                        >
-                          <Search
-                            className={`transition-all duration-300 ${isSearchOpen ? "w-4 h-4 text-purple-400 rotate-90" : "w-5 h-5 text-gray-400"
-                              }`}
-                          />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/*          /!* Search Icon Button *!/*/}
+              {/*          <Button*/}
+              {/*            type="button"*/}
+              {/*            size="icon"*/}
+              {/*            onClick={() => setIsSearchOpen(!isSearchOpen)}*/}
+              {/*            className={`absolute right-1 rounded-full transition-all duration-300 z-10 shadow-none ${isSearchOpen*/}
+              {/*              ? "bg-transparent hover:bg-gray-700/50 border-0 h-8 w-8"*/}
+              {/*              : "bg-transparent h-8 w-8 border-0"*/}
+              {/*              }`}*/}
+              {/*          >*/}
+              {/*            <Search*/}
+              {/*              className={`transition-all duration-300 ${isSearchOpen ? "w-4 h-4 text-purple-400 rotate-90" : "w-5 h-5 text-gray-400"*/}
+              {/*                }`}*/}
+              {/*            />*/}
+              {/*          </Button>*/}
+              {/*        </div>*/}
+              {/*      </div>*/}
+              {/*    </div>*/}
+              {/*  </div>*/}
+              {/*</div>*/}
             </>
           )}
 
