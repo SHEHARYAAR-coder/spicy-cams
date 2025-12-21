@@ -126,7 +126,7 @@ export function Header() {
           {/* All models link */}
             <div className={'flex items-center justify-center'}>
               <Link
-                href={'/m/'}
+                href={'/all-models/'}
                 className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
               >
                 <Star className="w-4 h-4 text-yellow-400" />
@@ -173,24 +173,6 @@ export function Header() {
               </div>
             </nav>
           )}
-
-
-          {/* Centered Search Bar */}
-          <div className={`relative ${session?.user ? 'hidden' : 'block'}`}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-                type="text"
-                placeholder="Search streams..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && pathname !== '/') {
-                    router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-                  }
-                }}
-                className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
-            />
-          </div>
 
           <div className="flex items-center space-x-4">
             {/* Search Bar for Streams - Always visible */}
