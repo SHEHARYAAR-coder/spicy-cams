@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
@@ -61,10 +61,11 @@ interface StreamApiResponse {
 export default function Home() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [streams, setStreams] = useState<Stream[]>([]);
   const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState("All Girls Cams");
   const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedAge, setSelectedAge] = useState("");
@@ -192,6 +193,12 @@ export default function Home() {
     const interval = setInterval(fetchStreams, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Sync searchQuery with URL search params
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    setSearchQuery(urlSearch);
+  }, [searchParams]);
 
   // Filter streams based on current filters
   useEffect(() => {

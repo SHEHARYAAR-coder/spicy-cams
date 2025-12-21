@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,23 +19,38 @@ import {
   User,
   Hand,
   LayoutDashboard,
+  Search, Star,
 } from "lucide-react";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
 
 export function Header() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [viewerLoginOpen, setViewerLoginOpen] = useState(false);
   const [modelLoginOpen, setModelLoginOpen] = useState(false);
   const [viewerSignupOpen, setViewerSignupOpen] = useState(false);
   const [modelSignupOpen, setModelSignupOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
+    }
+    router.push(`/?${params.toString()}`);
   };
 
   // Get user data directly from session
@@ -86,6 +102,14 @@ export function Header() {
                 className="h-22 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
+
+          {/* All models link */}
+            <div className={'flex items-center justify-center'}>
+              <Star />
+              <Link href={'/m/'} className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 '}>
+                All Models
+              </Link>
+            </div>
           </div>
 
           {/* Center nav pill - Only show when logged in */}
@@ -122,7 +146,42 @@ export function Header() {
             </nav>
           )}
 
+
+          {/* Centered Search Bar */}
+          <div className={`relative ${session?.user ? 'hidden' : 'block'}`}>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+                type="text"
+                placeholder="Search streams..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && pathname !== '/') {
+                    router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+                  }
+                }}
+                className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
+            />
+          </div>
+
           <div className="flex items-center space-x-4">
+            {/* Search Bar for Streams - Always visible */}
+            <div className={`relative ${session?.user ? 'block' : 'hidden'}`}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search streams..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && pathname !== '/') {
+                    router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+                  }
+                }}
+                className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
+              />
+            </div>
+
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -187,6 +246,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2 flex-wrap">
+
                 {/* Sign In Buttons */}
                 <Button
                   onClick={() => setViewerLoginOpen(true)}
