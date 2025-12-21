@@ -22,7 +22,7 @@ import {
   Search, Star,
 } from "lucide-react";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
@@ -37,6 +37,26 @@ export function Header() {
   const [viewerSignupOpen, setViewerSignupOpen] = useState(false);
   const [modelSignupOpen, setModelSignupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
+  const [onlineModelsCount, setOnlineModelsCount] = useState<number>(0);
+
+  // Fetch online models count
+  useEffect(() => {
+    const fetchOnlineCount = async () => {
+      try {
+        const response = await fetch('/api/streams/online-count');
+        const data = await response.json();
+        setOnlineModelsCount(data.count || 0);
+      } catch (error) {
+        console.error('Failed to fetch online models count:', error);
+        setOnlineModelsCount(0);
+      }
+    };
+
+    fetchOnlineCount();
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchOnlineCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
@@ -105,9 +125,17 @@ export function Header() {
 
           {/* All models link */}
             <div className={'flex items-center justify-center'}>
-              <Star />
-              <Link href={'/m/'} className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 '}>
-                All Models
+              <Link
+                href={'/m/'}
+                className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
+              >
+                <Star className="w-4 h-4 text-yellow-400" />
+                <span>All Models</span>
+                {onlineModelsCount > 0 && (
+                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
+                    {onlineModelsCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
