@@ -114,7 +114,7 @@ export function Header() {
     <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
       <div className="mx-auto px-6 py-2 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-6">
             <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
               <img
                 src="/logo/logo.png"
@@ -123,7 +123,7 @@ export function Header() {
               />
             </Link>
 
-          {/* All models link */}
+            {(sessionUser?.role !== "MODEL") && (
             <div className={'flex items-center justify-center'}>
               <Link
                 href={'/all-models/'}
@@ -131,13 +131,20 @@ export function Header() {
               >
                 <Star className="w-4 h-4 text-yellow-400" />
                 <span>All Models</span>
-                {onlineModelsCount > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
-                    {onlineModelsCount}
-                  </span>
-                )}
               </Link>
             </div>
+            )}
+
+            {onlineModelsCount > 0 && (
+                <div className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
+                  <span className={'flex gap-2'}>
+                    Live Streams
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
+                      {onlineModelsCount}
+                    </span>
+                  </span>
+                </div>
+            )}
           </div>
 
           {/* Center nav pill - Only show when logged in */}
