@@ -8,18 +8,11 @@ import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { PrivateChatContainer } from "@/components/chat";
 import {
   Video,
-  Users,
   Play,
-  Star,
-  MapPin,
-  Calendar,
   Heart,
-  Languages,
-  Search,
   MessageCircle,
 } from "lucide-react";
 
@@ -67,12 +60,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState("All Girls Cams");
-  const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedAge, setSelectedAge] = useState("");
-  const [selectedEthnicity, setSelectedEthnicity] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("");
   const [viewMode, _setViewMode] = useState<"grid" | "list">("grid");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleCategoryClick = (categoryName: string) => {
     if (categoryName === "All Models") {
@@ -101,11 +89,7 @@ export default function Home() {
 
   // Filter categories based on user role
   const visibleCategories = categories.filter(category => {
-    // Hide "All Models" for models
-    if (category.name === "All Models" && isModel) {
-      return false;
-    }
-    return true;
+    return !(category.name === "All Models" && isModel);
   });
 
   const categoryFilters = [
@@ -133,35 +117,6 @@ export default function Home() {
     ).length;
     return { ...filter, count };
   });
-
-  const regions = [
-    "All Regions",
-    "North America",
-    "Europe",
-    "Asia",
-    "South America",
-    "Africa",
-    "Oceania",
-  ];
-  const ages = ["All Ages", "18-22", "23-30", "31-40", "40+"];
-  const ethnicities = [
-    "All Ethnicities",
-    "White",
-    "Asian",
-    "Latina",
-    "Black",
-    "Mixed",
-    "Other",
-  ];
-  const languages = [
-    "All Languages",
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Italian",
-    "Portuguese",
-  ];
 
   const fetchStreams = async () => {
     setLoading(true);
@@ -228,10 +183,6 @@ export default function Home() {
     streams,
     searchQuery,
     selectedCategory,
-    selectedRegion,
-    selectedAge,
-    selectedEthnicity,
-    selectedLanguage,
   ]);
 
   const handleJoinStream = (streamId: string) => {
@@ -243,6 +194,16 @@ export default function Home() {
       window.location.href = `/streaming?join=${streamId}`;
     }
   };
+
+  // Group streams by category
+  const groupedStreams = filteredStreams.reduce((acc, stream) => {
+    const category = stream.category || "Uncategorized";
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(stream);
+    return acc;
+  }, {} as Record<string, Stream[]>);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
@@ -527,20 +488,22 @@ export default function Home() {
                   </Card>
                 ))}
               </div>
-            ) : filteredStreams.length > 0 ? (
-              <div
-                className={`grid gap-3 md:gap-4 ${viewMode === "grid"
-                  ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-                  : "grid-cols-1"
-                  }`}
-              >
-                {filteredStreams.map((stream) => (
-                  <StreamCard
-                    key={stream.id}
-                    stream={stream}
-                    onJoinStream={handleJoinStream}
-                    className={viewMode === "list" ? "flex-row" : ""}
-                  />
+            ) : Object.keys(groupedStreams).length > 0 ? (
+              <div className="space-y-8">
+                {Object.entries(groupedStreams).map(([category, streams]) => (
+                  <div key={category}>
+                    <h2 className="text-xl font-bold mb-4">{category}</h2>
+                    <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-3 px-3 md:-mx-4 md:px-4">
+                      {streams.map((stream) => (
+                        <StreamCard
+                          key={stream.id}
+                          stream={stream}
+                          onJoinStream={handleJoinStream}
+                          className="flex-shrink-0 w-64"
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
