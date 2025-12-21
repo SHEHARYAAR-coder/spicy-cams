@@ -43,9 +43,10 @@ const years = Array.from({ length: 100 }, (_, i) => currentYear - i)
 
 interface RegisterFormProps {
     userType?: 'viewer' | 'model'
+    compact?: boolean
 }
 
-export default function RegisterForm({ userType: propUserType }: RegisterFormProps) {
+export default function RegisterForm({ userType: propUserType, compact = false }: RegisterFormProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [userType, setUserType] = useState<'viewer' | 'model'>(propUserType || 'viewer')
@@ -204,52 +205,56 @@ export default function RegisterForm({ userType: propUserType }: RegisterFormPro
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex">
-            {/* LEFT SIDE */}
-            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
-                <div className="absolute inset-0 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src="/auth/signup.PNG"
-                        alt="Signup Background"
-                        className="w-full h-full object-cover opacity-60"
-                    />
-                </div>
-
-                <div className="relative z-10 flex flex-col justify-between p-12 text-gray-100">
-                    <div className="flex items-center space-x-2">
-                        <Video className="w-8 h-8 text-purple-400" />
-                        <span className="text-2xl font-bold">SpicyCams</span>
+        <div className={compact ? "w-full" : "min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex"}>
+            {/* LEFT SIDE - Hidden in compact mode */}
+            {!compact && (
+                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-900/30 to-purple-700/10 relative overflow-hidden">
+                    <div className="absolute inset-0 overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src="/auth/signup.PNG"
+                            alt="Signup Background"
+                            className="w-full h-full object-cover opacity-60"
+                        />
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="space-y-4">
-                            <div className="w-20 h-1 bg-purple-500"></div>
-                            <blockquote className="text-3xl font-semibold leading-relaxed text-gray-100">
-                                “Join the SpicyCams model community and capture your next big moment.”
-                            </blockquote>
+                    <div className="relative z-10 flex flex-col justify-between p-12 text-gray-100">
+                        <div className="flex items-center space-x-2">
+                            <Video className="w-8 h-8 text-purple-400" />
+                            <span className="text-2xl font-bold">SpicyCams</span>
                         </div>
-                        <div>
-                            <p className="font-semibold">Jane Doe</p>
-                            <p className="text-purple-400 text-sm">
-                                Model at{" "}
-                                <a href="#" className="underline hover:text-purple-300">
-                                    SpicyCams Studio
-                                </a>
-                            </p>
+
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <div className="w-20 h-1 bg-purple-500"></div>
+                                <blockquote className="text-3xl font-semibold leading-relaxed text-gray-100">
+                                    “Join the SpicyCams model community and capture your next big moment.”
+                                </blockquote>
+                            </div>
+                            <div>
+                                <p className="font-semibold">Jane Doe</p>
+                                <p className="text-purple-400 text-sm">
+                                    Model at{" "}
+                                    <a href="#" className="underline hover:text-purple-300">
+                                        SpicyCams Studio
+                                    </a>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* RIGHT SIDE */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-                <div className="w-full max-w-lg p-8">
-                    {/* Mobile Logo */}
-                    <div className="lg:hidden flex items-center space-x-2 mb-8">
-                        <MessageSquare className="w-8 h-8 text-purple-400" />
-                        <span className="text-2xl font-bold text-gray-100">SpicyCams</span>
-                    </div>
+            <div className={compact ? "w-full" : "w-full lg:w-1/2 flex items-center justify-center p-8"}>
+                <div className={compact ? "w-full" : "w-full max-w-lg p-8"}>
+                    {/* Mobile Logo - Hidden in compact mode */}
+                    {!compact && (
+                        <div className="lg:hidden flex items-center space-x-2 mb-8">
+                            <MessageSquare className="w-8 h-8 text-purple-400" />
+                            <span className="text-2xl font-bold text-gray-100">SpicyCams</span>
+                        </div>
+                    )}
 
                     {/* Header */}
                     <div className="mb-8">
