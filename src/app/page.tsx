@@ -14,6 +14,7 @@ import {
   Play,
   Heart,
   MessageCircle,
+  HomeIcon,
 } from "lucide-react";
 
 interface Stream {
@@ -71,7 +72,7 @@ export default function Home() {
   };
 
   const categories = [
-    { name: "Home", icon: Heart, count: 0, active: true },
+    { name: "Home", icon: HomeIcon, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
     // { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
