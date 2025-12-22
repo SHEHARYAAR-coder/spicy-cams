@@ -59,7 +59,7 @@ export default function Home() {
   const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
-  const [selectedCategory, setSelectedCategory] = useState("All Girls Cams");
+  const [selectedCategory, setSelectedCategory] = useState("Home");
   const [viewMode, _setViewMode] = useState<"grid" | "list">("grid");
 
   const handleCategoryClick = (categoryName: string) => {
@@ -71,7 +71,7 @@ export default function Home() {
   };
 
   const categories = [
-    { name: "All Girls Cams", icon: Heart, count: 0, active: true },
+    { name: "Home", icon: Heart, count: 0, active: true },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
     // { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
@@ -242,13 +242,13 @@ export default function Home() {
                       {category.name}
                     </span>
 
-                    {/* Status Indicators */}
-                    {category.name === "All Girls Cams" && (
+{/*                    
+                    {category.name === "Home" && (
                       <div className="relative z-10 flex items-center gap-1">
                         <span className="text-xs font-medium text-purple-200">LIVE</span>
                         <div className="w-2 h-2 bg-purple-300 rounded-full shadow-lg shadow-purple-400/50" />
                       </div>
-                    )}
+                    )} */}
                     {category.name === "Private Messages" && (
                       <div className="relative z-10 flex items-center gap-1">
                         <span className="text-xs font-medium text-green-200">NEW</span>
