@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import AuthModal from "@/components/auth/auth-modal";
 
 interface Stream {
   id: string;
@@ -64,6 +65,8 @@ interface CategoryRowProps {
 }
 
 function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
+  
+  
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -107,6 +110,9 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
 
   return (
     <div className="relative">
+    
+      
+                       
       <h2 className="text-xl md:text-2xl font-bold mb-4 px-3 md:px-4">{category}</h2>
 
       <div className="relative group">
@@ -153,6 +159,7 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
 }
 
 export default function Home() {
+  const [viewerSignupOpen, setViewerSignupOpen] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -319,8 +326,9 @@ export default function Home() {
 
   const handleJoinStream = (streamId: string) => {
     if (!session) {
+      setViewerSignupOpen(true);
       // Redirect to login if not authenticated
-      window.location.href = `/v/login?callbackUrl=/streaming?join=${streamId}`;
+      //window.location.href = `/v/login?callbackUrl=/streaming?join=${streamId}`;
     } else {
       // Go to streaming page
       window.location.href = `/streaming?join=${streamId}`;
@@ -339,6 +347,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
+      <AuthModal
+        open={viewerSignupOpen}
+        onOpenChange={setViewerSignupOpen}
+        userType="viewer"
+        initialTab="signup"
+      />
       <div className="flex min-h-screen">
         {/* Sidebar (offset below sticky header) - Hidden on mobile */}
         <div className="hidden lg:block fixed top-32 left-0 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-40 shadow-2xl">
