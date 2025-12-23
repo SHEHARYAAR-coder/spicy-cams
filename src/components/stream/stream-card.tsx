@@ -172,13 +172,7 @@ export function StreamCard({
                     </div>
                 </div>
 
-                {/* Hover Overlay */}
-                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
-                    }`}>
-                    <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm flex items-center justify-center border-2 border-purple-500/70">
-                        <Play className="w-8 h-8 text-white ml-1" />
-                    </div>
-                </div>
+
             </div>
 
             {/* <CardContent className="px-4 py-3">
