@@ -622,7 +622,6 @@ export default function Home() {
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
               <div className="space-y-8 mt-12">
-<<<<<<< HEAD
                 {Object.entries(groupedStreams).map(([category, streams]) => (
                   <div key={category}>
                     <h2 className="text-xl font-bold mb-4 px-3 md:px-4">{category}</h2>
@@ -636,15 +635,6 @@ export default function Home() {
                       ))}
                     </div>
                   </div>
-=======
-                {Object.entries(groupedStreams).map(([category, categoryStreams]) => (
-                  <CategoryRow
-                    key={category}
-                    category={category}
-                    streams={categoryStreams}
-                    onJoinStream={handleJoinStream}
-                  />
->>>>>>> e089484968869299ed8b1cefdf509bad67ff2c11
                 ))}
               </div>
             ) : (
