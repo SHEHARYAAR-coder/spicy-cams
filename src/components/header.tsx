@@ -367,25 +367,37 @@ export function Header() {
           <div className="flex items-center justify-start gap-8 py-3">
             <Link
               href="/?category=girls"
-              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
+                  ? 'text-white border-b-2 border-purple-500 pb-1'
+                  : 'text-gray-300 hover:text-white'
+                }`}
             >
               Girls
             </Link>
             <Link
               href="/?category=couples"
-              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
+                  ? 'text-white border-b-2 border-purple-500 pb-1'
+                  : 'text-gray-300 hover:text-white'
+                }`}
             >
               Couples
             </Link>
             <Link
               href="/?category=guys"
-              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
+                  ? 'text-white border-b-2 border-purple-500 pb-1'
+                  : 'text-gray-300 hover:text-white'
+                }`}
             >
               Guys
             </Link>
             <Link
               href="/?category=trans"
-              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
+                  ? 'text-white border-b-2 border-purple-500 pb-1'
+                  : 'text-gray-300 hover:text-white'
+                }`}
             >
               Trans
             </Link>

@@ -62,6 +62,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [selectedCategory, setSelectedCategory] = useState("Home");
   const [viewMode, _setViewMode] = useState<"grid" | "list">("grid");
+  const urlCategory = searchParams.get('category');
 
   const handleCategoryClick = (categoryName: string) => {
     if (categoryName === "All Models") {
@@ -172,12 +173,26 @@ export default function Home() {
       );
     }
 
+    // URL Category filter (from header links: girls, couples, guys, trans)
+    if (urlCategory) {
+      const categoryLower = urlCategory.toLowerCase();
+      filtered = filtered.filter((stream) => {
+        const streamCategory = stream.category?.toLowerCase() || '';
+        // Match exact category or common variations
+        return streamCategory.includes(categoryLower) ||
+          (categoryLower === 'girls' && streamCategory.includes('girl')) ||
+          (categoryLower === 'couples' && streamCategory.includes('couple')) ||
+          (categoryLower === 'guys' && streamCategory.includes('guy')) ||
+          (categoryLower === 'trans' && (streamCategory.includes('trans') || streamCategory.includes('transgender')));
+      });
+    }
 
-    // Category filter: only filter if not Home or All Girls Cams
+    // Sidebar Category filter: only filter if not Home or All Girls Cams
     if (
       selectedCategory &&
       selectedCategory !== "Home" &&
-      selectedCategory !== "All Girls Cams"
+      selectedCategory !== "All Girls Cams" &&
+      !urlCategory // Don't apply sidebar filter if URL category is active
     ) {
       filtered = filtered.filter(
         (stream) => stream.category === selectedCategory
@@ -189,6 +204,7 @@ export default function Home() {
     streams,
     searchQuery,
     selectedCategory,
+    urlCategory,
   ]);
 
   const handleJoinStream = (streamId: string) => {
@@ -248,7 +264,7 @@ export default function Home() {
                       {category.name}
                     </span>
 
-{/*                    
+                    {/*                    
                     {category.name === "Home" && (
                       <div className="relative z-10 flex items-center gap-1">
                         <span className="text-xs font-medium text-purple-200">LIVE</span>
