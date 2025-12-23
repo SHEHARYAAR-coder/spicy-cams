@@ -369,41 +369,41 @@ export function Header() {
               <Link
                 href="/?category=girls"
                 className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
-                    ? 'text-white border-b-2 border-purple-500 pb-1'
-                    : 'text-gray-300 hover:text-white'
+                  ? 'text-white border-b-2 border-purple-500 pb-1'
+                  : 'text-gray-300 hover:text-white'
                   }`}
               >
-              Girls
-            </Link>
-            <Link
-              href="/?category=couples"
-              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
+                Girls
+              </Link>
+              <Link
+                href="/?category=couples"
+                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
                   ? 'text-white border-b-2 border-purple-500 pb-1'
                   : 'text-gray-300 hover:text-white'
-                }`}
-            >
-              Couples
-            </Link>
-            <Link
-              href="/?category=guys"
-              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
+                  }`}
+              >
+                Couples
+              </Link>
+              <Link
+                href="/?category=guys"
+                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
                   ? 'text-white border-b-2 border-purple-500 pb-1'
                   : 'text-gray-300 hover:text-white'
-                }`}
-            >
-              Guys
-            </Link>
-            <Link
-              href="/?category=trans"
-              className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
+                  }`}
+              >
+                Guys
+              </Link>
+              <Link
+                href="/?category=trans"
+                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
                   ? 'text-white border-b-2 border-purple-500 pb-1'
                   : 'text-gray-300 hover:text-white'
-                }`}
-            >
-              Trans
-            </Link>
+                  }`}
+              >
+                Trans
+              </Link>
+            </div>
           </div>
-        </div>
         </div>
       )}
     </>
