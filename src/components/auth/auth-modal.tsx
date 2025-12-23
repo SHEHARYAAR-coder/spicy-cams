@@ -30,7 +30,7 @@ export default function AuthModal({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="bg-gray-900 border-gray-700 text-white w-xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
+            <DialogContent className="bg-gray-900 border-gray-700 text-white !max-w-7xl sm:!max-w-7xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
                 {/* Close button */}
                 <div className="absolute top-4 right-4 z-50">
                     {/* <button
