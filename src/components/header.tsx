@@ -361,51 +361,55 @@ export function Header() {
         </div>
       </header>
 
-      {/* Category Navigation Bar - Hidden for models */}
-      {sessionUser?.role !== "MODEL" && (
-        <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-20 z-40">
-          <div className="mx-auto px-6 lg:px-8">
-            <div className="flex items-center justify-start gap-8 py-3">
-              <Link
-                href="/?category=girls"
-                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
-                  ? 'text-white border-b-2 border-purple-500 pb-1'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                Girls
-              </Link>
-              <Link
-                href="/?category=couples"
-                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
-                  ? 'text-white border-b-2 border-purple-500 pb-1'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                Couples
-              </Link>
-              <Link
-                href="/?category=guys"
-                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
-                  ? 'text-white border-b-2 border-purple-500 pb-1'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                Guys
-              </Link>
-              <Link
-                href="/?category=trans"
-                className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
-                  ? 'text-white border-b-2 border-purple-500 pb-1'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                Trans
-              </Link>
+      {/* Category Navigation Bar - Hidden on specific routes */}
+      {!pathname?.startsWith('/dashboard') &&
+        !pathname?.startsWith('/profile') &&
+        !pathname?.startsWith('/m/') &&
+        !pathname?.startsWith('/inbox') &&
+        !pathname?.startsWith('/support') && (
+          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-20 z-40">
+            <div className="mx-auto px-6 lg:px-8">
+              <div className="flex items-center justify-start gap-8 py-3">
+                <Link
+                  href="/?category=girls"
+                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
+                    ? 'text-white border-b-2 border-purple-500 pb-1'
+                    : 'text-gray-300 hover:text-white'
+                    }`}
+                >
+                  Girls
+                </Link>
+                <Link
+                  href="/?category=couples"
+                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
+                    ? 'text-white border-b-2 border-purple-500 pb-1'
+                    : 'text-gray-300 hover:text-white'
+                    }`}
+                >
+                  Couples
+                </Link>
+                <Link
+                  href="/?category=guys"
+                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
+                    ? 'text-white border-b-2 border-purple-500 pb-1'
+                    : 'text-gray-300 hover:text-white'
+                    }`}
+                >
+                  Guys
+                </Link>
+                <Link
+                  href="/?category=trans"
+                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
+                    ? 'text-white border-b-2 border-purple-500 pb-1'
+                    : 'text-gray-300 hover:text-white'
+                    }`}
+                >
+                  Trans
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </>
   );
 }
