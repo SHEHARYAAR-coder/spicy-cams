@@ -111,159 +111,160 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
-      <div className="mx-auto px-6 py-2 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-6">
-            <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
-              <img
-                src="/logo/logo.png"
-                alt="SpicyCams Logo"
-                className="h-22 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-            </Link>
+    <>
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
+        <div className="mx-auto px-6 py-2 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-6">
+              <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
+                <img
+                  src="/logo/logo.png"
+                  alt="SpicyCams Logo"
+                  className="h-22 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                />
+              </Link>
 
-            {(sessionUser?.role !== "MODEL") && (
-              <div className={'flex items-center justify-center'}>
-                <Link
-                  href={'/all-models/'}
-                  className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
-                >
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span>All Models</span>
-                </Link>
-              </div>
-            )}
+              {(sessionUser?.role !== "MODEL") && (
+                <div className={'flex items-center justify-center'}>
+                  <Link
+                    href={'/all-models/'}
+                    className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
+                  >
+                    <Star className="w-4 h-4 text-yellow-400" />
+                    <span>All Models</span>
+                  </Link>
+                </div>
+              )}
 
-            {onlineModelsCount > 0 && (
-              <div className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
-                <span className={'flex gap-2'}>
-                  Live Streams
-                  <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
-                    {onlineModelsCount}
+              {onlineModelsCount > 0 && (
+                <div className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
+                  <span className={'flex gap-2'}>
+                    Live Streams
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
+                      {onlineModelsCount}
+                    </span>
                   </span>
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Center nav pill - Only show when logged in */}
-          {session?.user && (
-            <nav className="hidden md:flex flex-1 items-center justify-center">
-              <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-3 py-1.5 shadow-xl">
-                <ul className="flex items-center gap-1">
-                  {[
-                    { label: "Home", href: "/" },
-                    { label: "Pricing", href: "/pricing" },
-                    { label: "Streaming", href: "/streaming" },
-                  ].map((item) => {
-                    const active =
-                      pathname === item.href ||
-                      (item.href !== "/" && pathname?.startsWith(item.href));
-                    return (
-                      <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${active
-                            ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50"
-                            : "text-gray-300 hover:text-white hover:bg-gray-700/70"
-                            }`}
-                        >
-                          <span className="whitespace-nowrap relative z-10">
-                            {item.label}
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </nav>
-          )}
-
-          <div className="flex items-center space-x-4">
-            {/* Search Bar for Streams - Always visible */}
-            <div className={`relative ${session?.user ? 'block' : 'hidden'}`}>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search streams..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && pathname !== '/') {
-                    router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-                  }
-                }}
-                className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
-              />
+                </div>
+              )}
             </div>
 
-            {session?.user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div tabIndex={0} className="outline-none">
-                    <Avatar className="w-10 h-10 cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-purple-500 hover:shadow-lg hover:shadow-purple-500/50 ring-offset-2 ring-offset-gray-900">
-                      <AvatarImage
-                        src={sessionUser?.image || undefined}
-                        alt="User avatar"
-                        className="object-cover w-10 h-10 rounded-full"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
-                        <User className="w-5 h-5 text-white" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[220px]">
-                  <DropdownMenuLabel
-                    className="flex items-center justify-start px-3 py-2.5 font-medium text-white"
-                  >
-                    <Hand className="w-4 h-4 mr-2 text-purple-400" /> Hi,{" "}
-                    {sessionUser?.name || "User"}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-gray-700/50" />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
-                      <LayoutDashboard className="w-4 h-4 mr-3 text-purple-400" />
-                      <span className="font-medium">Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
-                      <User className="w-4 h-4 mr-3 text-purple-400" />
-                      <span className="font-medium">Profile</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/streaming" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
-                      <Video className="w-4 h-4 mr-3 text-purple-400" />
-                      <span className="font-medium">Streaming</span>
-                    </Link>
-                  </DropdownMenuItem>
+            {/* Center nav pill - Only show when logged in */}
+            {session?.user && (
+              <nav className="hidden md:flex flex-1 items-center justify-center">
+                <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-3 py-1.5 shadow-xl">
+                  <ul className="flex items-center gap-1">
+                    {[
+                      { label: "Home", href: "/" },
+                      { label: "Pricing", href: "/pricing" },
+                      { label: "Streaming", href: "/streaming" },
+                    ].map((item) => {
+                      const active =
+                        pathname === item.href ||
+                        (item.href !== "/" && pathname?.startsWith(item.href));
+                      return (
+                        <li key={item.href}>
+                          <Link
+                            href={item.href}
+                            className={`relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${active
+                              ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50"
+                              : "text-gray-300 hover:text-white hover:bg-gray-700/70"
+                              }`}
+                          >
+                            <span className="whitespace-nowrap relative z-10">
+                              {item.label}
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </nav>
+            )}
 
-                  {(session.user as import("../../lib/auth-utils").SessionUser)
-                    .role === "MODEL" && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/model" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
-                          <Settings className="w-4 h-4 mr-3 text-purple-400" />
-                          <span className="font-medium">Model Studio</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                  <DropdownMenuSeparator className="bg-gray-700/50" />
-                  <DropdownMenuItem
-                    onSelect={handleSignOut}
-                    className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 px-3 py-2.5 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    <span className="font-medium">Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* <Button
+            <div className="flex items-center space-x-4">
+              {/* Search Bar for Streams - Always visible */}
+              <div className={`relative ${session?.user ? 'block' : 'hidden'}`}>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search streams..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && pathname !== '/') {
+                      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
+                    }
+                  }}
+                  className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
+                />
+              </div>
+
+              {session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div tabIndex={0} className="outline-none">
+                      <Avatar className="w-10 h-10 cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-purple-500 hover:shadow-lg hover:shadow-purple-500/50 ring-offset-2 ring-offset-gray-900">
+                        <AvatarImage
+                          src={sessionUser?.image || undefined}
+                          alt="User avatar"
+                          className="object-cover w-10 h-10 rounded-full"
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
+                          <User className="w-5 h-5 text-white" />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-gray-800/95 backdrop-blur-lg border-gray-700/50 text-gray-200 shadow-2xl min-w-[220px]">
+                    <DropdownMenuLabel
+                      className="flex items-center justify-start px-3 py-2.5 font-medium text-white"
+                    >
+                      <Hand className="w-4 h-4 mr-2 text-purple-400" /> Hi,{" "}
+                      {sessionUser?.name || "User"}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-gray-700/50" />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                        <LayoutDashboard className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                        <User className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Profile</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/streaming" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                        <Video className="w-4 h-4 mr-3 text-purple-400" />
+                        <span className="font-medium">Streaming</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {(session.user as import("../../lib/auth-utils").SessionUser)
+                      .role === "MODEL" && (
+                        <DropdownMenuItem asChild>
+                          <Link href="/model" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
+                            <Settings className="w-4 h-4 mr-3 text-purple-400" />
+                            <span className="font-medium">Model Studio</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      )}
+                    <DropdownMenuSeparator className="bg-gray-700/50" />
+                    <DropdownMenuItem
+                      onSelect={handleSignOut}
+                      className="cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 px-3 py-2.5 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      <span className="font-medium">Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* <Button
                   onClick={() => setViewerLoginOpen(true)}
                   variant="ghost"
                   size="sm"
@@ -306,59 +307,92 @@ export function Header() {
                   <span className="sm:hidden">Model Sign Up</span>
                 </Button> */}
 
-                <Button
-                  onClick={() => setViewerSignupOpen(true)}
-                  size="sm"
-                  className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 transition-all duration-300 font-medium"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Create Free Account</span>
-                  <span className="sm:hidden">Create Free Account</span>
-                </Button>
+                  <Button
+                    onClick={() => setViewerSignupOpen(true)}
+                    size="sm"
+                    className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 transition-all duration-300 font-medium"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Create Free Account</span>
+                    <span className="sm:hidden">Create Free Account</span>
+                  </Button>
 
-                <Button
-                  onClick={() => setViewerLoginOpen(true)}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium border border-gray-700/50 hover:border-gray-600"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Log In</span>
-                  <span className="sm:hidden">Log In</span>
-                </Button>
+                  <Button
+                    onClick={() => setViewerLoginOpen(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-300 hover:text-white hover:bg-gray-800/60 transition-all duration-300 font-medium border border-gray-700/50 hover:border-gray-600"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Log In</span>
+                    <span className="sm:hidden">Log In</span>
+                  </Button>
 
 
-                {/* Auth Modals */}
-                <AuthModal
-                  open={viewerLoginOpen}
-                  onOpenChange={setViewerLoginOpen}
-                  userType="viewer"
-                  initialTab="login"
-                />
-                <AuthModal
-                  open={viewerSignupOpen}
-                  onOpenChange={setViewerSignupOpen}
-                  userType="viewer"
-                  initialTab="signup"
-                />
-                <AuthModal
-                  open={modelLoginOpen}
-                  onOpenChange={setModelLoginOpen}
-                  userType="model"
-                  initialTab="login"
-                />
-                <AuthModal
-                  open={modelSignupOpen}
-                  onOpenChange={setModelSignupOpen}
-                  userType="model"
-                  initialTab="signup"
-                />
-              </div>
-            )}
+                  {/* Auth Modals */}
+                  <AuthModal
+                    open={viewerLoginOpen}
+                    onOpenChange={setViewerLoginOpen}
+                    userType="viewer"
+                    initialTab="login"
+                  />
+                  <AuthModal
+                    open={viewerSignupOpen}
+                    onOpenChange={setViewerSignupOpen}
+                    userType="viewer"
+                    initialTab="signup"
+                  />
+                  <AuthModal
+                    open={modelLoginOpen}
+                    onOpenChange={setModelLoginOpen}
+                    userType="model"
+                    initialTab="login"
+                  />
+                  <AuthModal
+                    open={modelSignupOpen}
+                    onOpenChange={setModelSignupOpen}
+                    userType="model"
+                    initialTab="signup"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Category Navigation Bar */}
+      <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-20 z-40">
+        <div className="mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-start gap-8 py-3">
+            <Link
+              href="/?category=girls"
+              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+            >
+              Girls
+            </Link>
+            <Link
+              href="/?category=couples"
+              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+            >
+              Couples
+            </Link>
+            <Link
+              href="/?category=guys"
+              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+            >
+              Guys
+            </Link>
+            <Link
+              href="/?category=trans"
+              className="text-gray-300 hover:text-white transition-colors duration-300 font-medium"
+            >
+              Trans
+            </Link>
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }
 

@@ -215,7 +215,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <div className="flex min-h-screen">
         {/* Sidebar (offset below sticky header) - Hidden on mobile */}
-        <div className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-40 shadow-2xl">
+        <div className="hidden lg:block fixed top-32 left-0 h-[calc(100vh-4rem)] w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-40 shadow-2xl">
           <div className="p-5 space-y-6">
             {/* Main Categories Section */}
             <div className="space-y-2">
