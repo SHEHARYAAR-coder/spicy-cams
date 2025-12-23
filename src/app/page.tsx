@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -17,6 +17,8 @@ import {
   HomeIcon,
   Sparkles,
   History,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Stream {
@@ -52,6 +54,102 @@ interface StreamApiResponse {
     avatar?: string;
   };
   participantCount?: number;
+}
+
+// Category Row Component with horizontal scrolling
+interface CategoryRowProps {
+  category: string;
+  streams: Stream[];
+  onJoinStream: (streamId: string) => void;
+}
+
+function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScrollability = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      );
+    }
+  };
+
+  const scroll = (direction: 'left' | 'right') => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -400 : 400;
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+      setTimeout(checkScrollability, 100);
+    }
+  };
+
+  // Check scrollability on mount and resize
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      checkScrollability();
+      container.addEventListener('scroll', checkScrollability);
+      window.addEventListener('resize', checkScrollability);
+
+      return () => {
+        container.removeEventListener('scroll', checkScrollability);
+        window.removeEventListener('resize', checkScrollability);
+      };
+    }
+  }, [streams]);
+
+  return (
+    <div className="relative">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 px-3 md:px-4">{category}</h2>
+
+      <div className="relative group">
+        {/* Left Scroll Button */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-3 md:p-4 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+          </button>
+        )}
+
+        {/* Streams Container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-2 overflow-x-auto scrollbar-hide pb-4 px-3 md:px-4 scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {streams.map((stream) => (
+            <StreamCard
+              key={stream.id}
+              stream={stream}
+              onJoinStream={onJoinStream}
+              className="flex-shrink-0 w-36 sm:w-40 md:w-44"
+            />
+          ))}
+        </div>
+
+        {/* Right Scroll Button */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-3 md:p-4 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function Home() {
@@ -524,6 +622,7 @@ export default function Home() {
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
               <div className="space-y-8 mt-12">
+<<<<<<< HEAD
                 {Object.entries(groupedStreams).map(([category, streams]) => (
                   <div key={category}>
                     <h2 className="text-xl font-bold mb-4 px-3 md:px-4">{category}</h2>
@@ -537,6 +636,15 @@ export default function Home() {
                       ))}
                     </div>
                   </div>
+=======
+                {Object.entries(groupedStreams).map(([category, categoryStreams]) => (
+                  <CategoryRow
+                    key={category}
+                    category={category}
+                    streams={categoryStreams}
+                    onJoinStream={handleJoinStream}
+                  />
+>>>>>>> e089484968869299ed8b1cefdf509bad67ff2c11
                 ))}
               </div>
             ) : (
