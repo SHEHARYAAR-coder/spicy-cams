@@ -495,7 +495,7 @@ export default function Home() {
                 ))}
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
-              <div className="space-y-8">
+              <div className="space-y-8 mt-12">
                 {Object.entries(groupedStreams).map(([category, streams]) => (
                   <div key={category}>
                     <h2 className="text-xl font-bold mb-4">{category}</h2>
