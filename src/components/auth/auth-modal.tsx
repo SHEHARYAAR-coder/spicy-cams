@@ -43,7 +43,7 @@ export default function AuthModal({
                 </div>
 
                 {/* Tabs */}
-                <div className="flex border-b border-gray-700 flex-shrink-0">
+                {/* <div className="flex border-b border-gray-700 flex-shrink-0">
                     <button
                         onClick={() => setActiveTab("login")}
                         className={`flex-1 py-4 px-6 text-center font-semibold transition-all ${activeTab === "login"
@@ -62,7 +62,7 @@ export default function AuthModal({
                     >
                         Sign Up
                     </button>
-                </div>
+                </div> */}
 
                 {/* Content - scrollable with full two-column layout */}
                 <div className="overflow-y-auto flex-1">
