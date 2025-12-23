@@ -74,17 +74,17 @@ export function StreamCard({
         switch (stream.status) {
             case 'LIVE':
                 return (
-                    <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-red-600 text-white px-2 py-1 text-xs font-medium flex items-center gap-1">
-                            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    <div className="absolute top-2 left-2 z-10">
+                        <div className="bg-red-600 text-white px-1.5 py-0.5 text-xs font-medium flex items-center gap-1">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                             LIVE
                         </div>
                     </div>
                 );
             case 'SCHEDULED':
                 return (
-                    <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-purple-600 text-white px-2 py-1 text-xs font-medium flex items-center gap-1">
+                    <div className="absolute top-2 left-2 z-10">
+                        <div className="bg-purple-600 text-white px-1.5 py-0.5 text-xs font-medium flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             SCHEDULED
                         </div>
@@ -92,8 +92,8 @@ export function StreamCard({
                 );
             case 'ENDED':
                 return (
-                    <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-gray-600 text-white px-2 py-1 text-xs font-medium">
+                    <div className="absolute top-2 left-2 z-10">
+                        <div className="bg-gray-600 text-white px-1.5 py-0.5 text-xs font-medium">
                             ENDED
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export function StreamCard({
             onClick={handleJoinStream}
         >
             {/* Thumbnail Wrapper with fixed height */}
-            <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
+            <div className="relative w-full h-40 sm:h-44 md:h-48 bg-gray-700 overflow-hidden">
                 {/* Thumbnail Image */}
                 {stream.thumbnailUrl ? (
                     <img
@@ -155,17 +155,17 @@ export function StreamCard({
                 </div> */}
 
                 {/* Region */}
-                <div className="absolute bottom-3 left-3 z-10">
-                    <div className="text-white px-2 py-1 text-xs font-bold">
+                <div className="absolute bottom-2 left-2 z-10">
+                    <div className="text-white px-1.5 py-0.5 text-xs font-bold">
                         {/* {['US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'BR', 'RO', 'CO'][Math.floor(Math.random() * 10)]} */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                             {/* <Avatar className="w-8 h-8">
                                 <AvatarImage src={stream.model.image} />
                                 <AvatarFallback className="text-xs">
                                     {stream.model.name?.charAt(0).toUpperCase() || 'M'}
                                 </AvatarFallback>
                             </Avatar> */}
-                            <p className="text-sm font-medium text-gray-200 truncate">
+                            <p className="text-xs font-medium text-gray-200 truncate">
                                 {stream.model.name || 'Unknown Model'}
                             </p>
                         </div>
@@ -196,7 +196,7 @@ export function StreamCard({
 export function StreamCardSkeleton() {
     return (
         <Card className="rounded-none animate-pulse bg-gray-800 border-gray-700 overflow-hidden">
-            <div className="w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700" />
+            <div className="w-full h-40 sm:h-44 md:h-48 bg-gray-700" />
             <CardContent className="p-4">
                 <div className="h-6 bg-gray-700 mb-2 w-3/4" />
                 <div className="flex items-center gap-3 mb-3">
