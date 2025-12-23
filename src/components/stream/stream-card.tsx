@@ -75,7 +75,7 @@ export function StreamCard({
             case 'LIVE':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                        <div className="bg-red-600 text-white px-2 py-1 text-xs font-medium flex items-center gap-1">
                             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                             LIVE
                         </div>
@@ -84,7 +84,7 @@ export function StreamCard({
             case 'SCHEDULED':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1">
+                        <div className="bg-purple-600 text-white px-2 py-1 text-xs font-medium flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             SCHEDULED
                         </div>
@@ -93,7 +93,7 @@ export function StreamCard({
             case 'ENDED':
                 return (
                     <div className="absolute top-3 left-3 z-10">
-                        <div className="bg-gray-600 text-white px-2 py-1 rounded text-xs font-medium">
+                        <div className="bg-gray-600 text-white px-2 py-1 text-xs font-medium">
                             ENDED
                         </div>
                     </div>
@@ -115,7 +115,7 @@ export function StreamCard({
 
     return (
         <Card
-            className={`p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden ${className}`}
+            className={`rounded-none p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 overflow-hidden ${className}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={handleJoinStream}
@@ -144,18 +144,7 @@ export function StreamCard({
                 {/* Status Badge */}
                 {getStatusBadge()}
 
-                {/* Star Rating */}
-                <div className="absolute top-3 right-3 z-10">
-                    <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                                key={star}
-                                className={`w-3 h-3 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'
-                                    }`}
-                            />
-                        ))}
-                    </div>
-                </div>
+
 
                 {/* Viewer Count */}
                 {/* <div className="absolute bottom-3 right-3 z-10">
@@ -167,15 +156,15 @@ export function StreamCard({
 
                 {/* Region */}
                 <div className="absolute bottom-3 left-3 z-10">
-                    <div className="bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-bold">
+                    <div className="text-white px-2 py-1 text-xs font-bold">
                         {/* {['US', 'CA', 'GB', 'DE', 'FR', 'ES', 'IT', 'BR', 'RO', 'CO'][Math.floor(Math.random() * 10)]} */}
                         <div className="flex items-center gap-2">
-                            <Avatar className="w-8 h-8">
+                            {/* <Avatar className="w-8 h-8">
                                 <AvatarImage src={stream.model.image} />
                                 <AvatarFallback className="text-xs">
                                     {stream.model.name?.charAt(0).toUpperCase() || 'M'}
                                 </AvatarFallback>
-                            </Avatar>
+                            </Avatar> */}
                             <p className="text-sm font-medium text-gray-200 truncate">
                                 {stream.model.name || 'Unknown Model'}
                             </p>
@@ -186,7 +175,7 @@ export function StreamCard({
                 {/* Hover Overlay */}
                 <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'
                     }`}>
-                    <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-purple-500/70">
+                    <div className="w-16 h-16 bg-purple-600/50 backdrop-blur-sm flex items-center justify-center border-2 border-purple-500/70">
                         <Play className="w-8 h-8 text-white ml-1" />
                     </div>
                 </div>
@@ -212,20 +201,20 @@ export function StreamCard({
 // Skeleton loader for loading states
 export function StreamCardSkeleton() {
     return (
-        <Card className="animate-pulse bg-gray-800 border-gray-700 rounded-lg overflow-hidden">
+        <Card className="rounded-none animate-pulse bg-gray-800 border-gray-700 overflow-hidden">
             <div className="w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700" />
             <CardContent className="p-4">
-                <div className="h-6 bg-gray-700 rounded mb-2 w-3/4" />
+                <div className="h-6 bg-gray-700 mb-2 w-3/4" />
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-8 h-8 bg-gray-700 rounded-full" />
                     <div>
-                        <div className="h-4 bg-gray-700 rounded w-24 mb-1" />
-                        <div className="h-3 bg-gray-700 rounded w-16" />
+                        <div className="h-4 bg-gray-700 w-24 mb-1" />
+                        <div className="h-3 bg-gray-700 w-16" />
                     </div>
                 </div>
-                <div className="h-4 bg-gray-700 rounded mb-2 w-full" />
-                <div className="h-4 bg-gray-700 rounded w-1/2 mb-3" />
-                <div className="h-8 bg-gray-700 rounded w-28" />
+                <div className="h-4 bg-gray-700 mb-2 w-full" />
+                <div className="h-4 bg-gray-700 w-1/2 mb-3" />
+                <div className="h-8 bg-gray-700 w-28" />
             </CardContent>
         </Card>
     );
