@@ -139,6 +139,7 @@ model User {
   meterEvents             MeterEvent[]
   withdrawalRequests      WithdrawalRequest[]  @relation("UserWithdrawals")
   reviewedWithdrawals     WithdrawalRequest[]  @relation("AdminReviews")
+  watchHistory            WatchHistory[]
 
   @@index([email])
   @@index([status])
@@ -231,6 +232,7 @@ model Stream {
   chatMessages    ChatMessage[]
   privateMessages PrivateMessage[]
   chatRequests    PrivateChatRequest[]
+  watchHistory    WatchHistory[]
   // moderationActions ModerationAction[] @relation("TargetStream")
 
   @@index([modelId])
@@ -585,4 +587,23 @@ model SystemConfig {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("system_config")
+}
+
+// ============================================
+// WATCH HISTORY
+// ============================================
+
+model WatchHistory {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  streamId  String   @map("stream_id")
+  watchedAt DateTime @default(now()) @map("watched_at")
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stream Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streamId])
+  @@index([userId, watchedAt])
+  @@map("watch_history")
 }

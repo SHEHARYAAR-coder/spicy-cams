@@ -15,6 +15,8 @@ import {
   Heart,
   MessageCircle,
   HomeIcon,
+  Sparkles,
+  History,
 } from "lucide-react";
 
 interface Stream {
@@ -69,11 +71,21 @@ export default function Home() {
       router.push("/m");
       return;
     }
+    if (categoryName === "Recommended") {
+      router.push("/recommended");
+      return;
+    }
+    if (categoryName === "Watch History") {
+      router.push("/watch-history");
+      return;
+    }
     setSelectedCategory(categoryName);
   };
 
   const categories = [
     { name: "Home", icon: HomeIcon, count: 0, active: true },
+    { name: "Recommended", icon: Sparkles, count: 0 },
+    { name: "Watch History", icon: History, count: 0 },
     { name: "Private Messages", icon: MessageCircle, count: 0 },
     // { name: "All Models", icon: Star, count: 0 },
     // { name: "GOLD Shows", icon: Star, count: 0 },
@@ -235,9 +247,9 @@ export default function Home() {
           <div className="p-5 space-y-6">
             {/* Main Categories Section */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-3">
+              {/* <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-3">
                 Main Menu
-              </h3>
+              </h3> */}
               {visibleCategories.map((category) => {
                 const IconComponent = category.icon;
                 const isActive = selectedCategory === category.name;
@@ -529,7 +541,7 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <Card className="border-2 border-dashed border-gray-700 bg-gray-800">
+              <Card className="border-2 border-dashed border-gray-700 bg-gray-800 mt-12">
                 <CardContent className="p-12 text-center">
                   <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Play className="w-12 h-12 text-gray-500" />

@@ -323,6 +323,17 @@ export default function StreamingPage() {
         setMode(newMode);
 
         console.log('✅ Mode set to:', newMode);
+
+        // Track watch history (only for viewers, not broadcasters)
+        if (newMode === 'watch') {
+          fetch('/api/watch-history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ streamId }),
+          }).catch(err => console.error('Failed to track watch history:', err));
+        }
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to join stream');
