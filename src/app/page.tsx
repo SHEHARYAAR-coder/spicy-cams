@@ -526,14 +526,13 @@ export default function Home() {
               <div className="space-y-8 mt-12">
                 {Object.entries(groupedStreams).map(([category, streams]) => (
                   <div key={category}>
-                    <h2 className="text-xl font-bold mb-4">{category}</h2>
-                    <div className="max-w-10/12 flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-3 md:px-4">
+                    <h2 className="text-xl font-bold mb-4 px-3 md:px-4">{category}</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-3 md:px-4">
                       {streams.map((stream) => (
                         <StreamCard
                           key={stream.id}
                           stream={stream}
                           onJoinStream={handleJoinStream}
-                          className="flex-shrink-0 w-64"
                         />
                       ))}
                     </div>
