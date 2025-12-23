@@ -172,8 +172,13 @@ export default function Home() {
       );
     }
 
-    // Category filter
-    if (selectedCategory && selectedCategory !== "All Girls Cams") {
+
+    // Category filter: only filter if not Home or All Girls Cams
+    if (
+      selectedCategory &&
+      selectedCategory !== "Home" &&
+      selectedCategory !== "All Girls Cams"
+    ) {
       filtered = filtered.filter(
         (stream) => stream.category === selectedCategory
       );
