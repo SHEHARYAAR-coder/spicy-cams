@@ -222,7 +222,7 @@ export default function Home() {
   const handleJoinStream = (streamId: string) => {
     if (!session) {
       // Redirect to login if not authenticated
-      window.location.href = `/login?callbackUrl=/streaming?join=${streamId}`;
+      window.location.href = `/v/login?callbackUrl=/streaming?join=${streamId}`;
     } else {
       // Go to streaming page
       window.location.href = `/streaming?join=${streamId}`;

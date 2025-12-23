@@ -365,7 +365,7 @@ export default function StreamingPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center mt-12">
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto bg-gray-800 border-gray-700">
             <CardContent className="p-6 text-center">
@@ -388,7 +388,7 @@ export default function StreamingPage() {
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
-    <div className={`bg-gray-900 text-white flex flex-col ${mode === 'broadcast' || mode === 'watch'
+    <div className={`mt-12 bg-gray-900 text-white flex flex-col ${mode === 'broadcast' || mode === 'watch'
       ? 'h-screen lg:h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden'
       : 'min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]'
       } lg:overflow-hidden`}>
