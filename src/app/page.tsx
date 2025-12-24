@@ -293,7 +293,7 @@ export default function Home() {
         />
 
         {/* Main Content - Full width on mobile, offset on desktop */}
-        <div className="flex-1 flex flex-col lg:ml-72">
+        <div className="flex-1 flex flex-col">
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
@@ -456,7 +456,7 @@ export default function Home() {
                 ))}
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
-              <div className="space-y-8 mt-12">
+              <div className="space-y-8 ">
                 {Object.entries(groupedStreams).map(([category, streams]) => (
                   <div key={category}>
                     <h2 className="text-xl font-bold mb-4 px-3 md:px-4">{category}</h2>
