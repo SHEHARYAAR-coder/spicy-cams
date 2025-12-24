@@ -125,13 +125,20 @@ export function Header() {
               </Link>
 
               {(sessionUser?.role !== "MODEL") && (
-                <div className={'flex items-center justify-center'}>
+                <div className={'flex items-center justify-center gap-3'}>
                   <Link
                     href={'/all-models/'}
                     className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
                   >
                     <Star className="w-4 h-4 text-yellow-400" />
                     <span>All Models</span>
+                  </Link>
+                  <Link
+                    href={'/top-models/'}
+                    className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600 bg-gradient-to-r from-purple-600/20 to-pink-600/20'}
+                  >
+                    <Star className="w-4 h-4 text-pink-400 fill-pink-400" />
+                    <span>Top Models</span>
                   </Link>
                 </div>
               )}
