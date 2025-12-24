@@ -374,7 +374,7 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-20 z-40">
+          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 sticky w-full top-20 z-40">
             <div className="mx-auto px-6 lg:px-8">
               <div className="flex items-center justify-start gap-8 py-3">
                 <Link
