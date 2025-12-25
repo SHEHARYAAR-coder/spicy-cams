@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter } from 'next/navigation';
 import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen, Camera } from 'lucide-react';
 import { TabbedChatContainer, MobileChatOverlay } from '@/components/chat';
+import { useStream } from '@/contexts/StreamContext';
 
 interface Stream {
   id: string;
@@ -32,6 +33,7 @@ interface Stream {
 export default function StreamingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { setStreamData, clearStreamData } = useStream();
   const [mode, setMode] = useState<'browse' | 'create' | 'broadcast' | 'watch'>('browse');
   const [streams, setStreams] = useState<Stream[]>([]);
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
@@ -278,6 +280,14 @@ export default function StreamingPage() {
           setCurrentStreamData(stream);
           setSelectedStream(stream.id);
           setMode(newMode);
+          // Update stream context for header
+          setStreamData({
+            id: stream.id,
+            title: stream.title,
+            description: stream.description,
+            model: stream.model,
+            category: stream.category
+          });
           setNewStream({ title: '', description: '', category: '', tags: [], thumbnailUrl: '', cameraDeviceId: '' }); // Reset form
           setTagInput('');
 
@@ -322,6 +332,17 @@ export default function StreamingPage() {
         setCurrentStreamData(stream || null);
         setMode(newMode);
 
+        // Update stream context for header
+        if (stream) {
+          setStreamData({
+            id: stream.id,
+            title: stream.title,
+            description: stream.description,
+            model: stream.model,
+            category: stream.category
+          });
+        }
+
         console.log('✅ Mode set to:', newMode);
 
         // Track watch history (only for viewers, not broadcasters)
@@ -350,6 +371,7 @@ export default function StreamingPage() {
     setMode('browse');
     setSelectedStream(null);
     setStreamToken(null);
+    clearStreamData(); // Clear stream context for header
     fetchStreams(); // Refresh stream list
   };
 
@@ -568,7 +590,7 @@ export default function StreamingPage() {
                             </div>
                           </div>
 
-                           {/* Camera Selection */}
+                          {/* Camera Selection */}
                           <div>
                             <label className="text-sm font-semibold mb-2 text-gray-200 flex items-center gap-2">
                               <Camera className="w-4 h-4 text-purple-400" />

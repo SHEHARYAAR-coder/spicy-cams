@@ -19,16 +19,18 @@ import {
   User,
   Hand,
   LayoutDashboard,
-  Search, Star,
+  Search, Star, Image as ImageIcon, PlaySquare,
 } from "lucide-react";
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
+import { useStream } from "@/contexts/StreamContext";
 
 export function Header() {
   const { data: session, status } = useSession();
+  const { isStreaming, streamData } = useStream();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -376,44 +378,95 @@ export function Header() {
         !pathname?.startsWith('/support') && (
           <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 sticky w-full top-20 z-40">
             <div className="mx-auto px-6 lg:px-8">
-              <div className="flex items-center justify-start gap-8 py-3">
-                <Link
-                  href="/?category=girls"
-                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
-                    ? 'text-white border-b-2 border-purple-500 pb-1'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  Girls
-                </Link>
-                <Link
-                  href="/?category=couples"
-                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
-                    ? 'text-white border-b-2 border-purple-500 pb-1'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  Couples
-                </Link>
-                <Link
-                  href="/?category=guys"
-                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
-                    ? 'text-white border-b-2 border-purple-500 pb-1'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  Guys
-                </Link>
-                <Link
-                  href="/?category=trans"
-                  className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
-                    ? 'text-white border-b-2 border-purple-500 pb-1'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  Trans
-                </Link>
-              </div>
+              {/* Show model info when streaming, otherwise show categories */}
+              {isStreaming && streamData ? (
+                <div className="flex items-center justify-start gap-6 py-3">
+                  {/* Model Avatar and Name */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10 ring-2 ring-purple-500/50">
+                      <AvatarImage
+                        src={streamData.model.image || undefined}
+                        alt={streamData.model.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
+                        <User className="w-5 h-5 text-white" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-white font-semibold">{streamData.model.name}</p>
+                      <p className="text-xs text-gray-400">Streaming now</p>
+                    </div>
+                  </div>
+
+                  {/* Separator */}
+                  <div className="h-8 w-px bg-gray-700/50" />
+
+                  {/* Model Profile Links */}
+                  <Link
+                    href={`/profile/${streamData.model.id}`}
+                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                  >
+                    <User className="w-4 h-4 text-purple-400" />
+                    <span>Profile</span>
+                  </Link>
+
+                  <Link
+                    href={`/profile/${streamData.model.id}?tab=photos`}
+                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                  >
+                    <ImageIcon className="w-4 h-4 text-purple-400" />
+                    <span>Photos</span>
+                  </Link>
+
+                  <Link
+                    href={`/profile/${streamData.model.id}?tab=videos`}
+                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                  >
+                    <PlaySquare className="w-4 h-4 text-purple-400" />
+                    <span>Videos</span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center justify-start gap-8 py-3">
+                  <Link
+                    href="/?category=girls"
+                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
+                      ? 'text-white border-b-2 border-purple-500 pb-1'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    Girls
+                  </Link>
+                  <Link
+                    href="/?category=couples"
+                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
+                      ? 'text-white border-b-2 border-purple-500 pb-1'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    Couples
+                  </Link>
+                  <Link
+                    href="/?category=guys"
+                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
+                      ? 'text-white border-b-2 border-purple-500 pb-1'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    Guys
+                  </Link>
+                  <Link
+                    href="/?category=trans"
+                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
+                      ? 'text-white border-b-2 border-purple-500 pb-1'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    Trans
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}

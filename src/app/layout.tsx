@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AgeVerificationDialog } from "@/components/age-verification-dialog";
 import { Header } from "@/components/header";
+import { StreamProvider } from "@/contexts/StreamContext";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -19,10 +20,12 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="antialiased font-sans bg-gray-950 text-white">
         <AuthProvider>
-          <AgeVerificationDialog />
-          <Header />
-          {children}
-          <Toaster position="top-right" richColors />
+          <StreamProvider>
+            <AgeVerificationDialog />
+            <Header />
+            {children}
+            <Toaster position="top-right" richColors />
+          </StreamProvider>
         </AuthProvider>
       </body>
     </html>
