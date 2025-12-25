@@ -61,6 +61,9 @@ interface CategoryRowProps {
 
 function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
 
+  // Determine if we should use 2 rows or 1 row based on stream count
+  const shouldUseTwoRows = streams.length > 6;
+  const gridRowsClass = shouldUseTwoRows ? 'grid-rows-2' : 'grid-rows-1';
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -79,7 +82,7 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
     if (container) {
-      const scrollAmount = direction === 'left' ? -400 : 400;
+      const scrollAmount = direction === 'left' ? -800 : 800;
       container.scrollBy({
         left: scrollAmount,
         behavior: 'smooth'
@@ -104,36 +107,36 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
   }, [streams]);
 
   return (
-    <div className="relative">
-
-
-
-      <h2 className="text-xl md:text-2xl font-bold mb-4 px-3 md:px-4">{category}</h2>
+    <div className="mb-8">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 px-2 md:px-3">{category}</h2>
 
       <div className="relative group">
         {/* Left Scroll Button */}
         {canScrollLeft && (
           <button
             onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-3 md:p-4 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-2 md:p-3 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
             aria-label="Scroll left"
           >
-            <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         )}
 
-        {/* Streams Container */}
+        {/* Streams Container - Dynamic Rows with Horizontal Scroll */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-2 overflow-x-auto scrollbar-hide pb-4 px-3 md:px-4 scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className={`grid ${gridRowsClass} grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 md:px-3 scroll-smooth`}
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+          }}
         >
           {streams.map((stream) => (
             <StreamCard
               key={stream.id}
               stream={stream}
               onJoinStream={onJoinStream}
-              className="flex-shrink-0 w-36 sm:w-40 md:w-44"
+              className="w-[210px] sm:w-[240px] md:w-[280px] lg:w-[300px]"
             />
           ))}
         </div>
@@ -142,10 +145,10 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
         {canScrollRight && (
           <button
             onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-3 md:p-4 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-2 md:p-3 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
             aria-label="Scroll right"
           >
-            <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         )}
       </div>
@@ -284,7 +287,7 @@ export default function Home() {
         userType="viewer"
         initialTab="signup"
       />
-      <div className="flex min-h-screen">
+      <div className="flex gap-5 min-h-screen">
         {/* Sidebar Component */}
         <Sidebar
           streams={streams}
@@ -292,8 +295,8 @@ export default function Home() {
           onCategoryChange={setSelectedCategory}
         />
 
-        {/* Main Content - Full width on mobile, offset on desktop */}
-        <div className="flex-1 flex flex-col">
+        {/* Main Content - Full width on mobile, flush next to sidebar on desktop */}
+        <div className="flex-1 flex flex-col lg:ml-0 h-screen overflow-hidden">
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
@@ -430,7 +433,7 @@ export default function Home() {
           )}
 
           {/* Content Area */}
-          <div className="flex-1 p-3 md:p-4">
+          <div className="flex-1 p-2 md:p-3 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
             {selectedCategory === "Private Messages" ? (
               <PrivateChatContainer streamId="homepage" token={null} />
             ) : loading && streams.length === 0 ? (
@@ -456,20 +459,14 @@ export default function Home() {
                 ))}
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
-              <div className="space-y-8 ">
-                {Object.entries(groupedStreams).map(([category, streams]) => (
-                  <div key={category}>
-                    <h2 className="text-xl font-bold mb-4 px-3 md:px-4">{category}</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-3 md:px-4">
-                      {streams.map((stream) => (
-                        <StreamCard
-                          key={stream.id}
-                          stream={stream}
-                          onJoinStream={handleJoinStream}
-                        />
-                      ))}
-                    </div>
-                  </div>
+              <div className="space-y-6">
+                {Object.entries(groupedStreams).map(([category, categoryStreams]) => (
+                  <CategoryRow
+                    key={category}
+                    category={category}
+                    streams={categoryStreams}
+                    onJoinStream={handleJoinStream}
+                  />
                 ))}
               </div>
             ) : (
