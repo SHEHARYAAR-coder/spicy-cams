@@ -9,6 +9,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@layer base {
+  body {
+    @apply bg-gray-900;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

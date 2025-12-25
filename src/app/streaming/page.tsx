@@ -410,33 +410,31 @@ export default function StreamingPage() {
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
-    <div className={`bg-gray-900 text-white flex flex-col ${mode === 'broadcast' || mode === 'watch'
-      ? 'h-screen lg:h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4rem)] overflow-hidden'
-      : 'min-h-[calc(100vh-4rem)] lg:h-[calc(100vh-4rem)]'
-      } lg:overflow-hidden`}>
-      <main className={`flex-1 flex flex-col min-h-0 ${mode === 'broadcast' || mode === 'watch'
-        ? 'p-0 lg:container lg:mx-auto lg:px-4 lg:py-4 overflow-hidden'
-        : 'container mx-auto px-4 py-4'
-        }`}>
+    <div className={`bg-gray-900 text-white flex flex-col`}>
+      <main className={`flex-1 flex flex-col min-h-0 px-8 py-4`}>
         <div className={`flex-none ${mode === 'create' ? 'hidden' : mode === 'broadcast' || mode === 'watch' ? 'hidden lg:block' : ''}`}>
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold">Live Streaming</h1>
-              <p className="text-gray-400">Create and watch live streams</p>
+              <h1 className="text-3xl font-bold">Live Stream's</h1>
             </div>
 
             {/* Navigation */}
             <div className="flex gap-2">
               {mode !== 'broadcast' && (
-                <Button
-                  onClick={() => setMode('browse')}
-                  variant={mode === 'browse' ? 'default' : 'outline'}
-                  className={mode === 'browse' ? "bg-purple-600 text-white hover:bg-purple-700" : "border-gray-700 hover:bg-gray-800 hover:text-white"}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  Browse Streams
-                </Button>
+                <div>
+                  <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-white hover:bg-gray-800 hover:text-white">
+                    Refresh
+                  </Button>
+                  {/* <Button
+                    onClick={() => setMode('browse')}
+                    variant={mode === 'browse' ? 'default' : 'outline'}
+                    className={mode === 'browse' ? "bg-purple-600 text-white hover:bg-purple-700" : "border-gray-700 hover:bg-gray-800 hover:text-white"}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Browse Streams
+                  </Button> */}
+                </div>
               )}
               {(session.user && (((session.user as { role?: string }).role === 'MODEL') || ((session.user as { role?: string }).role === 'ADMIN')) && mode !== 'broadcast') && (
                 <Button
@@ -457,14 +455,7 @@ export default function StreamingPage() {
           {/* Browse Mode */}
           {mode === 'browse' && (
             <div className="h-full overflow-y-auto pr-2 pb-4">
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-bold">Live Streams</h2>
-                  <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-white hover:bg-gray-800 hover:text-white">
-                    Refresh
-                  </Button>
-                </div>
-
+              <div className="space-y-6">              
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {streams.map((stream) => (
                     <StreamCard
