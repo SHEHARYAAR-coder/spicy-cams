@@ -151,62 +151,69 @@ function getRandomItem(array) {
 
 async function createTestStreams() {
   try {
-    console.log("🎬 Creating 30 test streams + 18 Asian category streams...");
+    console.log(
+      "🎬 Adding NEW test data: 30 test streams + 18 Asian category streams..."
+    );
 
-    // First, ensure we have at least one model user
-    let modelUsers = await prisma.user.findMany({
-      where: {
-        role: "MODEL",
-      },
-      include: {
-        profile: true,
-      },
+    // Get existing model count for logging
+    const existingModelCount = await prisma.user.count({
+      where: { role: "MODEL" },
     });
+    console.log(
+      `📊 Found ${existingModelCount} existing model users in database`
+    );
 
-    // If no models exist, create some
-    if (modelUsers.length === 0) {
-      console.log("📝 No model users found. Creating test model users...");
+    // Always create NEW model users with unique timestamp-based identifiers
+    const timestamp = Date.now();
+    const modelUsers = [];
 
-      for (let i = 0; i < 50; i++) {
-        const modelName = modelNames[i % modelNames.length];
-        const email = `${modelName.toLowerCase()}${i}@test.com`;
+    console.log("📝 Creating 50 NEW test model users...");
 
-        const user = await prisma.user.create({
-          data: {
-            email,
-            passwordHash: "$2a$10$dummyhashfortest", // Dummy hash
-            role: "MODEL",
-            status: "ACTIVE",
-            emailVerified: true,
-            profile: {
-              create: {
-                displayName: modelName,
-                isModel: true,
-                avatarUrl: `https://i.pravatar.cc/300?u=${modelName}`,
-                bio: `Hi! I'm ${modelName}. Come hang out with me! 💕`,
-                category: getRandomItem(categories),
-                language: "English",
-                verificationStatus: "approved",
-                profileCompleted: true,
-              },
-            },
-            wallet: {
-              create: {
-                balance: 0,
-                currency: "USD",
-              },
+    for (let i = 0; i < 50; i++) {
+      const modelName = modelNames[i % modelNames.length];
+      const email = `${modelName.toLowerCase()}.${timestamp}.${i}@test.com`;
+
+      const user = await prisma.user.create({
+        data: {
+          email,
+          passwordHash: "$2a$10$dummyhashfortest", // Dummy hash
+          role: "MODEL",
+          status: "ACTIVE",
+          emailVerified: true,
+          profile: {
+            create: {
+              displayName: `${modelName} ${timestamp % 1000}`,
+              isModel: true,
+              avatarUrl: `https://i.pravatar.cc/300?u=${modelName}${timestamp}${i}`,
+              bio: `Hi! I'm ${modelName}. Come hang out with me! 💕`,
+              category: getRandomItem(categories),
+              language: "English",
+              verificationStatus: "approved",
+              profileCompleted: true,
             },
           },
-        });
+          wallet: {
+            create: {
+              balance: 0,
+              currency: "USD",
+            },
+          },
+        },
+      });
 
-        modelUsers.push(user);
-      }
-
-      console.log(`✅ Created ${modelUsers.length} test model users`);
+      modelUsers.push(user);
     }
 
-    // Create 30 streams (distributed across categories)
+    console.log(`✅ Created ${modelUsers.length} NEW test model users`);
+
+    // Get existing stream count for logging
+    const existingStreamCount = await prisma.stream.count();
+    console.log(`📊 Database has ${existingStreamCount} existing streams`);
+
+    // Create 30 NEW streams (distributed across categories)
     const streams = [];
+    const streamTimestamp = Date.now();
+
     for (let i = 0; i < 30; i++) {
       const model = modelUsers[i % modelUsers.length];
       const category = categories[i % categories.length];
@@ -221,8 +228,8 @@ async function createTestStreams() {
           category,
           tags,
           status: "LIVE", // Set all as LIVE for testing
-          thumbnailUrl: `https://picsum.photos/seed/stream${i}/400/300`,
-          livekitRoomName: `test-room-${Date.now()}-${i}`,
+          thumbnailUrl: `https://picsum.photos/seed/stream${streamTimestamp}${i}/400/300`,
+          livekitRoomName: `test-room-${streamTimestamp}-${i}`,
           startedAt: new Date(Date.now() - Math.random() * 3600000), // Started within last hour
           scheduledAt: new Date(Date.now() - Math.random() * 7200000),
           recordingEnabled: Math.random() > 0.5,
@@ -261,8 +268,8 @@ async function createTestStreams() {
           category,
           tags,
           status: "LIVE",
-          thumbnailUrl: `https://picsum.photos/seed/asian${i}/400/300`,
-          livekitRoomName: `test-asian-room-${Date.now()}-${i}`,
+          thumbnailUrl: `https://picsum.photos/seed/asian${streamTimestamp}${i}/400/300`,
+          livekitRoomName: `test-asian-room-${streamTimestamp}-${i}`,
           startedAt: new Date(Date.now() - Math.random() * 3600000),
           scheduledAt: new Date(Date.now() - Math.random() * 7200000),
           recordingEnabled: Math.random() > 0.5,
@@ -286,9 +293,22 @@ async function createTestStreams() {
     }
 
     console.log(
-      "\n🎉 Successfully created 48 test streams (30 general + 18 Asian)!"
+      "\n🎉 Successfully created 48 NEW test streams (30 general + 18 Asian)!"
     );
+
+    // Get updated counts
+    const totalModelCount = await prisma.user.count({
+      where: { role: "MODEL" },
+    });
+    const totalStreamCount = await prisma.stream.count();
+
     console.log("\n📊 Summary:");
+    console.log(
+      `   Total Models in DB: ${totalModelCount} (added ${modelUsers.length} new)`
+    );
+    console.log(
+      `   Total Streams in DB: ${totalStreamCount} (added ${streams.length} new)`
+    );
 
     // Count streams by category
     const categoryCounts = {};
