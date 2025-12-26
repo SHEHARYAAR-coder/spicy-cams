@@ -5,6 +5,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LoginForm from "./login-form";
 import RegisterForm from "./register-form";
 import { X } from "lucide-react";
+import { DialogTitle } from "@radix-ui/react-dialog";
+import Link from "next/link";
 
 interface AuthModalProps {
     open: boolean;
@@ -30,46 +32,70 @@ export default function AuthModal({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="bg-gray-900 border-gray-700 text-white !max-w-7xl sm:!max-w-7xl p-0 overflow-hidden max-h-[90vh] flex flex-col">
-                {/* Close button */}
-                <div className="absolute top-4 right-4 z-50">
-                    {/* <button
-                        onClick={() => handleOpenChange(false)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                        aria-label="Close dialog"
-                    >
-                        <X className="w-6 h-6" />
-                    </button> */}
-                </div>
-
-                {/* Tabs */}
-                {/* <div className="flex border-b border-gray-700 flex-shrink-0">
-                    <button
-                        onClick={() => setActiveTab("login")}
-                        className={`flex-1 py-4 px-6 text-center font-semibold transition-all ${activeTab === "login"
-                            ? "border-b-2 border-purple-500 text-white"
-                            : "text-gray-400 hover:text-gray-300"
-                            }`}
-                    >
-                        Sign In
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("signup")}
-                        className={`flex-1 py-4 px-6 text-center font-semibold transition-all ${activeTab === "signup"
-                            ? "border-b-2 border-purple-500 text-white"
-                            : "text-gray-400 hover:text-gray-300"
-                            }`}
-                    >
-                        Sign Up
-                    </button>
-                </div> */}
-
-                {/* Content - scrollable with full two-column layout */}
-                <div className="overflow-y-auto flex-1">
+            <DialogContent className="bg-gray-900 border-gray-700 text-white !max-w-2xl p-0 overflow-hidden max-h-[40vh] flex flex-col">
+                <div className="flex-1 flex">
                     {activeTab === "login" ? (
-                        <LoginForm userType={userType} compact={false} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
+                            <div className="flex flex-col justify-center items-center text-center overflow-hidden">
+                                <img
+                                    src="/auth/forget.PNG"
+                                    alt="Login Background"
+                                    className="w-full h-full object-cover opacity-80"
+                                />
+                            </div>
+                            <div className="flex justify-center items-start pt-20">
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-bold mb-3">Welcome Back!</h2>
+                                    <p className="text-gray-400 mb-8">Choose your account type to continue</p>
+
+                                    <div className="flex flex-col gap-4">
+                                        <Link
+                                            href={'/v/login'}
+                                            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Login as Viewer
+                                        </Link>
+
+                                        <Link
+                                            href={'/m/login'}
+                                            className="px-8 py-3 bg-pink-600 hover:bg-pink-700 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Login as Model
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ) : (
-                        <RegisterForm userType={userType} compact={false} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
+                            <div className="flex justify-center items-start pt-20">
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-bold mb-3">Join Us Today!</h2>
+                                    <p className="text-gray-400 mb-8">Choose your account type to get started</p>
+                                    <div className="flex flex-col gap-4">
+                                        <Link
+                                            href={'/v/register'}
+                                            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Sign up as Viewer
+                                        </Link>
+                                        <Link
+                                            href={'/m/register'}
+                                            className="px-8 py-3 bg-pink-600 hover:bg-pink-700 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Sign up as Model
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex flex-col justify-center items-center text-center overflow-hidden">
+                                <img
+                                    src="/auth/login.PNG"
+                                    alt="Login Background"
+                                    className="w-full h-full object-cover opacity-80"
+                                />
+                            </div>
+                        </div>
                     )}
                 </div>
             </DialogContent>
