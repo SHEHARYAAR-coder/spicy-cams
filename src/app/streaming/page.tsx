@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { ModelBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
 import { MediaPermissions } from '@/components/stream/media-permissions';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
-import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen, Camera } from 'lucide-react';
+import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TabbedChatContainer, MobileChatOverlay } from '@/components/chat';
 import { useStream } from '@/contexts/StreamContext';
 
@@ -30,6 +30,110 @@ interface Stream {
   participantCount?: number;
 }
 
+// Category Row Component for recommendations
+interface CategoryRowProps {
+  category: string;
+  streams: Stream[];
+  onJoinStream: (streamId: string) => void;
+  currentStreamId?: string;
+}
+
+function CategoryRow({ category, streams, onJoinStream, currentStreamId }: CategoryRowProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Filter out current stream from recommendations
+  const filteredStreams = streams.filter(stream => stream.id !== currentStreamId);
+
+  const checkScrollability = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(
+        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
+      );
+    }
+  };
+
+  const scroll = (direction: 'left' | 'right') => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -800 : 800;
+      container.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+      setTimeout(checkScrollability, 100);
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      checkScrollability();
+      container.addEventListener('scroll', checkScrollability);
+      window.addEventListener('resize', checkScrollability);
+
+      return () => {
+        container.removeEventListener('scroll', checkScrollability);
+        window.removeEventListener('resize', checkScrollability);
+      };
+    }
+  }, [filteredStreams]);
+
+  if (filteredStreams.length === 0) return null;
+
+  return (
+    <div className="mb-8">
+      <h2 className="text-xl md:text-2xl font-bold mb-4 px-2 md:px-3">{category}</h2>
+
+      <div className="relative group">
+        {/* Left Scroll Button */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-2 md:p-3 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+        )}
+
+        {/* Streams Container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 md:px-3 scroll-smooth"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+          }}
+        >
+          {filteredStreams.map((stream) => (
+            <StreamCard
+              key={stream.id}
+              stream={stream}
+              onJoinStream={onJoinStream}
+              className="w-[210px] sm:w-[240px] md:w-[280px] lg:w-[300px] flex-shrink-0"
+            />
+          ))}
+        </div>
+
+        {/* Right Scroll Button */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-gray-800/90 hover:bg-gray-700 border border-gray-600 text-white p-2 md:p-3 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 shadow-lg"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function StreamingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -42,6 +146,7 @@ export default function StreamingPage() {
   const [loading, setLoading] = useState(false);
   const [hasMediaPermissions, setHasMediaPermissions] = useState(false);
   const [permissionError, setPermissionError] = useState<string>('');
+  const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
   // New stream form
   const [newStream, setNewStream] = useState({
@@ -217,12 +322,78 @@ export default function StreamingPage() {
     }
   };
 
+  // Fetch recommended streams based on category
+  const fetchRecommendations = async (category?: string) => {
+    if (!category) {
+      console.log('No category provided for recommendations');
+      return;
+    }
+
+    console.log('Fetching recommendations for category:', category);
+
+    try {
+      // Fetch all live streams with the same category
+      const response = await fetch('/api/streams/list');
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('All streams received:', data.streams?.length);
+
+        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+          ...stream,
+          createdAt: new Date(stream.createdAt),
+          model: {
+            id: stream.model?.id || stream.creator?.id || '',
+            name: stream.model?.name || stream.creator?.name || 'Unknown',
+            image: stream.model?.avatar || stream.model?.image || stream.creator?.avatar || stream.creator?.image
+          }
+        }));
+
+        // Filter by category (case-insensitive) and LIVE status, limit to 40
+        const categoryStreams = streamsWithDates
+          .filter((stream: Stream) =>
+            stream.status === 'LIVE' &&
+            stream.category?.toLowerCase() === category.toLowerCase() &&
+            stream.id !== selectedStream
+          )
+          .slice(0, 40);
+
+        console.log('Filtered streams for category', category, ':', categoryStreams.length);
+        setRecommendedStreams(categoryStreams);
+
+        // If no streams in this category, show other live streams
+        if (categoryStreams.length === 0) {
+          console.log('No streams in category, showing other live streams');
+          const otherStreams = streamsWithDates
+            .filter((stream: Stream) =>
+              stream.status === 'LIVE' &&
+              stream.id !== selectedStream
+            )
+            .slice(0, 40);
+          setRecommendedStreams(otherStreams);
+        }
+      } else {
+        console.error('Failed to fetch streams:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
+  };
+
   useEffect(() => {
     fetchStreams();
     // Refresh streams every 30 seconds
     const interval = setInterval(fetchStreams, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch recommendations when watching a stream
+  useEffect(() => {
+    if (mode === 'watch' && currentStreamData?.category) {
+      console.log('Watch mode detected, fetching recommendations for:', currentStreamData.category);
+      fetchRecommendations(currentStreamData.category);
+    }
+  }, [mode, currentStreamData?.category]);
 
   // Handle join stream from URL parameter
   useEffect(() => {
@@ -455,7 +626,7 @@ export default function StreamingPage() {
           {/* Browse Mode */}
           {mode === 'browse' && (
             <div className="h-full overflow-y-auto pr-2 pb-4">
-              <div className="space-y-6">              
+              <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {streams.map((stream) => (
                     <StreamCard
@@ -858,7 +1029,7 @@ export default function StreamingPage() {
           {mode === 'watch' && selectedStream && streamToken && (
             <div className="h-full flex flex-col">
               {/* Header - Hidden on mobile for full-screen video */}
-              <div className="hidden lg:flex flex-none justify-between items-center mb-4 h-[70vh]">
+              <div className="hidden lg:flex flex-none justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Watching Stream</h2>
                 <Button
                   onClick={handleStreamEnd}
@@ -870,31 +1041,47 @@ export default function StreamingPage() {
               </div>
 
               {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-3 gap-4 h-full">
-                  {/* Video Section - Takes 2/3 width */}
-                  <div className="lg:col-span-2 flex flex-col">
-                    <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
-                      <ViewerPlayer
-                        streamId={selectedStream}
-                        token={streamToken}
-                        serverUrl={LIVEKIT_SERVER_URL}
-                        streamTitle={currentStreamData?.title}
-                        modelName={currentStreamData?.model?.name}
-                        className="h-full w-full absolute inset-0"
-                      />
+                <div className="hidden lg:block">
+                  <div className="grid lg:grid-cols-3 gap-4 mb-6 h-[70vh]">
+                    {/* Video Section - Takes 2/3 width */}
+                    <div className="lg:col-span-2 flex flex-col">
+                      <div className="h-[500px] bg-black rounded-lg overflow-hidden relative">
+                        <ViewerPlayer
+                          streamId={selectedStream}
+                          token={streamToken}
+                          serverUrl={LIVEKIT_SERVER_URL}
+                          streamTitle={currentStreamData?.title}
+                          modelName={currentStreamData?.model?.name}
+                          className="h-full w-full absolute inset-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Chat Section - Takes 1/3 width */}
+                    <div className="lg:col-span-1">
+                      <div className="h-[500px]">
+                        <TabbedChatContainer
+                          streamId={selectedStream}
+                          canModerate={false}
+                          className="h-full"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Chat Section - Takes 1/3 width */}
-                  <div className="lg:col-span-1">
-                    <TabbedChatContainer
-                      streamId={selectedStream}
-                      canModerate={false}
-                      className="h-full"
-                    />
-                  </div>
+                  {/* Recommendations Section - Below video */}
+                  {recommendedStreams.length > 0 && (
+                    <div className="mt-8">
+                      <CategoryRow
+                        category={`More ${currentStreamData?.category || 'Live Streams'}`}
+                        streams={recommendedStreams}
+                        onJoinStream={handleJoinStream}
+                        currentStreamId={selectedStream}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Mobile Layout - True Full Screen Video */}
