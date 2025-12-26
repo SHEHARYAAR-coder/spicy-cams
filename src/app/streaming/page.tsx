@@ -808,7 +808,7 @@ export default function StreamingPage() {
               {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
               <div className="flex-1 min-h-0">
                 {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-3 gap-4 h-full">
+                <div className="hidden lg:grid lg:grid-cols-3 gap-4 h-[70vh]">
                   {/* Video Section - Takes 2/3 width */}
                   <div className="lg:col-span-2 flex flex-col">
                     <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
@@ -858,7 +858,7 @@ export default function StreamingPage() {
           {mode === 'watch' && selectedStream && streamToken && (
             <div className="h-full flex flex-col">
               {/* Header - Hidden on mobile for full-screen video */}
-              <div className="hidden lg:flex flex-none justify-between items-center mb-4">
+              <div className="hidden lg:flex flex-none justify-between items-center mb-4 h-[70vh]">
                 <h2 className="text-2xl font-bold">Watching Stream</h2>
                 <Button
                   onClick={handleStreamEnd}
