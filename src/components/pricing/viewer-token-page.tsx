@@ -18,7 +18,7 @@ export default function ViewerTokenPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Navigation would go here */}
       <div className="container mx-auto px-4 py-16 max-w-7xl">
         {/* Header */}
