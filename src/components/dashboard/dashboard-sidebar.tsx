@@ -245,7 +245,7 @@ export function DashboardSidebar({
   const SidebarContent = ({ collapsed = false }: { collapsed?: boolean }) => (
     <>
       {/* User Profile Section */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-gray-700 pt-10">
         <div
           className={cn(
             "flex items-center",

@@ -410,8 +410,8 @@ export default function StreamingPage() {
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
-    <div className={`bg-gray-900 text-white flex flex-col`}>
-      <main className={`flex-1 flex flex-col min-h-0 px-8 py-4`}>
+    <div className={`bg-gray-900 text-white flex flex-col min-h-screen`}>
+      <main className={`flex-1 flex flex-col min-h-0 px-8 py-4 pt-[10rem]`}>
         <div className={`flex-none ${mode === 'create' ? 'hidden' : mode === 'broadcast' || mode === 'watch' ? 'hidden lg:block' : ''}`}>
           {/* Header */}
           <div className="flex justify-between items-center mb-6">

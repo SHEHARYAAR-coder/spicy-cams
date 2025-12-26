@@ -279,6 +279,10 @@ export default function Home() {
     return acc;
   }, {} as Record<string, Stream[]>);
 
+  // Check if user is a model
+  const sessionUser = session?.user as { role?: string } | undefined;
+  const isModel = sessionUser?.role === "MODEL";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
       <AuthModal
@@ -296,7 +300,7 @@ export default function Home() {
         />
 
         {/* Main Content - Full width on mobile, flush next to sidebar on desktop */}
-        <div className="flex-1 flex flex-col lg:ml-0 h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col lg:ml-72 pt-[10rem] h-screen overflow-hidden">
           {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
@@ -432,8 +436,45 @@ export default function Home() {
             </>
           )}
 
+          {/* Promotional Banner - Only for viewers */}
+          {selectedCategory !== "Private Messages" && !isModel && (
+            <div className="px-2 md:px-3 mb-4">
+              <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg p-4 md:p-6 overflow-hidden shadow-xl">
+                {/* Decorative elements */}
+                <div className="absolute top-0 left-0 w-16 h-16 opacity-20">
+                  <span className="text-6xl">🎁</span>
+                </div>
+                <div className="absolute top-0 right-0 w-16 h-16 opacity-20">
+                  <span className="text-6xl">🎅</span>
+                </div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <span className="text-3xl md:text-4xl">🎁</span>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                        <span className="bg-red-600 px-3 py-1 rounded-lg">50% OFF</span>
+                        <span>Tokens for XXXmas</span>
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
+                    <p className="text-white text-sm md:text-base font-medium text-center md:text-left">
+                      Warm up your nights with someone special!
+                    </p>
+                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-6 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                      GET DISCOUNT
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+      
+
           {/* Content Area */}
-          <div className="flex-1 p-2 md:p-3 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+          <div className="flex-1 p-2 md:p-3 overflow-y-auto  scrollbar-hide ">
             {selectedCategory === "Private Messages" ? (
               <PrivateChatContainer streamId="homepage" token={null} />
             ) : loading && streams.length === 0 ? (

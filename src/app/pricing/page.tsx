@@ -10,7 +10,7 @@ export default function Page() {
   const userRole = (session?.user as { role?: string })?.role;
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 text-white pt-[10rem] px-8 py-4">
       {userRole === "MODEL" && <EarningsPage />}
       {userRole === "VIEWER" && <ViewerTokenPage />}
       {userRole === "ADMIN" && <ViewerTokenPage />}

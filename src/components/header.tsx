@@ -114,7 +114,7 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg sticky top-0 z-50">
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-0 z-50">
         <div className="mx-auto px-6 py-2 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-6">
@@ -376,7 +376,7 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 sticky w-full top-20 z-40">
+          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-[5rem] z-40">
             <div className="mx-auto px-6 lg:px-8">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (

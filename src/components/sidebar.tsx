@@ -112,7 +112,7 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
     }
 
     return (
-        <div className="hidden lg:block left-0 h-[calc(100vh-8rem)] w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-30 shadow-2xl">
+        <div className="hidden lg:block fixed left-0 top-[8rem] pt-2 bottom-0 w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-30 shadow-2xl">
             <div className="p-5 space-y-6">
                 {/* Main Categories Section */}
                 <div className="space-y-2">
