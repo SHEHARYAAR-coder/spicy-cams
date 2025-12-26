@@ -75,9 +75,13 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
                 sessionUser.roles.includes("MODEL")))
     );
 
-    // Filter categories based on user role
+    // Filter categories based on user role and login status
     const visibleCategories = categories.filter(category => {
-        return !(category.name === "All Models" && isModel);
+        // Hide "All Models" for models
+        if (category.name === "All Models" && isModel) return false;
+        // Hide "Private Messages" for non-logged-in users
+        if (category.name === "Private Messages" && !session) return false;
+        return true;
     });
 
     const categoryFilters: CategoryFilter[] = [
@@ -112,10 +116,10 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
     }
 
     return (
-        <div className="hidden lg:block fixed left-0 top-[8rem] pt-2 bottom-0 w-72 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-30 shadow-2xl">
-            <div className="p-5 space-y-6">
+        <div className="hidden lg:block fixed left-0 top-[6.5rem] pt-2 bottom-0 w-56 bg-gradient-to-b from-gray-900 via-gray-900/98 to-gray-950 backdrop-blur-md border-r border-gray-800/80 overflow-y-auto scrollbar-hide z-30 shadow-2xl">
+            <div className="p-4 space-y-5">
                 {/* Main Categories Section */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                     {visibleCategories.map((category) => {
                         const IconComponent = category.icon;
                         const isActive = localSelectedCategory === category.name;
@@ -124,7 +128,7 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
                             <button
                                 key={category.name}
                                 onClick={() => handleCategoryClick(category.name)}
-                                className={`group w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 relative overflow-hidden ${isActive
+                                className={`group w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden ${isActive
                                     ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.02]"
                                     : "text-gray-300 hover:bg-gray-800/60 hover:text-white hover:translate-x-1"
                                     }`}
@@ -135,10 +139,10 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
                                 )}
 
                                 <IconComponent
-                                    className={`w-5 h-5 relative z-10 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"
+                                    className={`w-4 h-4 relative z-10 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"
                                         }`}
                                 />
-                                <span className={`font-semibold text-sm relative z-10 flex-1 text-left`}>
+                                <span className={`font-semibold text-xs relative z-10 flex-1 text-left`}>
                                     {category.name}
                                 </span>
 
@@ -165,10 +169,10 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
 
                 {/* Category Pages Section */}
                 <div className="space-y-1.5">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-3">
+                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-2 mb-2">
                         Browse by Category
                     </h3>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         {categoryCounts.map((filter) => {
                             const isActive = localSelectedCategory === filter.name;
 
@@ -179,15 +183,15 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
                                         setLocalSelectedCategory(filter.name);
                                         onCategoryChange?.(filter.name);
                                     }}
-                                    className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${isActive
+                                    className={`group w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-all duration-200 ${isActive
                                         ? "bg-purple-600/90 text-white shadow-md shadow-purple-500/20"
                                         : "text-gray-400 hover:bg-gray-800/50 hover:text-gray-200"
                                         }`}
                                 >
-                                    <span className="flex items-center gap-2">
+                                    <span className="flex items-center gap-1.5">
                                         {/* Category Dot Indicator */}
                                         <div
-                                            className={`w-1.5 h-1.5 rounded-full transition-all ${isActive ? "bg-white shadow-sm" : "bg-gray-600 group-hover:bg-gray-400"
+                                            className={`w-1 h-1 rounded-full transition-all ${isActive ? "bg-white shadow-sm" : "bg-gray-600 group-hover:bg-gray-400"
                                                 }`}
                                         />
                                         <span className={`font-medium ${isActive ? "font-semibold" : ""}`}>

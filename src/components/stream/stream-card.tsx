@@ -121,7 +121,7 @@ export function StreamCard({
             onClick={handleJoinStream}
         >
             {/* Thumbnail Wrapper with fixed height */}
-            <div className="relative w-full h-40 sm:h-44 md:h-48 bg-gray-700 overflow-hidden">
+            <div className="relative w-full aspect-[4/3] bg-gray-700 overflow-hidden">
                 {/* Thumbnail Image */}
                 {stream.thumbnailUrl ? (
                     <img
@@ -196,7 +196,7 @@ export function StreamCard({
 export function StreamCardSkeleton() {
     return (
         <Card className="rounded-none animate-pulse bg-gray-800 border-gray-700 overflow-hidden">
-            <div className="w-full h-40 sm:h-44 md:h-48 bg-gray-700" />
+            <div className="w-full aspect-[4/3] bg-gray-700" />
             <CardContent className="p-4">
                 <div className="h-6 bg-gray-700 mb-2 w-3/4" />
                 <div className="flex items-center gap-3 mb-3">

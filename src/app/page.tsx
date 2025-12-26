@@ -136,7 +136,7 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
               key={stream.id}
               stream={stream}
               onJoinStream={onJoinStream}
-              className="w-[210px] sm:w-[240px] md:w-[280px] lg:w-[300px]"
+              className="w-[180px] sm:w-[200px] md:w-[220px] lg:w-[240px]"
             />
           ))}
         </div>
@@ -300,8 +300,7 @@ export default function Home() {
         />
 
         {/* Main Content - Full width on mobile, flush next to sidebar on desktop */}
-        <div className="flex-1 flex flex-col lg:ml-72 pt-[10rem] h-screen overflow-hidden">
-          {/* Top Filters Bar & Search Bar - hidden for Private Messages */}
+        <div className="flex-1 flex flex-col lg:ml-56 pt-[6rem] h-screen overflow-hidden">{/* Top Filters Bar & Search Bar - hidden for Private Messages */}
           {selectedCategory !== "Private Messages" && (
             <>
               {/*<div className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 p-3 md:p-4">*/}
@@ -438,31 +437,29 @@ export default function Home() {
 
           {/* Promotional Banner - Only for viewers */}
           {selectedCategory !== "Private Messages" && !isModel && (
-            <div className="px-2 md:px-3 mb-4">
-              <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg p-4 md:p-6 overflow-hidden shadow-xl">
+            <div className="px-2 py-5 md:px-3 mb-2">
+              <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg px-3 py-1.5 overflow-hidden shadow-lg">
                 {/* Decorative elements */}
-                <div className="absolute top-0 left-0 w-16 h-16 opacity-20">
-                  <span className="text-6xl">🎁</span>
+                <div className="absolute top-0 left-0 w-6 h-6 opacity-15">
+                  <span className="text-2xl">🎁</span>
                 </div>
-                <div className="absolute top-0 right-0 w-16 h-16 opacity-20">
-                  <span className="text-6xl">🎅</span>
+                <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
+                  <span className="text-2xl">🎅</span>
                 </div>
                 
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <span className="text-3xl md:text-4xl">🎁</span>
-                    <div>
-                      <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-                        <span className="bg-red-600 px-3 py-1 rounded-lg">50% OFF</span>
-                        <span>Tokens for XXXmas</span>
-                      </h2>
-                    </div>
+                <div className="relative z-10 flex flex-row items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🎁</span>
+                    <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                      <span className="bg-red-600 px-1.5 py-0.5 rounded text-xs">50% OFF</span>
+                      <span className="hidden sm:inline">Tokens for XXXmas</span>
+                    </h2>
                   </div>
-                  <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
-                    <p className="text-white text-sm md:text-base font-medium text-center md:text-left">
+                  <div className="flex items-center gap-2">
+                    <p className="hidden md:inline text-white text-xs font-medium">
                       Warm up your nights with someone special!
                     </p>
-                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-6 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
                       GET DISCOUNT
                     </Button>
                   </div>

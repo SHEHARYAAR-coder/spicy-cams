@@ -114,30 +114,30 @@ export function Header() {
 
   return (
     <>
-      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-0 z-50">
-        <div className="mx-auto px-6 py-2 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-6">
-              <Link href="/" className="flex items-center space-x-3 group transition-all duration-300 hover:opacity-80">
+      <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50  fixed w-full top-0 z-50">
+        <div className="mx-auto px-4 py-3 lg:px-6">
+          <div className="flex justify-between items-center h-12">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center space-x-2 group transition-all duration-300 hover:opacity-80">
                 <img
                   src="/logo/logo.png"
                   alt="SpicyCams Logo"
-                  className="h-22 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 />
               </Link>
 
               {(sessionUser?.role !== "MODEL") && (
-                <div className={'flex items-center justify-center gap-3'}>
+                <div className={'flex items-center justify-center gap-2'}>
                   <Link
                     href={'/all-models/'}
-                    className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
+                    className={'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
                   >
                     <Star className="w-4 h-4 text-yellow-400" />
                     <span>All Models</span>
                   </Link>
                   <Link
                     href={'/top-models/'}
-                    className={'relative inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600 bg-gradient-to-r from-purple-600/20 to-pink-600/20'}
+                    className={'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600 bg-gradient-to-r from-purple-600/20 to-pink-600/20'}
                   >
                     <Star className="w-4 h-4 text-pink-400 fill-pink-400" />
                     <span>Top Models</span>
@@ -146,8 +146,8 @@ export function Header() {
               )}
 
               {onlineModelsCount > 0 && (
-                <div className={'relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
-                  <span className={'flex gap-2'}>
+                <div className={'relative inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
+                  <span className={'flex gap-1.5'}>
                     Live Streams
                     <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
                       {onlineModelsCount}
@@ -160,8 +160,8 @@ export function Header() {
             {/* Center nav pill - Only show when logged in */}
             {session?.user && (
               <nav className="hidden md:flex flex-1 items-center justify-center">
-                <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-3 py-1.5 shadow-xl">
-                  <ul className="flex items-center gap-1">
+                <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-2 py-1 shadow-xl">
+                  <ul className="flex items-center gap-0.5">
                     {[
                       { label: "Home", href: "/" },
                       { label: "Pricing", href: "/pricing" },
@@ -174,7 +174,7 @@ export function Header() {
                         <li key={item.href}>
                           <Link
                             href={item.href}
-                            className={`relative inline-flex items-center rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${active
+                            className={`relative inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 ${active
                               ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg shadow-purple-500/50"
                               : "text-gray-300 hover:text-white hover:bg-gray-700/70"
                               }`}
@@ -191,10 +191,10 @@ export function Header() {
               </nav>
             )}
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               {/* Search Bar for Streams - Always visible */}
               <div className={`relative ${session?.user ? 'block' : 'hidden'}`}>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search streams..."
@@ -205,7 +205,7 @@ export function Header() {
                       router.push(`/?search=${encodeURIComponent(searchQuery)}`);
                     }
                   }}
-                  className="pl-10 pr-4 py-2 bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-48 lg:w-64"
+                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-40 lg:w-52"
                 />
               </div>
 
@@ -213,11 +213,11 @@ export function Header() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div tabIndex={0} className="outline-none">
-                      <Avatar className="w-10 h-10 cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-purple-500 hover:shadow-lg hover:shadow-purple-500/50 ring-offset-2 ring-offset-gray-900">
+                      <Avatar className="w-8 h-8 cursor-pointer transition-all duration-300 hover:ring-2 hover:ring-purple-500 hover:shadow-lg hover:shadow-purple-500/50 ring-offset-1 ring-offset-gray-900">
                         <AvatarImage
                           src={sessionUser?.image || undefined}
                           alt="User avatar"
-                          className="object-cover w-10 h-10 rounded-full"
+                          className="object-cover w-8 h-8 rounded-full"
                         />
                         <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
                           <User className="w-5 h-5 text-white" />
@@ -376,11 +376,11 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 fixed w-full top-[5rem] z-40">
-            <div className="mx-auto px-6 lg:px-8">
+          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40">
+            <div className="mx-auto px-4 lg:px-6">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (
-                <div className="flex items-center justify-start gap-6 py-3">
+                <div className="flex items-center justify-start gap-4 py-2">
                   {/* Model Avatar and Name */}
                   <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10 ring-2 ring-purple-500/50">
@@ -428,7 +428,7 @@ export function Header() {
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center justify-start gap-8 py-3">
+                <div className="flex items-center justify-start gap-6 py-2 font-medium text-sm pt-[1rem]">
                   <Link
                     href="/?category=girls"
                     className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
