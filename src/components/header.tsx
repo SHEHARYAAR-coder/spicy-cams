@@ -27,10 +27,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
 import { useStream } from "@/contexts/StreamContext";
+import { useCategoryType, CategoryType } from "@/contexts/CategoryContext";
 
 export function Header() {
   const { data: session, status } = useSession();
   const { isStreaming, streamData } = useStream();
+  const { selectedCategoryType, setSelectedCategoryType, showCategoryBar } = useCategoryType();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -363,7 +365,11 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40">
+          <div 
+            className={`bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40 transition-transform duration-300 ${
+              showCategoryBar ? 'translate-y-0' : '-translate-y-full'
+            }`}
+          >
             <div className="mx-auto px-4 lg:px-6">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (
@@ -416,42 +422,62 @@ export function Header() {
                 </div>
               ) : (
                 <div className="flex items-center justify-start gap-6 py-2 font-medium text-sm pt-[1rem]">
-                  <Link
-                    href="/?category=girls"
-                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'girls'
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryType("girls");
+                      if (pathname?.startsWith('/tags/')) {
+                        router.push('/tags/girls');
+                      }
+                    }}
+                    className={`transition-all duration-300 font-medium ${selectedCategoryType === 'girls'
                       ? 'text-white border-b-2 border-purple-500 pb-1'
                       : 'text-gray-300 hover:text-white'
                       }`}
                   >
                     Girls
-                  </Link>
-                  <Link
-                    href="/?category=couples"
-                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'couples'
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryType("couples");
+                      if (pathname?.startsWith('/tags/')) {
+                        router.push('/tags/couples');
+                      }
+                    }}
+                    className={`transition-all duration-300 font-medium ${selectedCategoryType === 'couples'
                       ? 'text-white border-b-2 border-purple-500 pb-1'
                       : 'text-gray-300 hover:text-white'
                       }`}
                   >
                     Couples
-                  </Link>
-                  <Link
-                    href="/?category=guys"
-                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'guys'
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryType("guys");
+                      if (pathname?.startsWith('/tags/')) {
+                        router.push('/tags/guys');
+                      }
+                    }}
+                    className={`transition-all duration-300 font-medium ${selectedCategoryType === 'guys'
                       ? 'text-white border-b-2 border-purple-500 pb-1'
                       : 'text-gray-300 hover:text-white'
                       }`}
                   >
                     Guys
-                  </Link>
-                  <Link
-                    href="/?category=trans"
-                    className={`transition-all duration-300 font-medium ${searchParams.get('category') === 'trans'
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryType("trans");
+                      if (pathname?.startsWith('/tags/')) {
+                        router.push('/tags/trans');
+                      }
+                    }}
+                    className={`transition-all duration-300 font-medium ${selectedCategoryType === 'trans'
                       ? 'text-white border-b-2 border-purple-500 pb-1'
                       : 'text-gray-300 hover:text-white'
                       }`}
                   >
                     Trans
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>

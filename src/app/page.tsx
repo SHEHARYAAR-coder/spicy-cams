@@ -14,6 +14,7 @@ import {
   Play,
   ChevronLeft,
   ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 import AuthModal from "@/components/auth/auth-modal";
 
@@ -126,8 +127,8 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
         <div
           ref={scrollContainerRef}
           className={`grid ${gridRowsClass} grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 md:px-3 scroll-smooth`}
-          style={{
-            scrollbarWidth: 'none',
+          style={{ 
+            scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
           }}
         >
@@ -446,7 +447,7 @@ export default function Home() {
                 <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
                   <span className="text-2xl">🎅</span>
                 </div>
-
+                
                 <div className="relative z-10 flex flex-row items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🎁</span>
@@ -468,7 +469,7 @@ export default function Home() {
             </div>
           )}
 
-
+      
 
           {/* Content Area */}
           <div className="flex-1 p-2 md:p-3 overflow-y-auto  scrollbar-hide ">
@@ -546,6 +547,28 @@ export default function Home() {
             <Video className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
           </Button>
         </Link>
+      )}
+
+      {/* Bottom Banner - Join SpicyCams */}
+      {!session && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-700 via-purple-600 to-purple-700 border-t-2 border-purple-500 shadow-2xl">
+          <div className="mx-auto px-4 py-3 lg:px-8">
+            <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center gap-3">
+                <MessageCircle className="w-6 h-6 text-white animate-pulse" />
+                <span className="text-white font-bold text-base md:text-lg">
+                  Join SpicyCams to interact with models!
+                </span>
+              </div>
+              <Button 
+                onClick={() => setViewerSignupOpen(true)}
+                className="bg-white hover:bg-gray-100 text-purple-700 font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
+              >
+                Join FREE
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

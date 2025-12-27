@@ -4,6 +4,7 @@ import { AgeVerificationDialog } from "@/components/age-verification-dialog";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { StreamProvider } from "@/contexts/StreamContext";
+import { CategoryProvider } from "@/contexts/CategoryContext";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -22,11 +23,13 @@ export default function RootLayout({
       <body className="antialiased font-sans bg-gray-950 text-white">
         <AuthProvider>
           <StreamProvider>
-            <AgeVerificationDialog />
-            <Header />
-            {children}
-            <Footer />
-            <Toaster position="top-right" richColors />
+            <CategoryProvider>
+              <AgeVerificationDialog />
+              <Header />
+              {children}
+              <Footer />
+              <Toaster position="top-right" richColors />
+            </CategoryProvider>
           </StreamProvider>
         </AuthProvider>
       </body>
