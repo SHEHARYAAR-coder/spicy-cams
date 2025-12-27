@@ -503,7 +503,7 @@ export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryCha
                 </div>
 
                 {/* Bottom Spacer */}
-                <div className="h-4" />
+                <div className="h-4 pb-10" />
             </div>
         </div>
     );
