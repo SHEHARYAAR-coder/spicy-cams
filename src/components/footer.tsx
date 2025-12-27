@@ -1,9 +1,23 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 export function Footer() {
+    const pathname = usePathname();
+    const isHomePage = pathname === '/';
+    
+    // Hide footer on dashboard routes
+    const hiddenRoutes = ['/dashboard', '/m', '/inbox', '/finances', '/streaming', '/profile'];
+    const shouldHideFooter = hiddenRoutes.some(route => pathname.startsWith(route));
+    
+    if (shouldHideFooter) {
+        return null;
+    }
+
     return (
-        <footer className="bg-gray-900/95 text-gray-300 ms-56 pt-12 pb-6">
+        <footer className={`bg-gray-900/95 text-gray-300 pt-12 pb-6 ${isHomePage ? 'lg:ms-56' : ''}`}>
             <div className="container mx-auto px-4">
                 {/* Main Footer Content */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
