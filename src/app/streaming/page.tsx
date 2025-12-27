@@ -148,6 +148,9 @@ export default function StreamingPage() {
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
+  // Check if user is a model
+  const isModel = session?.user && 'role' in session.user && session.user.role === 'MODEL';
+
   // New stream form
   const [newStream, setNewStream] = useState({
     title: '',
@@ -399,14 +402,20 @@ export default function StreamingPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const joinStreamId = urlParams.get('join');
+    const urlMode = urlParams.get('mode');
 
     if (joinStreamId && session) {
       console.log('Auto-joining stream from URL:', joinStreamId);
       handleJoinStream(joinStreamId);
       // Clean up URL
       window.history.replaceState({}, '', '/streaming');
+    } else if (urlMode === 'create' && session && isModel) {
+      console.log('Auto-switching to create mode from URL');
+      setMode('create');
+      // Clean up URL
+      window.history.replaceState({}, '', '/streaming');
     }
-  }, [session]);
+  }, [session, isModel]);
 
   // Create a new stream
   const handleCreateStream = async () => {
@@ -558,7 +567,7 @@ export default function StreamingPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center mt-12">
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto bg-gray-800 border-gray-700">
             <CardContent className="p-6 text-center">
@@ -575,52 +584,12 @@ export default function StreamingPage() {
     );
   }
 
-  const isModel = session.user && 'role' in session.user && session.user.role === 'MODEL';
-
   // Debug logging
   console.log('Current state:', { mode, selectedStream, streamToken, currentStreamData });
 
   return (
     <div className={`bg-gray-900 text-white flex flex-col min-h-screen`}>
-      <main className={`flex-1 flex flex-col min-h-0 px-8 py-4 pt-[10rem]`}>
-        <div className={`flex-none ${mode === 'create' ? 'hidden' : mode === 'broadcast' || mode === 'watch' ? 'hidden lg:block' : ''}`}>
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Live Stream's</h1>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex gap-2">
-              {mode !== 'broadcast' && (
-                <div>
-                  <Button onClick={fetchStreams} variant="outline" className="border-gray-700 text-white hover:bg-gray-800 hover:text-white">
-                    Refresh
-                  </Button>
-                  {/* <Button
-                    onClick={() => setMode('browse')}
-                    variant={mode === 'browse' ? 'default' : 'outline'}
-                    className={mode === 'browse' ? "bg-purple-600 text-white hover:bg-purple-700" : "border-gray-700 hover:bg-gray-800 hover:text-white"}
-                  >
-                    <Users className="w-4 h-4 mr-2" />
-                    Browse Streams
-                  </Button> */}
-                </div>
-              )}
-              {(session.user && (((session.user as { role?: string }).role === 'MODEL') || ((session.user as { role?: string }).role === 'ADMIN')) && mode !== 'broadcast') && (
-                <Button
-                  onClick={() => setMode('create')}
-                  variant={mode === 'create' ? 'default' : 'outline'}
-                  className={mode === 'create' ? "bg-purple-600 hover:bg-purple-700" : "border-gray-700 hover:bg-gray-800 hover:text-white"}
-                >
-                  <Plus className="w-4 h-4" />
-                  Go Live
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
+      <main className={`flex-1 flex flex-col min-h-0 ${mode === 'broadcast' || mode === 'watch' ? 'px-1 pt-[130px]' : 'px-8 py-4 pt-[10rem]'}`}>
         {/* Content Area */}
         <div className="flex-1 min-h-0 relative">
           {/* Browse Mode */}
@@ -964,18 +933,6 @@ export default function StreamingPage() {
           {/* Model Broadcast */}
           {mode === 'broadcast' && selectedStream && streamToken && (
             <div className="h-full flex flex-col">
-              {/* Header - Hidden on mobile for full-screen video */}
-              <div className="hidden lg:flex flex-none justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Broadcasting Live</h2>
-                <Button
-                  onClick={handleStreamEnd}
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-                >
-                  Back to Browse
-                </Button>
-              </div>
-
               {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
               <div className="flex-1 min-h-0">
                 {/* Desktop Layout */}
@@ -1028,18 +985,6 @@ export default function StreamingPage() {
           {/* Viewer Player */}
           {mode === 'watch' && selectedStream && streamToken && (
             <div className="h-full flex flex-col">
-              {/* Header - Hidden on mobile for full-screen video */}
-              <div className="hidden lg:flex flex-none justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Watching Stream</h2>
-                <Button
-                  onClick={handleStreamEnd}
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-                >
-                  Leave Stream
-                </Button>
-              </div>
-
               {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
               <div className="flex-1 min-h-0 overflow-y-auto">
                 {/* Desktop Layout */}

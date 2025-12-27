@@ -126,8 +126,8 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
         <div
           ref={scrollContainerRef}
           className={`grid ${gridRowsClass} grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 md:px-3 scroll-smooth`}
-          style={{ 
-            scrollbarWidth: 'none', 
+          style={{
+            scrollbarWidth: 'none',
             msOverflowStyle: 'none',
           }}
         >
@@ -446,7 +446,7 @@ export default function Home() {
                 <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
                   <span className="text-2xl">🎅</span>
                 </div>
-                
+
                 <div className="relative z-10 flex flex-row items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🎁</span>
@@ -468,7 +468,7 @@ export default function Home() {
             </div>
           )}
 
-      
+
 
           {/* Content Area */}
           <div className="flex-1 p-2 md:p-3 overflow-y-auto  scrollbar-hide ">
@@ -535,6 +535,18 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Floating "Go Live" Button - Only visible for models */}
+      {session && isModel && selectedCategory !== "Private Messages" && (
+        <Link href="/streaming?mode=create">
+          <Button
+            className="fixed bottom-8 right-8 h-16 w-16 rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 hover:from-purple-700 hover:via-purple-600 hover:to-pink-600 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 hover:scale-110 z-50 flex items-center justify-center group"
+            title="Go Live"
+          >
+            <Video className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }
