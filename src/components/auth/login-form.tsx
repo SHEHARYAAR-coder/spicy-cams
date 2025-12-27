@@ -126,7 +126,7 @@ export default function LoginForm({ userType, compact = false }: LoginFormProps)
                             }
                         }
 
-                        router.push('/model')
+                        router.push('/')
                     } else {
                         router.push(callbackUrl)
                     }
