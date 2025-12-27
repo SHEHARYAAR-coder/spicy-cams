@@ -1044,10 +1044,10 @@ export default function StreamingPage() {
               <div className="flex-1 min-h-0 overflow-y-auto">
                 {/* Desktop Layout */}
                 <div className="hidden lg:block">
-                  <div className="grid lg:grid-cols-3 gap-4 mb-6 h-[70vh]">
+                  <div className="grid lg:grid-cols-3 gap-4 h-[70vh]">
                     {/* Video Section - Takes 2/3 width */}
                     <div className="lg:col-span-2 flex flex-col">
-                      <div className="h-[500px] bg-black rounded-lg overflow-hidden relative">
+                      <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
                         <ViewerPlayer
                           streamId={selectedStream}
                           token={streamToken}
@@ -1061,12 +1061,42 @@ export default function StreamingPage() {
 
                     {/* Chat Section - Takes 1/3 width */}
                     <div className="lg:col-span-1">
-                      <div className="h-[500px]">
+                      <div className="h-[700px]">
                         <TabbedChatContainer
                           streamId={selectedStream}
                           canModerate={false}
                           className="h-full"
                         />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="px-2 py-6 md:px-3 my-12">
+                    <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg p-5 overflow-hidden shadow-lg">
+                      {/* Decorative elements */}
+                      <div className="absolute top-0 left-0 w-6 h-6 opacity-15">
+                        <span className="text-2xl">🎁</span>
+                      </div>
+                      <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
+                        <span className="text-2xl">🎅</span>
+                      </div>
+
+                      <div className="relative z-10 flex flex-row items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🎁</span>
+                          <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                            <span className="bg-red-600 px-1.5 py-0.5 rounded text-xs">50% OFF</span>
+                            <span className="hidden sm:inline">Tokens for XXXmas</span>
+                          </h2>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="hidden md:inline text-white text-xs font-medium">
+                            Warm up your nights with someone special!
+                          </p>
+                          <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
+                            GET DISCOUNT
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
