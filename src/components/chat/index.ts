@@ -3,6 +3,8 @@ export { ChatMessage } from "./chat-message";
 export { ChatInput } from "./chat-input";
 export { ChatGatePrompt } from "./chat-gate-prompt";
 export { ModerationPanel } from "./moderation-panel";
+export { TipMenuDialog } from "./tip-menu-dialog";
+export { TipsTab } from "./tips-tab";
 
 // Private chat components
 export { PrivateChatContainer } from "./private-chat-container";

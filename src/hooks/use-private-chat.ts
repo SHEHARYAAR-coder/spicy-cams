@@ -278,7 +278,7 @@ export function usePrivateChat({
     [streamId, token, receiverId, fetchConversations]
   );
 
-  // Fetch pending chat requests (for models)
+  // Fetch pending chat requests (for models only)
   const fetchChatRequests = useCallback(async () => {
     if (!token || !enabled) return;
 
@@ -295,8 +295,12 @@ export function usePrivateChat({
       if (response.ok) {
         const data = await response.json();
         setChatRequests(data.requests || []);
+      } else if (response.status === 403) {
+        // 403 means user is not the model - this is expected for viewers
+        // Silently ignore and don't log error
+        setChatRequests([]);
       } else {
-        console.error("Failed to fetch chat requests");
+        console.error("Failed to fetch chat requests:", response.status);
       }
     } catch (error) {
       console.error("Error fetching chat requests:", error);

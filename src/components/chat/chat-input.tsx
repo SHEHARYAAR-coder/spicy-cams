@@ -1,13 +1,14 @@
 import React, { useState, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Smile, Loader2, AlertCircle } from "lucide-react";
+import { Send, Smile, Loader2, AlertCircle, DollarSign } from "lucide-react";
 
 interface ChatInputProps {
     onSend: (message: string) => Promise<boolean>;
     disabled?: boolean;
     remaining: number | null;
     maxLength?: number;
+    onOpenTipMenu?: () => void;
 }
 
 export function ChatInput({
@@ -15,6 +16,7 @@ export function ChatInput({
     disabled = false,
     remaining,
     maxLength = 500,
+    onOpenTipMenu,
 }: ChatInputProps) {
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
@@ -67,6 +69,21 @@ export function ChatInput({
             {/* Input area */}
             <div className="flex-1 px-3 sm:px-4 pb-3">
                 <div className="flex items-center gap-2 h-full">
+                    {/* Tip Menu Button */}
+                    {onOpenTipMenu && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 flex-shrink-0 text-gray-400 hover:text-green-400 hover:bg-gray-700/50"
+                            disabled={disabled}
+                            onClick={onOpenTipMenu}
+                            title="Send Tip"
+                        >
+                            <DollarSign className="h-5 w-5" />
+                        </Button>
+                    )}
+
                     {/* Emoji Button */}
                     <Button
                         type="button"
@@ -98,10 +115,10 @@ export function ChatInput({
                         {/* Character count */}
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs pointer-events-none">
                             <span className={`${isOverLimit
-                                    ? "text-red-400"
-                                    : characterCount > maxLength * 0.8
-                                        ? "text-orange-400"
-                                        : "text-gray-500"
+                                ? "text-red-400"
+                                : characterCount > maxLength * 0.8
+                                    ? "text-orange-400"
+                                    : "text-gray-500"
                                 }`}>
                                 {characterCount}/{maxLength}
                             </span>

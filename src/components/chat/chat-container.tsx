@@ -4,6 +4,7 @@ import { useChat } from "@/hooks/use-chat";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { ChatGatePrompt } from "./chat-gate-prompt";
+import { TipMenuDialog } from "./tip-menu-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Loader2, AlertCircle, Wifi, WifiOff, ChevronUp, MessageCircle } from "lucide-react";
@@ -20,6 +21,7 @@ interface ChatContainerProps {
     const [chatReason, setChatReason] = useState<string | null>(null);
     const [balance, setBalance] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [tipMenuOpen, setTipMenuOpen] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -163,6 +165,27 @@ interface ChatContainerProps {
         }
     };
 
+    // Handle tip
+    const handleTip = async (tokens: number, activity?: string) => {
+        try {
+            // TODO: Implement actual tip API call
+            console.log(`Tipping ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
+
+            // For now, just send a message in chat
+            const message = activity
+                ? `Tipped ${tokens} tokens for ${activity} 💝`
+                : `Tipped ${tokens} tokens 💝`;
+
+            await sendMessage(message);
+
+            // You can add a toast notification here
+            // toast.success(`Sent ${tokens} tokens!`);
+        } catch (error) {
+            console.error("Error sending tip:", error);
+            // toast.error("Failed to send tip");
+        }
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -205,16 +228,16 @@ interface ChatContainerProps {
                     <div className="flex items-center gap-2 min-w-0">
                         {connected ? (
                             <Wifi className={`h-3.5 w-3.5 flex-shrink-0 ${connectionQuality === 'good' ? 'text-green-400' :
-                                    connectionQuality === 'poor' ? 'text-orange-400' :
-                                        'text-red-400'
+                                connectionQuality === 'poor' ? 'text-orange-400' :
+                                    'text-red-400'
                                 }`} />
                         ) : (
                             <WifiOff className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
                         )}
                         <span className="text-xs text-gray-400 font-medium hidden sm:inline">
-                            {connected ? 
+                            {connected ?
                                 (connectionQuality === 'good' ? 'Connected' :
-                                connectionQuality === 'poor' ? 'Unstable' : 'Connecting...') 
+                                    connectionQuality === 'poor' ? 'Unstable' : 'Connecting...')
                                 : 'Offline'
                             }
                         </span>
@@ -312,9 +335,17 @@ interface ChatContainerProps {
                         onSend={sendMessage}
                         disabled={!connected}
                         remaining={remaining}
+                        onOpenTipMenu={() => setTipMenuOpen(true)}
                     />
                 </div>
             </div>
+
+            {/* Tip Menu Dialog */}
+            <TipMenuDialog
+                open={tipMenuOpen}
+                onOpenChange={setTipMenuOpen}
+                onTip={handleTip}
+            />
         </div>
     );
 }
