@@ -81,7 +81,7 @@ export function TabbedChatContainer({
     const handleTip = async (tokens: number, activity?: string) => {
         try {
             console.log(`Tipping ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
-            
+
             // Check if chat is connected
             if (!connected) {
                 alert("Chat is not connected. Please wait and try again.");
