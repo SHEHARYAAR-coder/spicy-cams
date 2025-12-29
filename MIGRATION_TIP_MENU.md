@@ -7,6 +7,7 @@ npx prisma migrate dev --name add_tip_menu_items
 ```
 
 This will create the `tip_menu_items` table with the following structure:
+
 - id: Unique identifier
 - model_id: Foreign key to users table
 - icon: Emoji or icon string
@@ -20,6 +21,7 @@ This will create the `tip_menu_items` table with the following structure:
 ## After migration
 
 The system will automatically:
+
 1. Create indexes on (model_id, is_active) and (model_id, category)
 2. Set up foreign key relationship with CASCADE delete
 3. Default values: category="tip", is_active=true, sort_order=0

@@ -102,8 +102,8 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
                         onClick={() => setActiveSubTab("tip")}
                         size="sm"
                         className={`flex-1 ${activeSubTab === "tip"
-                                ? "bg-purple-600 text-white hover:bg-purple-700"
-                                : "text-gray-400 hover:text-white hover:bg-gray-800"
+                            ? "bg-purple-600 text-white hover:bg-purple-700"
+                            : "text-gray-400 hover:text-white hover:bg-gray-800"
                             }`}
                     >
                         <Heart className="w-4 h-4 mr-2" />
@@ -114,8 +114,8 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
                         onClick={() => setActiveSubTab("toy")}
                         size="sm"
                         className={`flex-1 ${activeSubTab === "toy"
-                                ? "bg-purple-600 text-white hover:bg-purple-700"
-                                : "text-gray-400 hover:text-white hover:bg-gray-800"
+                            ? "bg-purple-600 text-white hover:bg-purple-700"
+                            : "text-gray-400 hover:text-white hover:bg-gray-800"
                             }`}
                     >
                         <Zap className="w-4 h-4 mr-2" />
@@ -126,8 +126,8 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
                         onClick={() => setActiveSubTab("games")}
                         size="sm"
                         className={`flex-1 ${activeSubTab === "games"
-                                ? "bg-purple-600 text-white hover:bg-purple-700"
-                                : "text-gray-400 hover:text-white hover:bg-gray-800"
+                            ? "bg-purple-600 text-white hover:bg-purple-700"
+                            : "text-gray-400 hover:text-white hover:bg-gray-800"
                             }`}
                     >
                         <Gamepad2 className="w-4 h-4 mr-2" />
@@ -136,113 +136,113 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
                 </div>
             </div>
 
-      {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
-        {loading ? (
-          <div className="h-full flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
-          </div>
-        ) : (
-          <>
-            {activeSubTab === "tip" && (
-              <div className="h-full overflow-y-auto px-3 sm:px-4 py-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                {/* Activity Header */}
-                <div className="flex items-center justify-between mb-3 text-xs font-semibold text-gray-400 uppercase">
-                  <span>Activity</span>
-                  <span>Tokens</span>
-                </div>
-
-                {/* Activities List */}
-                <div className="space-y-2 mb-4">
-                  {getCategoryActivities("tip").map((activity, index) => (
-                    <button
-                      key={activity.id || index}
-                      onClick={() => handleTipActivity(activity)}
-                      className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{activity.icon}</span>
-                        <span className="text-sm text-gray-300 group-hover:text-white">
-                          {activity.name}
-                        </span>
-                      </div>
-                      <span className="text-sm font-semibold text-purple-400">
-                        {activity.tokens}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeSubTab === "toy" && (
-              <div className="h-full px-3 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                {getCategoryActivities("toy").length > 0 ? (
-                  <div className="space-y-2">
-                    {getCategoryActivities("toy").map((activity, index) => (
-                      <button
-                        key={activity.id || index}
-                        onClick={() => handleTipActivity(activity)}
-                        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{activity.icon}</span>
-                          <span className="text-sm text-gray-300 group-hover:text-white">
-                            {activity.name}
-                          </span>
-                        </div>
-                        <span className="text-sm font-semibold text-purple-400">
-                          {activity.tokens}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-gray-400">
-                      <Zap className="w-12 h-12 mx-auto mb-3 text-purple-400" />
-                      <p className="text-sm">No sex toy controls available</p>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden">
+                {loading ? (
+                    <div className="h-full flex items-center justify-center">
+                        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeSubTab === "games" && (
-              <div className="h-full px-3 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-                {getCategoryActivities("games").length > 0 ? (
-                  <div className="space-y-2">
-                    {getCategoryActivities("games").map((activity, index) => (
-                      <button
-                        key={activity.id || index}
-                        onClick={() => handleTipActivity(activity)}
-                        className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{activity.icon}</span>
-                          <span className="text-sm text-gray-300 group-hover:text-white">
-                            {activity.name}
-                          </span>
-                        </div>
-                        <span className="text-sm font-semibold text-purple-400">
-                          {activity.tokens}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
                 ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center text-gray-400">
-                      <Gamepad2 className="w-12 h-12 mx-auto mb-3 text-purple-400" />
-                      <p className="text-sm">No games & fun activities available</p>
-                    </div>
-                  </div>
+                    <>
+                        {activeSubTab === "tip" && (
+                            <div className="h-full overflow-y-auto px-3 sm:px-4 py-3 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                                {/* Activity Header */}
+                                <div className="flex items-center justify-between mb-3 text-xs font-semibold text-gray-400 uppercase">
+                                    <span>Activity</span>
+                                    <span>Tokens</span>
+                                </div>
+
+                                {/* Activities List */}
+                                <div className="space-y-2 mb-4">
+                                    {getCategoryActivities("tip").map((activity, index) => (
+                                        <button
+                                            key={activity.id || index}
+                                            onClick={() => handleTipActivity(activity)}
+                                            className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-2xl">{activity.icon}</span>
+                                                <span className="text-sm text-gray-300 group-hover:text-white">
+                                                    {activity.name}
+                                                </span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-purple-400">
+                                                {activity.tokens}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeSubTab === "toy" && (
+                            <div className="h-full px-3 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                                {getCategoryActivities("toy").length > 0 ? (
+                                    <div className="space-y-2">
+                                        {getCategoryActivities("toy").map((activity, index) => (
+                                            <button
+                                                key={activity.id || index}
+                                                onClick={() => handleTipActivity(activity)}
+                                                className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-2xl">{activity.icon}</span>
+                                                    <span className="text-sm text-gray-300 group-hover:text-white">
+                                                        {activity.name}
+                                                    </span>
+                                                </div>
+                                                <span className="text-sm font-semibold text-purple-400">
+                                                    {activity.tokens}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full">
+                                        <div className="text-center text-gray-400">
+                                            <Zap className="w-12 h-12 mx-auto mb-3 text-purple-400" />
+                                            <p className="text-sm">No sex toy controls available</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeSubTab === "games" && (
+                            <div className="h-full px-3 sm:px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+                                {getCategoryActivities("games").length > 0 ? (
+                                    <div className="space-y-2">
+                                        {getCategoryActivities("games").map((activity, index) => (
+                                            <button
+                                                key={activity.id || index}
+                                                onClick={() => handleTipActivity(activity)}
+                                                className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 border border-gray-700 hover:border-purple-500/50 transition-all group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-2xl">{activity.icon}</span>
+                                                    <span className="text-sm text-gray-300 group-hover:text-white">
+                                                        {activity.name}
+                                                    </span>
+                                                </div>
+                                                <span className="text-sm font-semibold text-purple-400">
+                                                    {activity.tokens}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full">
+                                        <div className="text-center text-gray-400">
+                                            <Gamepad2 className="w-12 h-12 mx-auto mb-3 text-purple-400" />
+                                            <p className="text-sm">No games & fun activities available</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </>
                 )}
-              </div>
-            )}
-          </>
-        )}
-      </div>            {/* Footer - Quick Tip Amounts */}
+            </div>            {/* Footer - Quick Tip Amounts */}
             <div className="flex-shrink-0 px-3 sm:px-4 py-3 border-t border-gray-700 bg-gray-800/50">
                 <div className="flex flex-wrap gap-2 mb-3">
                     {QUICK_TIP_AMOUNTS.map((amount) => (
