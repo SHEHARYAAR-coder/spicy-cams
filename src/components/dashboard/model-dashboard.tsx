@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatsCard } from "./stats-card";
+import { TipMenuManager } from "./tip-menu-manager";
 import {
   DollarSign,
   Video,
@@ -171,6 +172,9 @@ export function CreatorDashboard({ userData }: CreatorDashboardProps) {
           </a>
         </CardContent>
       </Card>
+
+      {/* Tip Menu Manager */}
+      <TipMenuManager />
     </div>
   );
 }

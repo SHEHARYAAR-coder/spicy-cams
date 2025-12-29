@@ -25,6 +25,24 @@ export function TabbedChatContainer({
     const [activeTab, setActiveTab] = useState<"public" | "private" | "tips">("public");
     const [chatToken, setChatToken] = useState<string | null>(null);
     const [selectedPrivateUserId, setSelectedPrivateUserId] = useState<string | null>(null);
+    const [modelId, setModelId] = useState<string>("");
+
+    // Get stream info to get modelId
+    useEffect(() => {
+        const fetchStreamInfo = async () => {
+            try {
+                const response = await fetch(`/api/streams/${streamId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setModelId(data.stream?.modelId || "");
+                }
+            } catch (error) {
+                console.error("Error fetching stream info:", error);
+            }
+        };
+
+        fetchStreamInfo();
+    }, [streamId]);
 
     // Get chat token for private messages
     useEffect(() => {
@@ -219,6 +237,7 @@ export function TabbedChatContainer({
                 <div className={cn("absolute inset-0", activeTab === "tips" ? "block" : "hidden")}>
                     <TipsTab
                         onTip={handleTip}
+                        modelId={modelId}
                         className="h-full border-0 rounded-none"
                     />
                 </div>

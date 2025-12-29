@@ -73,6 +73,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         thumbnailUrl: stream.thumbnailUrl,
         playbackUrl: stream.playbackUrl,
         participantCount,
+        modelId: stream.model.id,
         model: {
           id: stream.model.id,
           name: stream.model.profile?.displayName || stream.model.email,

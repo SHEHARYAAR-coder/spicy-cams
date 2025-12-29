@@ -544,10 +544,11 @@ export default function Home() {
       {session && isModel && selectedCategory !== "Private Messages" && (
         <Link href="/streaming?mode=create">
           <Button
-            className="fixed bottom-8 right-8 h-16 w-16 rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 hover:from-purple-700 hover:via-purple-600 hover:to-pink-600 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 hover:scale-110 z-50 flex items-center justify-center group"
+            className="text-white fixed bottom-8 right-8 h-16 w-32 rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 hover:from-purple-700 hover:via-purple-600 hover:to-pink-600 shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 hover:scale-110 z-50 flex items-center justify-center group"
             title="Go Live"
           >
             <Video className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
+            Go Live
           </Button>
         </Link>
       )}

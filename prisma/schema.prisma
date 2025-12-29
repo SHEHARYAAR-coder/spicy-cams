@@ -140,6 +140,7 @@ model User {
   withdrawalRequests      WithdrawalRequest[]  @relation("UserWithdrawals")
   reviewedWithdrawals     WithdrawalRequest[]  @relation("AdminReviews")
   watchHistory            WatchHistory[]
+  tipMenuItems            TipMenuItem[]
 
   @@index([email])
   @@index([status])
@@ -606,4 +607,29 @@ model WatchHistory {
   @@unique([userId, streamId])
   @@index([userId, watchedAt])
   @@map("watch_history")
+}
+
+// ============================================
+// TIP MENU
+// ============================================
+
+model TipMenuItem {
+  id          String   @id @default(cuid())
+  modelId     String   @map("model_id")
+  icon        String   // Emoji or icon
+  name        String   // Activity name
+  tokens      Int      // Token cost
+  category    String   @default("tip") // "tip", "toy", "games"
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  model User @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId, isActive])
+  @@index([modelId, category])
+  @@map("tip_menu_items")
 }
