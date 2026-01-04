@@ -574,6 +574,70 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Become a Model Banner - For logged-in viewers */}
+      {session && !isModel && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 overflow-hidden">
+          <div className="relative bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 animate-gradient-x border-t-2 border-pink-400 shadow-2xl">
+            {/* Glowing effect overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+            
+            {/* Animated sparkles */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-white rounded-full animate-ping opacity-75"></div>
+              <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-yellow-300 rounded-full animate-pulse"></div>
+              <div className="absolute bottom-1/3 left-1/2 w-1 h-1 bg-pink-300 rounded-full animate-bounce"></div>
+            </div>
+
+            <div className="relative mx-auto px-4 py-4 lg:px-8">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-6">
+                {/* Icon with glow */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-60 animate-pulse"></div>
+                  <Video className="relative w-8 h-8 md:w-10 md:h-10 text-white drop-shadow-2xl" />
+                </div>
+
+                {/* Text content */}
+                <div className="text-center md:text-left">
+                  <h3 className="text-white font-black text-lg md:text-2xl drop-shadow-lg animate-pulse">
+                    ✨ Become a Model & Earn Money! ✨
+                  </h3>
+                  {/* <p className="text-pink-100 text-xs md:text-sm font-semibold mt-0.5">
+                    Start streaming now and make up to $10,000+/month 💰
+                  </p> */}
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="flex gap-2">
+                  <Link href="/m/register">
+                    <Button 
+                      className="relative bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-black px-6 md:px-8 py-2.5 md:py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 group overflow-hidden"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        <Play className="w-4 h-4 md:w-5 md:h-5 group-hover:scale-125 transition-transform" />
+                        <span className="text-sm md:text-base">Let's Go</span>
+                      </span>
+                      <div className="absolute inset-0 bg-white/30 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                    </Button>
+                  </Link>
+                  
+                  {/* <Link href="/model">
+                    <Button 
+                      variant="outline"
+                      className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white/50 hover:border-white font-bold px-4 md:px-6 py-2.5 md:py-3 rounded-full transition-all duration-300 hover:scale-105 text-sm md:text-base"
+                    >
+                      Learn More
+                    </Button>
+                  </Link> */}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom glow line */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-yellow-300 to-transparent animate-pulse"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
