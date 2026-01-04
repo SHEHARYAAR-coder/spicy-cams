@@ -144,6 +144,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
   const [isMicEnabled, setIsMicEnabled] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
+  const [isEndingStream, setIsEndingStream] = useState(false);
   const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('');
   const [availableMicrophones, setAvailableMicrophones] = useState<MediaDeviceInfo[]>([]);
@@ -351,7 +352,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
     }
   };
 
-  // Check pause state on mount and periodically
+  // Check pause state on mount and periodically (less frequently to reduce API load)
   useEffect(() => {
     const checkPauseState = async () => {
       try {
@@ -366,7 +367,8 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
     };
 
     checkPauseState();
-    const interval = setInterval(checkPauseState, 5000); // Check every 5 seconds
+    // Increased from 5s to 15s to reduce API load
+    const interval = setInterval(checkPauseState, 15000);
     return () => clearInterval(interval);
   }, [streamId]);
 
@@ -426,6 +428,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
   };
 
   const handleEndStream = async () => {
+    setIsEndingStream(true);
     try {
       await fetch(`/api/streams/${streamId}`, {
         method: 'PATCH',
@@ -437,6 +440,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
       onStreamEnd?.();
     } catch (error) {
       console.error('Error ending stream:', error);
+      setIsEndingStream(false);
     }
   };
 
@@ -504,12 +508,17 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
 
             <Button
               onClick={() => setShowEndDialog(true)}
+              disabled={isEndingStream}
               variant="destructive"
               size="sm"
-              className="bg-red-600 hover:bg-red-700 h-9 px-3 sm:px-4"
+              className="bg-red-600 hover:bg-red-700 hover:cursor-pointer h-9 px-3 sm:px-4 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <PhoneOff className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">End Stream</span>
+              {isEndingStream ? (
+                <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+              ) : (
+                <PhoneOff className="w-4 h-4 sm:mr-2" />
+              )}
+              <span className="hidden sm:inline">{isEndingStream ? 'Ending...' : 'End Stream'}</span>
             </Button>
           </div>
         </div>
@@ -563,17 +572,23 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
             <Button
               variant="outline"
               onClick={() => setShowEndDialog(false)}
-              className="flex-1 border-2 border-gray-600 text-white hover:bg-gray-800 hover:border-gray-500 transition-all duration-200 h-11 font-semibold"
+              disabled={isEndingStream}
+              className="flex-1 border-2 border-gray-600 text-white hover:bg-gray-800 hover:border-gray-500 transition-all duration-200 h-11 font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleEndStream}
-              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-900/30 transition-all duration-200 h-11 font-semibold"
+              disabled={isEndingStream}
+              className="flex-1 bg-gradient-to-r hover:cursor-pointer from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-900/30 transition-all duration-200 h-11 font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <PhoneOff className="w-4 h-4 mr-2" />
-              End Stream
+              {isEndingStream ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <PhoneOff className="w-4 h-4 mr-2" />
+              )}
+              {isEndingStream ? 'Ending Stream...' : 'End Stream'}
             </Button>
           </DialogFooter>
         </DialogContent>

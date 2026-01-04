@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const items = await prisma.tipMenuItem.findMany({
+    const items = await (prisma.tipMenuItem?.findMany?.({
       where: {
         modelId,
         isActive: true,
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         { sortOrder: "asc" },
         { tokens: "asc" },
       ],
-    });
+    }) ?? Promise.resolve([]));
 
     return NextResponse.json({ items });
   } catch (error) {

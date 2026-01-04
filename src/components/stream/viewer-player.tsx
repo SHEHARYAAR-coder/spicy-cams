@@ -231,8 +231,8 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
         };
 
         checkPauseState();
-        // Check every 3 seconds for pause state updates
-        const interval = setInterval(checkPauseState, 3000);
+        // Increased from 3s to 15s to reduce API load
+        const interval = setInterval(checkPauseState, 15000);
         return () => clearInterval(interval);
     }, [streamId]);
 

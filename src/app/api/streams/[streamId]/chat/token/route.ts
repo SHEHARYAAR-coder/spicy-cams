@@ -27,11 +27,17 @@ export async function POST(
     const { streamId } = await params;
     const userId = session.user.id;
 
-    // Check if stream exists and is live
-    const stream = await prisma.stream.findUnique({
-      where: { id: streamId },
-      select: { id: true, status: true, modelId: true },
-    });
+    // Combine stream and user queries for efficiency
+    const [stream, user] = await Promise.all([
+      prisma.stream.findUnique({
+        where: { id: streamId },
+        select: { id: true, status: true, modelId: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+      }),
+    ]);
 
     if (!stream) {
       return NextResponse.json({ error: "Stream not found" }, { status: 404 });
@@ -45,14 +51,8 @@ export async function POST(
       );
     }
 
-    // Determine user role first
+    // Determine user role
     const isModel = stream.modelId === userId;
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    // Models don't need to pass chat checks (no credit requirement)
     const isModelRole = user?.role === "MODEL" || isModel;
 
     // Check if user can chat (balance, ban, mute checks) - skip for models

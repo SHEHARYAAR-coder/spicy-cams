@@ -11,6 +11,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SpicyCams - Live Streaming Platform",
   description: "Credit-gated live streaming platform",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -19,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased font-sans bg-gray-950 text-white">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="antialiased font-sans bg-gray-950 text-white" suppressHydrationWarning>
         <AuthProvider>
           <StreamProvider>
             <CategoryProvider>

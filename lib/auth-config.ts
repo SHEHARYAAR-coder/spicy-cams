@@ -29,6 +29,7 @@ interface CustomUser {
   id: string;
   email: string;
   name: string;
+  username: string;
   role: string;
   emailVerified: boolean;
 }
@@ -132,6 +133,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.profile?.displayName || user.email,
+            username: user.username,
             role: user.role,
             emailVerified: user.emailVerified,
           } as CustomUser;
@@ -157,10 +159,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
 
           if (!existingUser) {
+            // Generate username for Google OAuth user
+            const baseUsername = user.email!.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+            let username = baseUsername;
+            let counter = 1;
+            while (await prisma.user.findUnique({ where: { username } })) {
+              username = `${baseUsername}${counter}`;
+              counter++;
+            }
+
             // Create new user with Google OAuth
             existingUser = await prisma.user.create({
               data: {
                 email: user.email!,
+                username,
                 emailVerified: true, // Google emails are pre-verified
                 role: "VIEWER",
                 status: "ACTIVE", // Set to ACTIVE for new Google OAuth users
@@ -259,6 +271,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         const customUser = user as CustomUser;
         token.id = customUser.id;
+        token.username = customUser.username;
         token.role = customUser.role;
         token.emailVerified = customUser.emailVerified;
       }
@@ -272,8 +285,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (dbUser) {
           token.id = dbUser.id;
+          token.username = dbUser.username;
           token.role = dbUser.role;
           token.emailVerified = dbUser.emailVerified;
+        }
+      }
+
+      // Ensure username is always present by fetching from DB if missing
+      if (!token.username && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { username: true, role: true },
+        });
+        if (dbUser) {
+          token.username = dbUser.username;
+          // Also ensure role is up-to-date
+          if (dbUser.role) {
+            token.role = dbUser.role;
+          }
         }
       }
 
@@ -284,6 +313,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.name = session.user.name || session.user.email || "";
         // Add custom fields to session user
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (session.user as any).username = token.username as string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (session.user as any).role = token.role as string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

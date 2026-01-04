@@ -349,6 +349,7 @@ export async function getRecentMessages(
   const messages = await prisma.chatMessage.findMany({
     where: {
       streamId,
+      isDeleted: false,
       ...(beforeId && { id: { lt: beforeId } }),
     },
     include: {

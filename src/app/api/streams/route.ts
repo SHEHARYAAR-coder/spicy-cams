@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
               updatedStream.model.profile?.displayName ||
               updatedStream.model.email,
             avatar: updatedStream.model.profile?.avatarUrl,
+            username: updatedStream.model.username,
           },
           createdAt: updatedStream.createdAt,
         },

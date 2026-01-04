@@ -11,7 +11,9 @@ import {
     Users,
     Tag,
     FolderOpen,
-    Star
+    Star,
+    Share2,
+    Check
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -44,6 +46,7 @@ export function StreamCard({
 }: StreamCardProps) {
     const [participantCount, setParticipantCount] = useState(stream.participantCount || 0);
     const [isHovered, setIsHovered] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
 
     // Poll for participant count if stream is live
     useEffect(() => {
@@ -68,6 +71,19 @@ export function StreamCard({
 
     const handleJoinStream = () => {
         onJoinStream?.(stream.id);
+    };
+
+    const handleCopyLink = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            // Try to copy username-based URL
+            const link = `${window.location.origin}/streaming/${stream.model.name?.toLowerCase().replace(/\s+/g, '-')}`;
+            await navigator.clipboard.writeText(link);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (error) {
+            console.error('Failed to copy link:', error);
+        }
     };
 
     const getStatusBadge = () => {
@@ -143,6 +159,21 @@ export function StreamCard({
 
                 {/* Status Badge */}
                 {getStatusBadge()}
+
+                {/* Share Button - Top Right Corner */}
+                {stream.status === 'LIVE' && (
+                    <button
+                        onClick={handleCopyLink}
+                        className="absolute top-2 right-2 z-20 bg-black/70 hover:bg-black/90 backdrop-blur-sm text-white p-2 rounded-full transition-all duration-200"
+                        title="Copy stream link"
+                    >
+                        {isCopied ? (
+                            <Check className="w-4 h-4 text-green-400" />
+                        ) : (
+                            <Share2 className="w-4 h-4" />
+                        )}
+                    </button>
+                )}
 
 
 

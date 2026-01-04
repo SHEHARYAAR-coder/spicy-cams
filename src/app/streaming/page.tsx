@@ -148,6 +148,18 @@ export default function StreamingPage() {
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
+  // Debug: Log session when it changes
+  useEffect(() => {
+    if (session) {
+      console.log('📋 Session loaded:', {
+        user: session.user,
+        hasUsername: 'username' in (session.user as object),
+        username: (session.user as { username?: string }).username,
+        role: (session.user as { role?: string }).role
+      });
+    }
+  }, [session]);
+
   // Check if user is a model
   const isModel = session?.user && 'role' in session.user && session.user.role === 'MODEL';
 
@@ -398,24 +410,78 @@ export default function StreamingPage() {
     }
   }, [mode, currentStreamData?.category]);
 
-  // Handle join stream from URL parameter
+  // Save stream state to localStorage whenever it changes
+  useEffect(() => {
+    if (selectedStream && currentStreamData && streamToken && mode !== 'browse') {
+      const streamState = {
+        selectedStream,
+        streamData: {
+          id: currentStreamData.id,
+          title: currentStreamData.title,
+          description: currentStreamData.description,
+          category: currentStreamData.category,
+          model: currentStreamData.model,
+        },
+        streamToken,
+        mode,
+        timestamp: Date.now(),
+      };
+      sessionStorage.setItem('activeStreamState', JSON.stringify(streamState));
+    }
+  }, [selectedStream, currentStreamData, streamToken, mode]);
+
+  // Handle join stream from URL parameter or restore from session storage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const joinStreamId = urlParams.get('join');
     const urlMode = urlParams.get('mode');
+    const fromUsername = urlParams.get('from_username');
 
     if (joinStreamId && session) {
       console.log('Auto-joining stream from URL:', joinStreamId);
       handleJoinStream(joinStreamId);
-      // Clean up URL
-      window.history.replaceState({}, '', '/streaming');
+      // Clean up URL (but preserve session storage for refresh)
+      if (!fromUsername) {
+        window.history.replaceState({}, '', '/streaming');
+      }
     } else if (urlMode === 'create' && session && isModel) {
       console.log('Auto-switching to create mode from URL');
       setMode('create');
       // Clean up URL
       window.history.replaceState({}, '', '/streaming');
+    } else if (!joinStreamId && !urlMode && session && !selectedStream) {
+      // No URL params - try to restore from session storage
+      try {
+        const savedState = sessionStorage.getItem('activeStreamState');
+        if (savedState) {
+          const state = JSON.parse(savedState);
+          // Only restore if it's relatively recent (within 24 hours)
+          if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
+            console.log('Restoring stream state from session:', state.selectedStream);
+            
+            // If user is the broadcaster, redirect to username URL
+            const sessionUser = session?.user as { username?: string } | undefined;
+            if (state.mode === 'broadcast' && sessionUser?.username) {
+              console.log('Redirecting to username URL for restored broadcast:', sessionUser.username);
+              router.push(`/streaming/${encodeURIComponent(sessionUser.username)}`);
+              return; // Don't restore state here, let the username page handle it
+            }
+            
+            setSelectedStream(state.selectedStream);
+            setCurrentStreamData(state.streamData);
+            setStreamToken(state.streamToken);
+            setMode(state.mode);
+            setStreamData(state.streamData);
+          } else {
+            sessionStorage.removeItem('activeStreamState');
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring stream state:', error);
+        sessionStorage.removeItem('activeStreamState');
+      }
     }
-  }, [session, isModel]);
+  }, [session, isModel, selectedStream, router]);
 
   // Create a new stream
   const handleCreateStream = async () => {
@@ -437,7 +503,6 @@ export default function StreamingPage() {
         const responseData = await response.json();
         console.log('✅ Stream created successfully:', responseData);
         const stream = responseData.stream;
-        setSelectedStream(stream.id);
 
         // model token
         console.log('🔑 Requesting creator token for stream:', stream.id);
@@ -449,18 +514,34 @@ export default function StreamingPage() {
           const tokenData = await tokenResponse.json();
           console.log('✅ Token received:', tokenData.token.substring(0, 20) + '...');
           console.log('✅ Role from API:', tokenData.role);
-          console.log('📝 Setting state - Stream ID:', stream.id);
-          console.log('📝 Setting state - Token:', 'received');
 
           // IMPORTANT: Set mode based on role from API
           const newMode = tokenData.role === 'creator' ? 'broadcast' : 'watch';
           console.log('📝 Setting state - Mode:', newMode);
 
+          // For broadcasters, redirect to username URL IMMEDIATELY
+          // The [username] page will handle fetching the stream data
+          const modelUsername = stream.model?.username;
+          const sessionUser = session?.user as { username?: string } | undefined;
+          const username = modelUsername || sessionUser?.username;
+          
+          console.log('🔍 Model username from API:', modelUsername);
+          console.log('🔍 Session username:', sessionUser?.username);
+          console.log('🔍 Using username:', username || 'NO USERNAME');
+          console.log('🔍 Mode:', newMode);
+          
+          if (username && newMode === 'broadcast') {
+            console.log('✅ Redirecting to username URL:', `/streaming/${username}`);
+            setLoading(false); // Reset loading before redirect
+            router.replace(`/streaming/${encodeURIComponent(username)}`);
+            return; // Exit - the [username] page handles everything
+          }
+          
+          // For viewers (non-broadcast mode), set local state
           setStreamToken(tokenData.token);
           setCurrentStreamData(stream);
           setSelectedStream(stream.id);
           setMode(newMode);
-          // Update stream context for header
           setStreamData({
             id: stream.id,
             title: stream.title,
@@ -468,10 +549,10 @@ export default function StreamingPage() {
             model: stream.model,
             category: stream.category
           });
-          setNewStream({ title: '', description: '', category: '', tags: [], thumbnailUrl: '', cameraDeviceId: '' }); // Reset form
+          setNewStream({ title: '', description: '', category: '', tags: [], thumbnailUrl: '', cameraDeviceId: '' });
           setTagInput('');
 
-          console.log('✅ All state updated, mode should be:', newMode);
+          console.log('✅ All state updated for viewer mode');
         } else {
           const error = await tokenResponse.json();
           console.error('❌ Failed to get token:', error);
@@ -552,6 +633,7 @@ export default function StreamingPage() {
     setSelectedStream(null);
     setStreamToken(null);
     clearStreamData(); // Clear stream context for header
+    sessionStorage.removeItem('activeStreamState'); // Clear saved stream state
     fetchStreams(); // Refresh stream list
   };
 

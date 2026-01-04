@@ -52,11 +52,26 @@ export async function POST(request: NextRequest) {
     const verificationToken = generateVerificationToken()
     const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
 
+    // Generate username from email (lowercase, alphanumeric only)
+    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '')
+    
+    // Check if username exists and add a number suffix if needed
+    let username = baseUsername
+    let usernameExists = await prisma.user.findUnique({ where: { username } })
+    let counter = 1
+    
+    while (usernameExists) {
+      username = `${baseUsername}${counter}`
+      usernameExists = await prisma.user.findUnique({ where: { username } })
+      counter++
+    }
+
     // Create user and profile in a transaction
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           email,
+          username,
           passwordHash,
           role: role as UserRole,
           status: UserStatus.PENDING_VERIFICATION,

@@ -163,7 +163,7 @@ export function TabbedChatContainer({
                             onClick={() => setActiveTab("private")}
                         >
                             <MessageCircle className="w-3.5 h-3.5" />
-                            <span>DMs</span>
+                            <span>Private</span>
                             {totalNotifications > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>

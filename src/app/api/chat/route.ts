@@ -150,62 +150,63 @@ export async function POST(request: NextRequest) {
 
     const isModel = stream.modelId === userId;
 
-    // Atomically handle debit (if needed) and message creation
-    const chatMessage = await prisma.$transaction(async (tx) => {
-      // For non-models, ensure balance and debit 1 credit
-      if (!isModel) {
-        // Conditionally debit only if balance >= 1 to avoid negative balances
-        const debit = await tx.wallet.updateMany({
-          where: { userId, balance: { gte: new Prisma.Decimal(1) } },
-          data: { balance: { decrement: new Prisma.Decimal(1) } },
-        });
+    // Create message first (always succeeds for models, conditional for viewers)
+    let chatMessage: any;
+    let balanceAfter: Prisma.Decimal | null = null;
+    
+    if (!isModel) {
+      // For viewers: try to debit and create message in single transaction
+      try {
+        chatMessage = await prisma.$transaction(async (tx) => {
+          // Check and debit balance
+          const debit = await tx.wallet.updateMany({
+            where: { userId, balance: { gte: new Prisma.Decimal(1) } },
+            data: { balance: { decrement: new Prisma.Decimal(1) } },
+          });
 
-        if (debit.count === 0) {
-          throw new Error("INSUFFICIENT_CREDITS");
-        }
+          if (debit.count === 0) {
+            throw new Error("INSUFFICIENT_CREDITS");
+          }
 
-        // Fetch updated balance for ledger entry
-        const updatedWallet = await tx.wallet.findUnique({
-          where: { userId },
-          select: { balance: true },
-        });
+          // Get updated balance
+          const wallet = await tx.wallet.findUnique({
+            where: { userId },
+            select: { balance: true },
+          });
+          balanceAfter = wallet?.balance || null;
 
-        // Create the message and reference it in the ledger entry
-        const createdMessage = await tx.chatMessage.create({
-          data: {
-            streamId,
-            userId,
-            message: validation.sanitized!,
-          },
-          include: {
-            user: {
-              select: {
-                id: true,
-                role: true,
-                profile: { select: { displayName: true, avatarUrl: true } },
+          // Create message
+          const createdMessage = await tx.chatMessage.create({
+            data: {
+              streamId,
+              userId,
+              message: validation.sanitized!,
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  role: true,
+                  profile: { select: { displayName: true, avatarUrl: true } },
+                },
               },
             },
-          },
-        });
+          });
 
-        await tx.ledgerEntry.create({
-          data: {
-            userId,
-            type: "DEBIT",
-            amount: new Prisma.Decimal(1),
-            currency: "USD",
-            balanceAfter: updatedWallet!.balance,
-            referenceType: "CHAT_MESSAGE",
-            referenceId: createdMessage.id,
-            description: "Public chat message debit",
-          },
+          return createdMessage;
         });
-
-        return createdMessage;
+      } catch (err) {
+        if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
+          return Response.json(
+            { error: "Insufficient credits" },
+            { status: 402 }
+          );
+        }
+        throw err;
       }
-
-      // Model path: just create the message without debit
-      const createdMessage = await tx.chatMessage.create({
+    } else {
+      // For models: just create message
+      chatMessage = await prisma.chatMessage.create({
         data: {
           streamId,
           userId,
@@ -221,25 +222,31 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-      return createdMessage;
-    }).catch((err) => {
-      if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
-        return null;
-      }
-      throw err;
-    });
-
-    if (!chatMessage) {
-      return Response.json(
-        { error: "Insufficient credits" },
-        { status: 402 }
-      );
     }
 
     // Increment rate limit
     rateLimiter.increment(userId);
 
-    // Broadcast to all connected clients using optimized broadcast
+    // Create ledger entry asynchronously (non-blocking) for viewers
+    if (!isModel && balanceAfter !== null) {
+      // Fire and forget - don't await this
+      prisma.ledgerEntry.create({
+        data: {
+          userId,
+          type: "DEBIT",
+          amount: new Prisma.Decimal(1),
+          currency: "USD",
+          balanceAfter,
+          referenceType: "CHAT_MESSAGE",
+          referenceId: chatMessage.id,
+          description: "Public chat message debit",
+        },
+      }).catch((err) => {
+        console.error("Failed to create ledger entry:", err);
+      });
+    }
+
+    // Broadcast to all connected clients
     const event = {
       type: "message",
       data: {

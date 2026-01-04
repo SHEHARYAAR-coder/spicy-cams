@@ -72,6 +72,13 @@ export function usePrivateChat({
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageSeenRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  
+  // Store refs to latest function versions to avoid dependency loops
+  const fetchConversationsRef = useRef<any>(null);
+  const fetchChatRequestsRef = useRef<any>(null);
+  const fetchMessagesRef = useRef<any>(null);
+  const receiverIdRef = useRef<string | undefined>(receiverId);
 
   // Fetch conversations list
   const fetchConversations = useCallback(async (showLoading = false) => {
@@ -307,6 +314,23 @@ export function usePrivateChat({
     }
   }, [streamId, token, enabled]);
 
+  // Update refs with latest function versions to avoid dependency loops
+  useEffect(() => {
+    fetchConversationsRef.current = fetchConversations;
+  }, [fetchConversations]);
+
+  useEffect(() => {
+    fetchChatRequestsRef.current = fetchChatRequests;
+  }, [fetchChatRequests]);
+
+  useEffect(() => {
+    fetchMessagesRef.current = fetchMessages;
+  }, [fetchMessages]);
+
+  useEffect(() => {
+    receiverIdRef.current = receiverId;
+  }, [receiverId]);
+
   // Send a chat request
   const sendChatRequest = useCallback(
     async (targetReceiverId: string, initialMessage?: string) => {
@@ -437,20 +461,30 @@ export function usePrivateChat({
 
 
   // Start polling for new messages and conversations
+  // NO DEPENDENCIES - uses refs to get latest function values
   const startPolling = useCallback(() => {
     if (!enabled || !token) return;
 
-    // Poll conversations every 10 seconds (reduced frequency)
+    // Clear any existing abort controller
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
+    // Poll conversations every 10 seconds
     pollIntervalRef.current = setInterval(() => {
-      fetchConversations();
-      fetchChatRequests(); // Poll for new chat requests
+      if (abortControllerRef.current?.signal.aborted) return;
+      
+      // Use refs to get latest function versions
+      fetchConversationsRef.current();
+      fetchChatRequestsRef.current();
 
       // If we have an active conversation, refresh its messages too
-      if (receiverId) {
-        fetchMessages(receiverId);
+      if (receiverIdRef.current) {
+        fetchMessagesRef.current(receiverIdRef.current);
       }
-    }, 10000); // Increased from 5s to 10s to reduce load
-  }, [enabled, token, fetchConversations, fetchChatRequests, receiverId, fetchMessages]);
+    }, 10000);
+  }, [enabled, token]); // ONLY external control flags - not functions!
 
   // Stop polling
   const stopPolling = useCallback(() => {
@@ -458,23 +492,28 @@ export function usePrivateChat({
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
     }
+    // Abort any pending requests
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
   }, []);
 
   // Effect to manage polling
+  // ONLY depends on external control flags, not functions
   useEffect(() => {
     if (enabled && token) {
       // Only show loading on very first initialization
       const shouldShowLoading = isInitialLoadRef.current && conversations.length === 0;
       startPolling();
-      fetchConversations(shouldShowLoading);
-      fetchChatRequests(); // Initial fetch of chat requests
+      fetchConversationsRef.current(shouldShowLoading);
+      fetchChatRequestsRef.current();
     } else {
       stopPolling();
     }
 
     return () => stopPolling();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, token, startPolling, stopPolling, fetchConversations, fetchChatRequests]);
+  }, [enabled, token, startPolling, stopPolling]);
 
   // Effect to fetch messages when receiverId changes
   useEffect(() => {
