@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -127,8 +128,8 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
         <div
           ref={scrollContainerRef}
           className={`grid ${gridRowsClass} grid-flow-col auto-cols-max gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 md:px-3 scroll-smooth`}
-          style={{ 
-            scrollbarWidth: 'none', 
+          style={{
+            scrollbarWidth: 'none',
             msOverflowStyle: 'none',
           }}
         >
@@ -447,7 +448,7 @@ export default function Home() {
                 <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
                   <span className="text-2xl">🎅</span>
                 </div>
-                
+
                 <div className="relative z-10 flex flex-row items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🎁</span>
@@ -460,7 +461,7 @@ export default function Home() {
                     <p className="hidden md:inline text-white text-xs font-medium">
                       Warm up your nights with someone special!
                     </p>
-                    <Button 
+                    <Button
                       onClick={() => setViewerSignupOpen(true)}
                       className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto"
                     >
@@ -472,7 +473,7 @@ export default function Home() {
             </div>
           )}
 
-      
+
 
           {/* Content Area */}
           <div className="flex-1 p-2 md:p-3 overflow-y-auto  scrollbar-hide ">
@@ -502,13 +503,63 @@ export default function Home() {
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
               <div className="space-y-6">
-                {Object.entries(groupedStreams).map(([category, categoryStreams]) => (
-                  <CategoryRow
-                    key={category}
-                    category={category}
-                    streams={categoryStreams}
-                    onJoinStream={handleJoinStream}
-                  />
+                {Object.entries(groupedStreams).map(([category, categoryStreams], index) => (
+                  <>
+                    <CategoryRow
+                      key={category}
+                      category={category}
+                      streams={categoryStreams}
+                      onJoinStream={handleJoinStream}
+                    />
+                    {/* Show promotional card after 2nd category row */}
+                    {index === 1 && !session && (
+                      <div className="px-2 md:px-3 my-8">
+                        <Link href="/m/register">
+                          <div className="grid grid-cols-1 sm:grid-cols-2">
+                            <div className="w-full overflow-hidden bg-black border-2 border-gray-800 hover:border-pink-500/50 transition-all duration-300 cursor-pointer group">
+                              <div className="p-0">
+                                <div className="grid md:grid-cols-2 gap-0">
+                                  {/* Image Column */}
+                                  <div className="relative h-full overflow-hidden bg-black">
+                                    <Image
+                                      src="/imgs/model_placeholder.png"
+                                      alt="Become a Model"
+                                      fill
+                                      className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                  </div>
+
+                                  {/* Text Column */}
+                                  <div className="flex flex-col justify-center items-start p-8 md:p-12 space-y-4 bg-black">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <div className="">
+                                        <img
+                                          src={'/logo/SC-Logo.png'}
+                                          alt=""
+                                          className="object-cover w-52"
+                                        />
+                                      </div>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-white">
+                                      Become a Model
+                                    </h2>
+                                    <p className="text-base md:text-lg text-gray-400">
+                                      Get popular fast — stream in the region!
+                                    </p>
+                                    <div className="pt-2">
+                                      <span className="text-pink-500 font-bold text-lg hover:text-pink-400 transition-colors">
+                                        Earn as Model
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    )}
+                  </>
                 ))}
               </div>
             ) : (
@@ -564,7 +615,7 @@ export default function Home() {
                   Join SpicyCams to interact with models!
                 </span>
               </div>
-              <Button 
+              <Button
                 onClick={() => setViewerSignupOpen(true)}
                 className="bg-white hover:bg-gray-100 text-purple-700 font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-300 hover:scale-105"
               >
