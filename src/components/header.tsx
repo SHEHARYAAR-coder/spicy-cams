@@ -19,7 +19,7 @@ import {
   User,
   Hand,
   LayoutDashboard,
-  Search, Star, Image as ImageIcon, PlaySquare,
+  Search, Star, Image as ImageIcon, PlaySquare, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 import React, { useState, useEffect } from "react";
@@ -42,6 +42,7 @@ export function Header() {
   const [modelSignupOpen, setModelSignupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [onlineModelsCount, setOnlineModelsCount] = useState<number>(0);
+  const [liveStreams, setLiveStreams] = useState<Array<{ id: string, modelId: string }>>([]);
 
   // Fetch online models count
   useEffect(() => {
@@ -61,6 +62,48 @@ export function Header() {
     const interval = setInterval(fetchOnlineCount, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch list of live streams for navigation
+  useEffect(() => {
+    if (!isStreaming) return;
+
+    const fetchLiveStreams = async () => {
+      try {
+        const response = await fetch('/api/streams/list');
+        if (response.ok) {
+          const data = await response.json();
+          const streams = (data.streams || []).map((stream: any) => ({
+            id: stream.id,
+            modelId: stream.model?.id || stream.creator?.id
+          }));
+          setLiveStreams(streams);
+        }
+      } catch (error) {
+        console.error('Failed to fetch live streams:', error);
+      }
+    };
+
+    fetchLiveStreams();
+  }, [isStreaming]);
+
+  // Navigate to next/previous stream
+  const navigateStream = (direction: 'next' | 'prev') => {
+    if (!streamData || liveStreams.length === 0) return;
+
+    const currentIndex = liveStreams.findIndex(s => s.modelId === streamData.model.id);
+    if (currentIndex === -1) return;
+
+    let newIndex;
+    if (direction === 'next') {
+      newIndex = (currentIndex + 1) % liveStreams.length;
+    } else {
+      newIndex = (currentIndex - 1 + liveStreams.length) % liveStreams.length;
+    }
+
+    const newStream = liveStreams[newIndex];
+    // Navigate to the streaming page with the join parameter
+    router.push(`/streaming?join=${newStream.id}`);
+  };
 
   const handleSignOut = () => {
     void signOut({ callbackUrl: "/" });
@@ -365,15 +408,24 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div 
-            className={`bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40 transition-transform duration-300 ${
-              showCategoryBar ? 'translate-y-0' : '-translate-y-full'
-            }`}
+          <div
+            className={`bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40 transition-transform duration-300 ${showCategoryBar ? 'translate-y-0' : '-translate-y-full'
+              }`}
           >
             <div className="mx-auto px-4 lg:px-6">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (
                 <div className="flex items-center justify-start gap-2 sm:gap-4 py-2 overflow-x-auto scrollbar-hide">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => navigateStream('prev')}
+                    className="flex-shrink-0 p-1.5 sm:p-2 rounded-full bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 transition-all duration-300 group"
+                    title="Previous Stream"
+                    disabled={liveStreams.length <= 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-purple-400" />
+                  </button>
+
                   {/* Model Avatar and Name */}
                   <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     <Avatar className="w-8 h-8 sm:w-10 sm:h-10 ring-2 ring-purple-500/50">
@@ -391,6 +443,16 @@ export function Header() {
                       <p className="text-[10px] sm:text-xs text-gray-400">Streaming now</p>
                     </div>
                   </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => navigateStream('next')}
+                    className="flex-shrink-0 p-1.5 sm:p-2 rounded-full bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 transition-all duration-300 group"
+                    title="Next Stream"
+                    disabled={liveStreams.length <= 1}
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-purple-400" />
+                  </button>
 
                   {/* Separator */}
                   <div className="h-6 sm:h-8 w-px bg-gray-700/50 flex-shrink-0" />
