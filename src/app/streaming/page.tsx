@@ -337,17 +337,12 @@ export default function StreamingPage() {
     }
   };
 
-  // Fetch recommended streams based on category
+  // Fetch recommended streams - show ALL live streams regardless of category
   const fetchRecommendations = async (category?: string) => {
-    if (!category) {
-      console.log('No category provided for recommendations');
-      return;
-    }
-
-    console.log('Fetching recommendations for category:', category);
+    console.log('Fetching all live stream recommendations');
 
     try {
-      // Fetch all live streams with the same category
+      // Fetch all live streams
       const response = await fetch('/api/streams/list');
 
       if (response.ok) {
@@ -364,29 +359,16 @@ export default function StreamingPage() {
           }
         }));
 
-        // Filter by category (case-insensitive) and LIVE status, limit to 40
-        const categoryStreams = streamsWithDates
+        // Show ALL live streams except the current one, limit to 40
+        const allStreams = streamsWithDates
           .filter((stream: Stream) =>
             stream.status === 'LIVE' &&
-            stream.category?.toLowerCase() === category.toLowerCase() &&
             stream.id !== selectedStream
           )
           .slice(0, 40);
 
-        console.log('Filtered streams for category', category, ':', categoryStreams.length);
-        setRecommendedStreams(categoryStreams);
-
-        // If no streams in this category, show other live streams
-        if (categoryStreams.length === 0) {
-          console.log('No streams in category, showing other live streams');
-          const otherStreams = streamsWithDates
-            .filter((stream: Stream) =>
-              stream.status === 'LIVE' &&
-              stream.id !== selectedStream
-            )
-            .slice(0, 40);
-          setRecommendedStreams(otherStreams);
-        }
+        console.log('Showing all live streams:', allStreams.length);
+        setRecommendedStreams(allStreams);
       } else {
         console.error('Failed to fetch streams:', response.statusText);
       }
@@ -404,11 +386,11 @@ export default function StreamingPage() {
 
   // Fetch recommendations when watching a stream
   useEffect(() => {
-    if (mode === 'watch' && currentStreamData?.category) {
-      console.log('Watch mode detected, fetching recommendations for:', currentStreamData.category);
-      fetchRecommendations(currentStreamData.category);
+    if (mode === 'watch') {
+      console.log('Watch mode detected, fetching all stream recommendations');
+      fetchRecommendations();
     }
-  }, [mode, currentStreamData?.category]);
+  }, [mode, selectedStream]);
 
   // Save stream state to localStorage whenever it changes
   useEffect(() => {
@@ -433,7 +415,7 @@ export default function StreamingPage() {
   // Handle join stream from URL parameter or restore from session storage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const joinStreamId = urlParams.get('join');
+    const joinStreamId = urlParams.get('join') || urlParams.get('stream'); // Support both 'join' and 'stream' params
     const urlMode = urlParams.get('mode');
     const fromUsername = urlParams.get('from_username');
 
@@ -458,7 +440,7 @@ export default function StreamingPage() {
           // Only restore if it's relatively recent (within 24 hours)
           if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
             console.log('Restoring stream state from session:', state.selectedStream);
-            
+
             // If user is the broadcaster, redirect to username URL
             const sessionUser = session?.user as { username?: string } | undefined;
             if (state.mode === 'broadcast' && sessionUser?.username) {
@@ -466,7 +448,7 @@ export default function StreamingPage() {
               router.push(`/streaming/${encodeURIComponent(sessionUser.username)}`);
               return; // Don't restore state here, let the username page handle it
             }
-            
+
             setSelectedStream(state.selectedStream);
             setCurrentStreamData(state.streamData);
             setStreamToken(state.streamToken);
@@ -524,19 +506,19 @@ export default function StreamingPage() {
           const modelUsername = stream.model?.username;
           const sessionUser = session?.user as { username?: string } | undefined;
           const username = modelUsername || sessionUser?.username;
-          
+
           console.log('🔍 Model username from API:', modelUsername);
           console.log('🔍 Session username:', sessionUser?.username);
           console.log('🔍 Using username:', username || 'NO USERNAME');
           console.log('🔍 Mode:', newMode);
-          
+
           if (username && newMode === 'broadcast') {
             console.log('✅ Redirecting to username URL:', `/streaming/${username}`);
             setLoading(false); // Reset loading before redirect
             router.replace(`/streaming/${encodeURIComponent(username)}`);
             return; // Exit - the [username] page handles everything
           }
-          
+
           // For viewers (non-broadcast mode), set local state
           setStreamToken(tokenData.token);
           setCurrentStreamData(stream);
@@ -1132,7 +1114,7 @@ export default function StreamingPage() {
                   {recommendedStreams.length > 0 && (
                     <div className="mt-8">
                       <CategoryRow
-                        category={`More ${currentStreamData?.category || 'Live Streams'}`}
+                        category="More Live Streams"
                         streams={recommendedStreams}
                         onJoinStream={handleJoinStream}
                         currentStreamId={selectedStream}

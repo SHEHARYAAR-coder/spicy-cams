@@ -19,7 +19,7 @@ import {
   User,
   Hand,
   LayoutDashboard,
-  Search, Star, Image as ImageIcon, PlaySquare,
+  Search, Star, Image as ImageIcon, PlaySquare, ChevronLeft, ChevronRight,
 } from "lucide-react";
 
 import React, { useState, useEffect } from "react";
@@ -31,7 +31,7 @@ import { useCategoryType, CategoryType } from "@/contexts/CategoryContext";
 
 export function Header() {
   const { data: session, status } = useSession();
-  const { isStreaming, streamData } = useStream();
+  const { isStreaming, streamData, currentStreamIndex, activeStreams, navigateToNextStream, navigateToPreviousStream } = useStream();
   const { selectedCategoryType, setSelectedCategoryType, showCategoryBar } = useCategoryType();
   const pathname = usePathname();
   const router = useRouter();
@@ -365,60 +365,101 @@ export function Header() {
         !pathname?.startsWith('/m/') &&
         !pathname?.startsWith('/inbox') &&
         !pathname?.startsWith('/support') && (
-          <div 
-            className={`bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40 transition-transform duration-300 ${
-              showCategoryBar ? 'translate-y-0' : '-translate-y-full'
-            }`}
+          <div
+            className={`bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50 shadow-lg fixed w-full top-[4rem] z-40 transition-transform duration-300 ${showCategoryBar ? 'translate-y-0' : '-translate-y-full'
+              }`}
           >
             <div className="mx-auto px-4 lg:px-6">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (
-                <div className="flex items-center justify-start gap-4 py-2">
-                  {/* Model Avatar and Name */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10 ring-2 ring-purple-500/50">
-                      <AvatarImage
-                        src={streamData.model.image || undefined}
-                        alt={streamData.model.name}
-                        className="object-cover"
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
-                        <User className="w-5 h-5 text-white" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-white font-semibold">{streamData.model.name}</p>
-                      <p className="text-xs text-gray-400">Streaming now</p>
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <div className="flex items-center gap-4">
+                    {/* Model Avatar and Name */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10 ring-2 ring-purple-500/50">
+                        <AvatarImage
+                          src={streamData.model.image || undefined}
+                          alt={streamData.model.name}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
+                          <User className="w-5 h-5 text-white" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-white font-semibold">{streamData.model.name}</p>
+                        <p className="text-xs text-gray-400">Streaming now</p>
+                      </div>
                     </div>
+
+                    {/* Separator */}
+                    <div className="h-8 w-px bg-gray-700/50" />
+
+                    {/* Model Profile Links */}
+                    <Link
+                      href={`/profile/${streamData.model.id}`}
+                      className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    >
+                      <User className="w-4 h-4 text-purple-400" />
+                      <span>Profile</span>
+                    </Link>
+
+                    <Link
+                      href={`/profile/${streamData.model.id}?tab=photos`}
+                      className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    >
+                      <ImageIcon className="w-4 h-4 text-purple-400" />
+                      <span>Photos</span>
+                    </Link>
+
+                    <Link
+                      href={`/profile/${streamData.model.id}?tab=videos`}
+                      className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    >
+                      <PlaySquare className="w-4 h-4 text-purple-400" />
+                      <span>Videos</span>
+                    </Link>
                   </div>
 
-                  {/* Separator */}
-                  <div className="h-8 w-px bg-gray-700/50" />
+                  {/* Navigation Buttons - Only show for viewers (non-models) */}
+                  {sessionUser?.role !== "MODEL" && activeStreams.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      {/* Stream Counter */}
+                      <div className="text-xs text-gray-400 font-medium px-3 py-2 bg-gray-800/60 rounded-full border border-gray-700/50">
+                        {currentStreamIndex + 1} / {activeStreams.length}
+                      </div>
 
-                  {/* Model Profile Links */}
-                  <Link
-                    href={`/profile/${streamData.model.id}`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
-                  >
-                    <User className="w-4 h-4 text-purple-400" />
-                    <span>Profile</span>
-                  </Link>
+                      {/* Previous Button */}
+                      <button
+                        onClick={navigateToPreviousStream}
+                        disabled={currentStreamIndex <= 0}
+                        className={`group relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 border ${currentStreamIndex <= 0
+                            ? 'bg-gray-800/30 text-gray-600 border-gray-700/30 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/40 hover:to-pink-600/40 text-white border-purple-500/50 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/30'
+                          }`}
+                        title={currentStreamIndex <= 0 ? 'No previous stream' : 'Go to previous stream'}
+                      >
+                        <ChevronLeft className={`w-4 h-4 transition-transform duration-300 ${currentStreamIndex > 0 ? 'group-hover:-translate-x-1' : ''
+                          }`} />
+                        <span className="hidden sm:inline">Previous</span>
+                      </button>
 
-                  <Link
-                    href={`/profile/${streamData.model.id}?tab=photos`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
-                  >
-                    <ImageIcon className="w-4 h-4 text-purple-400" />
-                    <span>Photos</span>
-                  </Link>
-
-                  <Link
-                    href={`/profile/${streamData.model.id}?tab=videos`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
-                  >
-                    <PlaySquare className="w-4 h-4 text-purple-400" />
-                    <span>Videos</span>
-                  </Link>
+                      {/* Next Button */}
+                      <button
+                        onClick={navigateToNextStream}
+                        disabled={currentStreamIndex >= activeStreams.length - 1}
+                        className={`group relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 border ${currentStreamIndex >= activeStreams.length - 1
+                            ? 'bg-gray-800/30 text-gray-600 border-gray-700/30 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/40 hover:to-pink-600/40 text-white border-purple-500/50 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/30'
+                          }`}
+                        title={currentStreamIndex >= activeStreams.length - 1 ? 'No next stream' : 'Go to next stream'}
+                      >
+                        <span className="hidden sm:inline">Next</span>
+                        <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${currentStreamIndex < activeStreams.length - 1 ? 'group-hover:translate-x-1' : ''
+                          }`} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-center justify-start gap-6 py-2 font-medium text-sm pt-[1rem]">
