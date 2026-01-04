@@ -28,6 +28,7 @@ interface Stream {
 
 export default function StreamByUsernamePage() {
   const { data: session } = useSession();
+  
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
