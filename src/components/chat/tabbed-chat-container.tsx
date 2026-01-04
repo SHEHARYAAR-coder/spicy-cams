@@ -66,11 +66,13 @@ export function TabbedChatContainer({
         fetchChatToken();
     }, [streamId, session]);
 
-    // Get unread private message count and chat requests - always enabled to maintain state
+    // Get unread private message count and chat requests - skip polling, PrivateChatContainer handles it
     const { conversations, chatRequests } = usePrivateChat({
         streamId,
         token: chatToken,
         enabled: !!chatToken, // Always enabled when token is available
+        isModel: canModerate, // Only fetch chat requests if user is the model
+        skipPolling: true, // Don't poll here - PrivateChatContainer handles polling
     });
 
     // Get connection status from chat hook for live chat
@@ -232,6 +234,7 @@ export function TabbedChatContainer({
                         token={chatToken}
                         className="h-full border-0 rounded-none"
                         initialPartnerId={selectedPrivateUserId}
+                        isModel={canModerate}
                     />
                 </div>
                 <div className={cn("absolute inset-0", activeTab === "tips" ? "block" : "hidden")}>

@@ -50,12 +50,12 @@ export function PrivateMessageBubble({
                         <Avatar className="w-9 h-9 ring-2 ring-gray-600/30 hover:ring-purple-500/30 transition-all duration-200">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                                src={message.sender.image || "/default-avatar.png"}
+                                src={message.sender.image || "/default-avatar.svg"}
                                 alt={message.sender.name}
                                 className="w-full h-full object-cover rounded-full"
                                 onError={(e) => {
                                     const target = e.target as HTMLImageElement;
-                                    target.src = "/default-avatar.png";
+                                    target.src = "/default-avatar.svg";
                                 }}
                             />
                         </Avatar>

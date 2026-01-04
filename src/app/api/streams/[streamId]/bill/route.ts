@@ -145,6 +145,7 @@ export async function POST(
     );
 
     // model, create ledger entries
+    // Increased timeout to 15 seconds to handle slow database connections
     const result = await prisma.$transaction(async (tx) => {
       // Deduct tokens from viewer's wallet
       const updatedViewerWallet = await tx.wallet.update({
@@ -251,6 +252,9 @@ export async function POST(
         modelWallet,
         streamSession: updatedSession,
       };
+    }, {
+      maxWait: 10000, // Maximum time to wait for transaction to start
+      timeout: 20000, // Maximum time for the entire transaction (20 seconds)
     });
 
     return NextResponse.json({

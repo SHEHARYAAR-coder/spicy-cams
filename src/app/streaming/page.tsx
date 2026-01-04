@@ -147,6 +147,17 @@ export default function StreamingPage() {
   const [hasMediaPermissions, setHasMediaPermissions] = useState(false);
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile/desktop to render only one layout (prevents duplicate API calls from hooks)
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Check if user is a model
   const isModel = session?.user && 'role' in session.user && session.user.role === 'MODEL';
@@ -1049,13 +1060,39 @@ export default function StreamingPage() {
           {/* Fallback broadcast without username - show error */}
           {mode === 'broadcast' && selectedStream && streamToken && !sessionUser?.username && (
             <div className="h-full flex flex-col">
-              {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
+              {/* Render only one layout to prevent duplicate hooks */}
               <div className="flex-1 min-h-0">
-                {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-3 gap-4 h-[70vh]">
-                  {/* Video Section - Takes 2/3 width */}
-                  <div className="lg:col-span-2 flex flex-col">
-                    <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
+                {!isMobile ? (
+                  /* Desktop Layout */
+                  <div className="grid grid-cols-3 gap-4 h-[70vh]">
+                    {/* Video Section - Takes 2/3 width */}
+                    <div className="col-span-2 flex flex-col">
+                      <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
+                        <ModelBroadcast
+                          streamId={selectedStream}
+                          token={streamToken}
+                          serverUrl={LIVEKIT_SERVER_URL}
+                          streamTitle={currentStreamData?.title || newStream.title}
+                          selectedCameraId={newStream.cameraDeviceId}
+                          onStreamEnd={handleStreamEnd}
+                          className="h-full w-full absolute inset-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Chat Section - Takes 1/3 width */}
+                    <div className="col-span-1">
+                      <TabbedChatContainer
+                        streamId={selectedStream}
+                        canModerate={true}
+                        className="h-full w-full"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  /* Mobile Layout - Full Screen Video */
+                  <div className="fixed inset-0 bg-black z-10 overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center">
                       <ModelBroadcast
                         streamId={selectedStream}
                         token={streamToken}
@@ -1063,37 +1100,13 @@ export default function StreamingPage() {
                         streamTitle={currentStreamData?.title || newStream.title}
                         selectedCameraId={newStream.cameraDeviceId}
                         onStreamEnd={handleStreamEnd}
-                        className="h-full w-full absolute inset-0"
+                        className="w-full h-full"
                       />
                     </div>
+                    {/* Floating Chat Overlay */}
+                    <MobileChatOverlay streamId={selectedStream} canModerate={true} />
                   </div>
-
-                  {/* Chat Section - Takes 1/3 width */}
-                  <div className="lg:col-span-1">
-                    <TabbedChatContainer
-                      streamId={selectedStream}
-                      canModerate={true}
-                      className="h-full w-full"
-                    />
-                  </div>
-                </div>
-
-                {/* Mobile Layout - True Full Screen Video */}
-                <div className="lg:hidden fixed inset-0 bg-black z-10 overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ModelBroadcast
-                      streamId={selectedStream}
-                      token={streamToken}
-                      serverUrl={LIVEKIT_SERVER_URL}
-                      streamTitle={currentStreamData?.title || newStream.title}
-                      selectedCameraId={newStream.cameraDeviceId}
-                      onStreamEnd={handleStreamEnd}
-                      className="w-full h-full"
-                    />
-                  </div>
-                  {/* Floating Chat Overlay */}
-                  <MobileChatOverlay streamId={selectedStream} canModerate={true} />
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -1101,95 +1114,97 @@ export default function StreamingPage() {
           {/* Viewer Player */}
           {mode === 'watch' && selectedStream && streamToken && (
             <div className="h-full flex flex-col">
-              {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
+              {/* Render only one layout to prevent duplicate hooks */}
               <div className="flex-1 min-h-0 overflow-y-auto">
-                {/* Desktop Layout */}
-                <div className="hidden lg:block">
-                  <div className="grid lg:grid-cols-3 gap-4 h-[70vh]">
-                    {/* Video Section - Takes 2/3 width */}
-                    <div className="lg:col-span-2 flex flex-col">
-                      <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
-                        <ViewerPlayer
-                          streamId={selectedStream}
-                          token={streamToken}
-                          serverUrl={LIVEKIT_SERVER_URL}
-                          streamTitle={currentStreamData?.title}
-                          modelName={currentStreamData?.model?.name}
-                          className="h-full w-full absolute inset-0"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Chat Section - Takes 1/3 width */}
-                    <div className="lg:col-span-1">
-                      <div className="h-[700px]">
-                        <TabbedChatContainer
-                          streamId={selectedStream}
-                          canModerate={false}
-                          className="h-full"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="px-2 py-6 md:px-3 my-12">
-                    <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg p-5 overflow-hidden shadow-lg">
-                      {/* Decorative elements */}
-                      <div className="absolute top-0 left-0 w-6 h-6 opacity-15">
-                        <span className="text-2xl">🎁</span>
-                      </div>
-                      <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
-                        <span className="text-2xl">🎅</span>
-                      </div>
-
-                      <div className="relative z-10 flex flex-row items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">🎁</span>
-                          <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
-                            <span className="bg-red-600 px-1.5 py-0.5 rounded text-xs">50% OFF</span>
-                            <span className="hidden sm:inline">Tokens for XXXmas</span>
-                          </h2>
+                {!isMobile ? (
+                  /* Desktop Layout */
+                  <>
+                    <div className="grid grid-cols-3 gap-4 h-[70vh]">
+                      {/* Video Section - Takes 2/3 width */}
+                      <div className="col-span-2 flex flex-col">
+                        <div className="flex-1 bg-black rounded-lg overflow-hidden relative">
+                          <ViewerPlayer
+                            streamId={selectedStream}
+                            token={streamToken}
+                            serverUrl={LIVEKIT_SERVER_URL}
+                            streamTitle={currentStreamData?.title}
+                            modelName={currentStreamData?.model?.name}
+                            className="h-full w-full absolute inset-0"
+                          />
                         </div>
-                        <div className="flex items-center gap-2">
-                          <p className="hidden md:inline text-white text-xs font-medium">
-                            Warm up your nights with someone special!
-                          </p>
-                          <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
-                            GET DISCOUNT
-                          </Button>
+                      </div>
+
+                      {/* Chat Section - Takes 1/3 width */}
+                      <div className="col-span-1">
+                        <div className="h-[700px]">
+                          <TabbedChatContainer
+                            streamId={selectedStream}
+                            canModerate={false}
+                            className="h-full"
+                          />
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Recommendations Section - Below video */}
-                  {recommendedStreams.length > 0 && (
-                    <div className="mt-8">
-                      <CategoryRow
-                        category={`More ${currentStreamData?.category || 'Live Streams'}`}
-                        streams={recommendedStreams}
-                        onJoinStream={handleJoinStream}
-                        currentStreamId={selectedStream}
+                    <div className="px-2 py-6 md:px-3 my-12">
+                      <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg p-5 overflow-hidden shadow-lg">
+                        {/* Decorative elements */}
+                        <div className="absolute top-0 left-0 w-6 h-6 opacity-15">
+                          <span className="text-2xl">🎁</span>
+                        </div>
+                        <div className="absolute top-0 right-0 w-6 h-6 opacity-15">
+                          <span className="text-2xl">🎅</span>
+                        </div>
+
+                        <div className="relative z-10 flex flex-row items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">🎁</span>
+                            <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+                              <span className="bg-red-600 px-1.5 py-0.5 rounded text-xs">50% OFF</span>
+                              <span className="hidden sm:inline">Tokens for XXXmas</span>
+                            </h2>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="hidden md:inline text-white text-xs font-medium">
+                              Warm up your nights with someone special!
+                            </p>
+                            <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
+                              GET DISCOUNT
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recommendations Section - Below video */}
+                    {recommendedStreams.length > 0 && (
+                      <div className="mt-8">
+                        <CategoryRow
+                          category={`More ${currentStreamData?.category || 'Live Streams'}`}
+                          streams={recommendedStreams}
+                          onJoinStream={handleJoinStream}
+                          currentStreamId={selectedStream}
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* Mobile Layout - Full Screen Video */
+                  <div className="fixed inset-0 bg-black z-10 overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ViewerPlayer
+                        streamId={selectedStream}
+                        token={streamToken}
+                        serverUrl={LIVEKIT_SERVER_URL}
+                        streamTitle={currentStreamData?.title}
+                        modelName={currentStreamData?.model?.name}
+                        className="w-full h-full"
                       />
                     </div>
-                  )}
-                </div>
-
-                {/* Mobile Layout - True Full Screen Video */}
-                <div className="lg:hidden fixed inset-0 bg-black z-10 overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ViewerPlayer
-                      streamId={selectedStream}
-                      token={streamToken}
-                      serverUrl={LIVEKIT_SERVER_URL}
-                      streamTitle={currentStreamData?.title}
-                      modelName={currentStreamData?.model?.name}
-                      className="w-full h-full"
-                    />
+                    {/* Floating Chat Overlay */}
+                    <MobileChatOverlay streamId={selectedStream} canModerate={false} />
                   </div>
-                  {/* Floating Chat Overlay */}
-                  <MobileChatOverlay streamId={selectedStream} canModerate={false} />
-                </div>
+                )}
               </div>
             </div>
           )}

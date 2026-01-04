@@ -61,12 +61,12 @@ export function PrivateChatRequestNotification({
                             <Avatar className="w-12 h-12 ring-2 ring-purple-500/30">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src={request.senderImage || "/default-avatar.png"}
+                                    src={request.senderImage || "/default-avatar.svg"}
                                     alt={request.senderName}
                                     className="w-full h-full object-cover rounded-full"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
-                                        target.src = "/default-avatar.png";
+                                        target.src = "/default-avatar.svg";
                                     }}
                                 />
                             </Avatar>

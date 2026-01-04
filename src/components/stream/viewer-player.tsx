@@ -231,8 +231,8 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
         };
 
         checkPauseState();
-        // Increased from 3s to 15s to reduce API load
-        const interval = setInterval(checkPauseState, 15000);
+        // Increased from 15s to 30s to reduce API load
+        const interval = setInterval(checkPauseState, 30000);
         return () => clearInterval(interval);
     }, [streamId]);
 

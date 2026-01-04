@@ -16,6 +16,7 @@ interface PrivateChatContainerProps {
     token: string | null;
     className?: string;
     initialPartnerId?: string | null;
+    isModel?: boolean; // Whether the user is the stream model
 }
 
 export function PrivateChatContainer({
@@ -23,6 +24,7 @@ export function PrivateChatContainer({
     token,
     className,
     initialPartnerId,
+    isModel = false,
 }: PrivateChatContainerProps) {
     const { data: session } = useSession();
     const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(initialPartnerId || null);
@@ -54,6 +56,7 @@ export function PrivateChatContainer({
         receiverId: selectedPartnerId || undefined,
         token,
         enabled: streamId !== "homepage" && !!token,
+        isModel, // Only fetch chat requests if user is the model
     });
 
     // Fetch stream model info (skip for homepage)
@@ -145,8 +148,8 @@ export function PrivateChatContainer({
 
         checkCreatorRequestStatus();
 
-        // Poll for status changes every 5 seconds
-        const interval = setInterval(checkCreatorRequestStatus, 5000);
+        // Poll for status changes every 30 seconds (reduced from 5s to minimize API calls)
+        const interval = setInterval(checkCreatorRequestStatus, 30000);
 
         return () => clearInterval(interval);
     }, [creatorInfo, conversations, token, streamId, session?.user?.id]);
@@ -231,16 +234,23 @@ export function PrivateChatContainer({
         );
     }
 
+    // Show loading if token is not yet available (waiting for chat token to be fetched)
+    // Once token is available, rely on the hook's loading state
+    const isWaitingForToken = !token && streamId !== "homepage";
+    const isLoadingData = loading && conversations.length === 0 && chatRequests.length === 0;
+
     return (
         <Card className={cn("flex flex-col h-full bg-gray-900", className)}>
             {!selectedPartnerId ? (
                 // Conversation list view
                 <>
-                    {loading && conversations.length === 0 && chatRequests.length === 0 ? (
+                    {isWaitingForToken || isLoadingData ? (
                         <div className="flex-1 flex items-center justify-center animate-in fade-in duration-300">
                             <div className="text-center p-6">
                                 <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto mb-2" />
-                                <p className="text-xs text-gray-400">Loading...</p>
+                                <p className="text-xs text-gray-400">
+                                    {isWaitingForToken ? "Connecting..." : "Loading..."}
+                                </p>
                             </div>
                         </div>
                     ) : (

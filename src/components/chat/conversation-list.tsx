@@ -74,12 +74,12 @@ export function ConversationList({
                             <Avatar className="w-12 h-12 ring-2 ring-gray-600/50 transition-all duration-200 group-hover:ring-purple-500/30">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src={conversation.partnerImage || "/default-avatar.png"}
+                                    src={conversation.partnerImage || "/default-avatar.svg"}
                                     alt={conversation.partnerName}
                                     className="w-full h-full object-cover rounded-full"
                                     onError={(e) => {
                                         const target = e.target as HTMLImageElement;
-                                        target.src = "/default-avatar.png";
+                                        target.src = "/default-avatar.svg";
                                     }}
                                 />
                             </Avatar>

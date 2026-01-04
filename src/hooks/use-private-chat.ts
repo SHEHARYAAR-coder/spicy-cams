@@ -51,6 +51,8 @@ interface UsePrivateChatProps {
   receiverId?: string;
   token: string | null;
   enabled?: boolean;
+  isModel?: boolean; // Whether the user is the stream model (can receive chat requests)
+  skipPolling?: boolean; // If true, fetch once but don't poll (for badge counts)
 }
 
 export function usePrivateChat({
@@ -58,6 +60,8 @@ export function usePrivateChat({
   receiverId,
   token,
   enabled = true,
+  isModel = false,
+  skipPolling = false,
 }: UsePrivateChatProps) {
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [conversations, setConversations] = useState<PrivateConversation[]>([]);
@@ -82,7 +86,11 @@ export function usePrivateChat({
 
   // Fetch conversations list
   const fetchConversations = useCallback(async (showLoading = false) => {
-    if (!token || !enabled) return;
+    if (!token || !enabled) {
+      // Reset loading if we're skipping the fetch
+      if (showLoading) setLoading(false);
+      return;
+    }
 
     // Load from cache first for instant display
     const cached = getCachedConversations(streamId);
@@ -287,7 +295,8 @@ export function usePrivateChat({
 
   // Fetch pending chat requests (for models only)
   const fetchChatRequests = useCallback(async () => {
-    if (!token || !enabled) return;
+    // Only fetch chat requests if user is the model
+    if (!token || !enabled || !isModel) return;
 
     try {
       const response = await fetch(
@@ -312,7 +321,7 @@ export function usePrivateChat({
     } catch (error) {
       console.error("Error fetching chat requests:", error);
     }
-  }, [streamId, token, enabled]);
+  }, [streamId, token, enabled, isModel]);
 
   // Update refs with latest function versions to avoid dependency loops
   useEffect(() => {
@@ -463,7 +472,8 @@ export function usePrivateChat({
   // Start polling for new messages and conversations
   // NO DEPENDENCIES - uses refs to get latest function values
   const startPolling = useCallback(() => {
-    if (!enabled || !token) return;
+    // Skip polling if disabled or skipPolling flag is set
+    if (!enabled || !token || skipPolling) return;
 
     // Clear any existing abort controller
     if (abortControllerRef.current) {
@@ -475,16 +485,20 @@ export function usePrivateChat({
     pollIntervalRef.current = setInterval(() => {
       if (abortControllerRef.current?.signal.aborted) return;
       
-      // Use refs to get latest function versions
-      fetchConversationsRef.current();
-      fetchChatRequestsRef.current();
+      // Use refs to get latest function versions (with null checks)
+      if (fetchConversationsRef.current) {
+        fetchConversationsRef.current();
+      }
+      if (fetchChatRequestsRef.current) {
+        fetchChatRequestsRef.current();
+      }
 
       // If we have an active conversation, refresh its messages too
-      if (receiverIdRef.current) {
+      if (receiverIdRef.current && fetchMessagesRef.current) {
         fetchMessagesRef.current(receiverIdRef.current);
       }
     }, 30000);
-  }, [enabled, token]); // ONLY external control flags - not functions!
+  }, [enabled, token, skipPolling]); // ONLY external control flags - not functions!
 
   // Stop polling
   const stopPolling = useCallback(() => {
@@ -506,8 +520,13 @@ export function usePrivateChat({
       // Only show loading on very first initialization
       const shouldShowLoading = isInitialLoadRef.current && conversations.length === 0;
       startPolling();
-      fetchConversationsRef.current(shouldShowLoading);
-      fetchChatRequestsRef.current();
+      // Add null checks for refs that may not be set yet
+      if (fetchConversationsRef.current) {
+        fetchConversationsRef.current(shouldShowLoading);
+      }
+      if (fetchChatRequestsRef.current) {
+        fetchChatRequestsRef.current();
+      }
     } else {
       stopPolling();
     }
