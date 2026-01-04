@@ -148,20 +148,44 @@ export default function StreamingPage() {
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
-  // Debug: Log session when it changes
-  useEffect(() => {
-    if (session) {
-      console.log('📋 Session loaded:', {
-        user: session.user,
-        hasUsername: 'username' in (session.user as object),
-        username: (session.user as { username?: string }).username,
-        role: (session.user as { role?: string }).role
-      });
-    }
-  }, [session]);
-
   // Check if user is a model
   const isModel = session?.user && 'role' in session.user && session.user.role === 'MODEL';
+  const sessionUser = session?.user as { username?: string } | undefined;
+
+  // If user is a model with an active stream, redirect to username URL
+  // This ensures broadcasters always see their shareable URL
+  useEffect(() => {
+    const checkActiveStream = async () => {
+      if (!isModel || !sessionUser?.username) return;
+
+      try {
+        // Check if user has an active stream
+        const response = await fetch(`/api/streams/by-username/${sessionUser.username}`);
+        if (response.ok) {
+          // User has an active stream, redirect to username URL
+          console.log('📺 Active stream detected, redirecting to username URL');
+          router.replace(`/streaming/${encodeURIComponent(sessionUser.username)}`);
+        }
+      } catch (error) {
+        // No active stream, stay on browse/create page
+        console.log('No active stream found');
+      }
+    };
+
+    // Only check on initial load, not when in create mode
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('mode')) {
+      checkActiveStream();
+    }
+  }, [isModel, sessionUser?.username, router]);
+
+  // Redirect to username URL when in broadcast mode
+  useEffect(() => {
+    if (mode === 'broadcast' && sessionUser?.username) {
+      console.log('🔄 Broadcast mode on /streaming - redirecting to username URL');
+      router.replace(`/streaming/${encodeURIComponent(sessionUser.username)}`);
+    }
+  }, [mode, sessionUser?.username, router]);
 
   // New stream form
   const [newStream, setNewStream] = useState({
@@ -1012,8 +1036,18 @@ export default function StreamingPage() {
             </div>
           )}
 
-          {/* Model Broadcast */}
-          {mode === 'broadcast' && selectedStream && streamToken && (
+          {/* Model Broadcast - Should not render here, redirect to username URL */}
+          {mode === 'broadcast' && selectedStream && streamToken && sessionUser?.username && (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+                <p className="text-white text-lg">Redirecting to your stream...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Fallback broadcast without username - show error */}
+          {mode === 'broadcast' && selectedStream && streamToken && !sessionUser?.username && (
             <div className="h-full flex flex-col">
               {/* Desktop: Side-by-side layout | Mobile: Full-screen video */}
               <div className="flex-1 min-h-0">

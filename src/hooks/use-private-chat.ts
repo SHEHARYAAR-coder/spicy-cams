@@ -471,7 +471,7 @@ export function usePrivateChat({
     }
     abortControllerRef.current = new AbortController();
 
-    // Poll conversations every 10 seconds
+    // Poll conversations every 30 seconds (reduced from 10 seconds to minimize API calls)
     pollIntervalRef.current = setInterval(() => {
       if (abortControllerRef.current?.signal.aborted) return;
       
@@ -483,7 +483,7 @@ export function usePrivateChat({
       if (receiverIdRef.current) {
         fetchMessagesRef.current(receiverIdRef.current);
       }
-    }, 10000);
+    }, 30000);
   }, [enabled, token]); // ONLY external control flags - not functions!
 
   // Stop polling

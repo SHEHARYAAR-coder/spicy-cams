@@ -106,38 +106,38 @@ export function Header() {
       <header className="bg-gray-900/95 backdrop-blur-md border-b border-gray-800/50  fixed w-full top-0 z-50">
         <div className="mx-auto px-4 py-3 lg:px-6">
           <div className="flex justify-between items-center h-12">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/" className="flex items-center space-x-2 group transition-all duration-300 hover:opacity-80">
                 <img
                   src="/logo/logo.png"
                   alt="SpicyCams Logo"
-                  className="h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-14 sm:h-20 lg:h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 />
               </Link>
 
               {(sessionUser?.role !== "MODEL") && (
-                <div className={'flex items-center justify-center gap-2'}>
+                <div className={'hidden sm:flex items-center justify-center gap-2'}>
                   <Link
                     href={'/all-models/'}
                     className={'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}
                   >
                     <Star className="w-4 h-4 text-yellow-400" />
-                    <span>All Models</span>
+                    <span className="hidden md:inline">All Models</span>
                   </Link>
                   <Link
                     href={'/top-models/'}
                     className={'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600 bg-gradient-to-r from-purple-600/20 to-pink-600/20'}
                   >
                     <Star className="w-4 h-4 text-pink-400 fill-pink-400" />
-                    <span>Top Models</span>
+                    <span className="hidden md:inline">Top Models</span>
                   </Link>
                 </div>
               )}
 
               {onlineModelsCount > 0 && (
-                <div className={'relative inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
+                <div className={'relative hidden sm:inline-flex items-center rounded-full px-2 sm:px-3 py-1.5 text-xs font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-gray-600'}>
                   <span className={'flex gap-1.5'}>
-                    Live Streams
+                    <span className="hidden md:inline">Live Streams</span>
                     <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-green-500 rounded-full">
                       {onlineModelsCount}
                     </span>
@@ -180,13 +180,13 @@ export function Header() {
               </nav>
             )}
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-2">
               {/* Search Bar for Streams - Always visible */}
               <div className={`relative ${session?.user ? 'block' : 'hidden'}`}>
                 <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                 <Input
                   type="text"
-                  placeholder="Search streams..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   onKeyDown={(e) => {
@@ -194,7 +194,7 @@ export function Header() {
                       router.push(`/?search=${encodeURIComponent(searchQuery)}`);
                     }
                   }}
-                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-40 lg:w-52"
+                  className="pl-8 pr-3 py-1.5 text-xs bg-gray-800/60 border-gray-700/50 text-gray-200 placeholder:text-gray-400 focus:border-purple-500 focus:ring-purple-500/20 rounded-full transition-all duration-300 w-24 sm:w-32 md:w-40 lg:w-52"
                 />
               </div>
 
@@ -373,51 +373,54 @@ export function Header() {
             <div className="mx-auto px-4 lg:px-6">
               {/* Show model info when streaming, otherwise show categories */}
               {isStreaming && streamData ? (
-                <div className="flex items-center justify-start gap-4 py-2">
+                <div className="flex items-center justify-start gap-2 sm:gap-4 py-2 overflow-x-auto scrollbar-hide">
                   {/* Model Avatar and Name */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10 ring-2 ring-purple-500/50">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                    <Avatar className="w-8 h-8 sm:w-10 sm:h-10 ring-2 ring-purple-500/50">
                       <AvatarImage
                         src={streamData.model.image || undefined}
                         alt={streamData.model.name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-purple-600 to-purple-800">
-                        <User className="w-5 h-5 text-white" />
+                        <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="text-white font-semibold">{streamData.model.name}</p>
-                      <p className="text-xs text-gray-400">Streaming now</p>
+                    <div className="min-w-0">
+                      <p className="text-white font-semibold text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">{streamData.model.name}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400">Streaming now</p>
                     </div>
                   </div>
 
                   {/* Separator */}
-                  <div className="h-8 w-px bg-gray-700/50" />
+                  <div className="h-6 sm:h-8 w-px bg-gray-700/50 flex-shrink-0" />
 
                   {/* Model Profile Links */}
                   <Link
                     href={`/profile/${streamData.model.id}`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    className="relative inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500 flex-shrink-0"
+                    title="Profile"
                   >
-                    <User className="w-4 h-4 text-purple-400" />
-                    <span>Profile</span>
+                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
+                    <span className="hidden sm:inline">Profile</span>
                   </Link>
 
                   <Link
                     href={`/profile/${streamData.model.id}?tab=photos`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    className="relative inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500 flex-shrink-0"
+                    title="Photos"
                   >
-                    <ImageIcon className="w-4 h-4 text-purple-400" />
-                    <span>Photos</span>
+                    <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
+                    <span className="hidden sm:inline">Photos</span>
                   </Link>
 
                   <Link
                     href={`/profile/${streamData.model.id}?tab=videos`}
-                    className="relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500"
+                    className="relative inline-flex items-center gap-1.5 sm:gap-2 rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium transition-all duration-300 hover:bg-gray-800/60 hover:text-white text-gray-300 border border-gray-700/50 hover:border-purple-500 flex-shrink-0"
+                    title="Videos"
                   >
-                    <PlaySquare className="w-4 h-4 text-purple-400" />
-                    <span>Videos</span>
+                    <PlaySquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400" />
+                    <span className="hidden sm:inline">Videos</span>
                   </Link>
                 </div>
               ) : (
