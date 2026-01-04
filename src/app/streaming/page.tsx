@@ -148,6 +148,7 @@ export default function StreamingPage() {
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [existingStreamId, setExistingStreamId] = useState<string | null>(null);
 
   // Detect mobile/desktop to render only one layout (prevents duplicate API calls from hooks)
   useEffect(() => {
@@ -163,11 +164,49 @@ export default function StreamingPage() {
   const isModel = session?.user && 'role' in session.user && session.user.role === 'MODEL';
   const sessionUser = session?.user as { username?: string } | undefined;
 
-  // If user is a model with an active stream, redirect to username URL
+  // Handle "Go Live" button click - check for existing stream first
+  const handleGoLive = async () => {
+    if (!isModel || !sessionUser?.username) {
+      setMode('create');
+      return;
+    }
+
+    try {
+      // Check if model has an existing active stream
+      const response = await fetch(`/api/streams/by-username/${sessionUser.username}`);
+      if (response.ok) {
+        const data = await response.json();
+        // Model has an active stream - redirect to it
+        console.log('Model has active stream, redirecting to:', sessionUser.username);
+        router.replace(`/streaming/${encodeURIComponent(sessionUser.username)}`);
+      } else {
+        // No active stream - proceed to create mode
+        setMode('create');
+      }
+    } catch (error) {
+      // Error checking - proceed to create mode
+      setMode('create');
+    }
+  };
+
+  // If user is a model with an active stream and NOT watching another stream, redirect to username URL
   // This ensures broadcasters always see their shareable URL
   useEffect(() => {
     const checkActiveStream = async () => {
       if (!isModel || !sessionUser?.username) return;
+
+      // Don't redirect if user is watching another stream or in watch mode
+      if (mode === 'watch' || selectedStream) {
+        console.log('User is watching a stream, skipping redirect');
+        return;
+      }
+
+      // Don't redirect if join parameter is in URL (user wants to watch a specific stream)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('join')) {
+        console.log('Join parameter found, skipping redirect');
+        return;
+      }
 
       try {
         // Check if user has an active stream
@@ -185,10 +224,10 @@ export default function StreamingPage() {
 
     // Only check on initial load, not when in create mode
     const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.get('mode')) {
+    if (!urlParams.get('mode') && !urlParams.get('join')) {
       checkActiveStream();
     }
-  }, [isModel, sessionUser?.username, router]);
+  }, [isModel, sessionUser?.username, router, mode, selectedStream]);
 
   // Redirect to username URL when in broadcast mode
   useEffect(() => {
@@ -481,7 +520,8 @@ export default function StreamingPage() {
       }
     } else if (urlMode === 'create' && session && isModel) {
       console.log('Auto-switching to create mode from URL');
-      setMode('create');
+      // Use handleGoLive which checks for existing stream first
+      handleGoLive();
       // Clean up URL
       window.history.replaceState({}, '', '/streaming');
     } else if (!joinStreamId && !urlMode && session && !selectedStream) {
@@ -730,7 +770,7 @@ export default function StreamingPage() {
                       <h3 className="text-xl text-white font-semibold mb-2">No streams available</h3>
                       <p className="text-gray-400 mb-4">Be the first to start streaming!</p>
                       {isModel && (
-                        <Button onClick={() => setMode('create')} className="bg-purple-600 text-white hover:bg-purple-700">
+                        <Button onClick={handleGoLive} className="bg-purple-600 text-white hover:bg-purple-700">
                           <Plus className="w-4 h-4 mr-2" />
                           Start Streaming
                         </Button>

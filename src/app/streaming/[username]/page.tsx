@@ -158,10 +158,10 @@ export default function StreamByUsernamePage() {
   const [hasFetched, setHasFetched] = useState(false);
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
-  // Fetch recommended streams based on category
-  const fetchRecommendations = async (category?: string, currentStreamId?: string) => {
+  // Fetch random live streams for recommendations
+  const fetchRecommendations = async (currentStreamId?: string) => {
     try {
-      const response = await fetch('/api/streams/list');
+      const response = await fetch('/api/streams/list?status=live');
       if (response.ok) {
         const data = await response.json();
         const streamsWithDates = (data.streams || []).map((s: any) => ({
@@ -174,21 +174,15 @@ export default function StreamByUsernamePage() {
           }
         }));
 
-        // Filter by category and LIVE status
-        let filteredStreams = streamsWithDates.filter((s: Stream) =>
+        // Filter out current stream and only show LIVE streams
+        const liveStreams = streamsWithDates.filter((s: Stream) =>
           s.status === 'LIVE' && s.id !== currentStreamId
         );
 
-        if (category) {
-          const categoryStreams = filteredStreams.filter((s: Stream) =>
-            s.category?.toLowerCase() === category.toLowerCase()
-          );
-          if (categoryStreams.length > 0) {
-            filteredStreams = categoryStreams;
-          }
-        }
+        // Shuffle the streams randomly
+        const shuffled = liveStreams.sort(() => Math.random() - 0.5);
 
-        setRecommendedStreams(filteredStreams.slice(0, 20));
+        setRecommendedStreams(shuffled.slice(0, 20));
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
@@ -267,7 +261,7 @@ export default function StreamByUsernamePage() {
   // Fetch recommendations when stream is loaded and user is viewing (not broadcasting)
   useEffect(() => {
     if (stream && mode === 'watch') {
-      fetchRecommendations(stream.category, stream.id);
+      fetchRecommendations(stream.id);
     }
   }, [stream, mode]);
 
@@ -392,7 +386,7 @@ export default function StreamByUsernamePage() {
                   {recommendedStreams.length > 0 && (
                     <div className="mt-8">
                       <CategoryRow
-                        category={`More ${stream.category || 'Live Streams'}`}
+                        category="More Live Streams"
                         streams={recommendedStreams}
                         onJoinStream={handleJoinStream}
                         currentStreamId={stream.id}
