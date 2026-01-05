@@ -180,7 +180,7 @@ export function Header() {
                     {[
                       { label: "Home", href: "/" },
                       { label: "Pricing", href: "/pricing" },
-                      { label: "Streaming", href: "/streaming" },
+                      // { label: "Streaming", href: "/streaming" },
                     ].map((item) => {
                       const active =
                         pathname === item.href ||

@@ -117,6 +117,7 @@ export async function GET(request: NextRequest) {
           model: {
             id: stream.model.id,
             name: stream.model.profile?.displayName || stream.model.email,
+            username: stream.model.username,
             avatar: stream.model.profile?.avatarUrl,
           },
           startedAt: stream.startedAt,

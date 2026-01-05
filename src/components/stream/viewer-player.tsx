@@ -46,6 +46,8 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { StreamActionBar } from "./stream-action-bar";
+import { TipDialog } from "./tip-dialog";
 
 
 
@@ -55,7 +57,13 @@ interface ViewerPlayerProps {
     serverUrl: string;
     streamTitle?: string;
     modelName?: string;
+    modelId?: string;
     className?: string;
+    onSendTip?: (tokens: number, activity?: string) => void;
+    onPrivateShow?: (minutes: number) => void;
+    onLike?: () => void;
+    likeCount?: number;
+    privateShowPrice?: number;
 }
 
 export function ViewerPlayer({
@@ -64,7 +72,13 @@ export function ViewerPlayer({
     serverUrl,
     streamTitle,
     modelName,
-    className = ""
+    modelId,
+    className = "",
+    onSendTip,
+    onPrivateShow,
+    onLike,
+    likeCount = 0,
+    privateShowPrice = 90,
 }: ViewerPlayerProps) {
     return (
         <div className={`relative ${className}`}>
@@ -84,6 +98,12 @@ export function ViewerPlayer({
                     streamId={streamId}
                     streamTitle={streamTitle}
                     modelName={modelName}
+                    modelId={modelId}
+                    onSendTip={onSendTip}
+                    onPrivateShow={onPrivateShow}
+                    onLike={onLike}
+                    likeCount={likeCount}
+                    privateShowPrice={privateShowPrice}
                 />
                 <RoomAudioRenderer />
             </LiveKitRoom>
@@ -95,6 +115,12 @@ interface ViewerVideoViewProps {
     streamId: string;
     streamTitle?: string;
     modelName?: string;
+    modelId?: string;
+    onSendTip?: (tokens: number, activity?: string) => void;
+    onPrivateShow?: (minutes: number) => void;
+    onLike?: () => void;
+    likeCount?: number;
+    privateShowPrice?: number;
 }
 
 function LiveViewerStats({ streamTitle, modelName, startTime, isPaused }: {
@@ -149,7 +175,17 @@ function LiveViewerStats({ streamTitle, modelName, startTime, isPaused }: {
     );
 }
 
-function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewProps) {
+function ViewerVideoView({ 
+    streamId, 
+    streamTitle, 
+    modelName,
+    modelId,
+    onSendTip,
+    onPrivateShow,
+    onLike,
+    likeCount: propLikeCount = 0,
+    privateShowPrice = 90,
+}: ViewerVideoViewProps) {
     const tracks = useTracks(
         [
             { source: Track.Source.Camera, withPlaceholder: true },
@@ -164,22 +200,34 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
     const [isAudioMuted, setIsAudioMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showLike, setShowLike] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
+    const [localLikeCount, setLocalLikeCount] = useState(propLikeCount);
     const [selectedView, setSelectedView] = useState<'camera' | 'screen'>('camera');
     const [videoContainerRef, setVideoContainerRef] = useState<HTMLDivElement | null>(null);
     const [balance, setBalance] = useState<number | null>(null);
     const [showLowBalanceWarning, setShowLowBalanceWarning] = useState(false);
     const [billingError, setBillingError] = useState<string | null>(null);
     const [isPaused, setIsPaused] = useState(false);
+    const [hasAttemptedBilling, setHasAttemptedBilling] = useState(false);
+    const [showTipDialog, setShowTipDialog] = useState(false);
 
     const toggleAudio = () => {
         setIsAudioMuted(!isAudioMuted);
     };
 
-    const sendLike = () => {
+    const handleOpenTipDialog = () => {
+        setShowTipDialog(true);
+    };
+
+    const handleTip = (tokens: number, activity?: string) => {
+        onSendTip?.(tokens, activity);
+        setShowTipDialog(false);
+    };
+
+    const handleLike = () => {
         setShowLike(true);
-        setLikeCount(prev => prev + 1);
+        setLocalLikeCount(prev => prev + 1);
         setTimeout(() => setShowLike(false), 1000);
+        onLike?.();
     };
 
     const shareStream = () => {
@@ -245,6 +293,7 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
 
         // Function to process billing
         const processBilling = async () => {
+            setHasAttemptedBilling(true);
             try {
                 const response = await fetch(`/api/streams/${streamId}/bill`, {
                     method: 'POST',
@@ -275,16 +324,14 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                     // Insufficient funds
                     setBillingError('Insufficient balance. Please add credits to continue watching.');
                     setShowLowBalanceWarning(true);
-
-                    // Optionally, you could disconnect the user here
-                    // For now, we'll just show the error
                 } else {
                     console.error('Billing error:', data.error);
-                    setBillingError(data.error);
+                    setBillingError(data.error || null);
                 }
             } catch (error) {
                 console.error('Failed to process billing:', error);
-                setBillingError('Failed to process payment');
+                // Only show error if we've actually tried billing, not on initial load
+                setBillingError('Failed to process payment. Retrying...');
             }
         };
 
@@ -317,12 +364,17 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
         fetchBalance();
     }, []);
 
+    // Find video tracks - check for track presence rather than just publication kind
     const videoTrack = tracks.find(
-        (trackRef) => trackRef.source === Track.Source.Camera && trackRef.publication?.kind === 'video'
+        (trackRef) => 
+            trackRef.source === Track.Source.Camera && 
+            trackRef.publication?.track
     );
 
     const screenTrack = tracks.find(
-        (trackRef) => trackRef.source === Track.Source.ScreenShare && trackRef.publication?.kind === 'video'
+        (trackRef) => 
+            trackRef.source === Track.Source.ScreenShare && 
+            trackRef.publication?.track
     );
 
     // Prioritize screen share over camera, or use selected view
@@ -353,10 +405,17 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
     // Debug logging for viewer
     useEffect(() => {
         console.log('👀 Viewer - Connection State:', connectionState);
-        console.log('👀 Viewer - Tracks:', tracks.length);
-        console.log('👀 Viewer - Participants:', participants.length);
+        console.log('👀 Viewer - All Tracks:', tracks.map(t => ({
+            source: t.source,
+            hasPublication: !!t.publication,
+            hasTrack: !!t.publication?.track,
+            isSubscribed: t.publication?.isSubscribed,
+            kind: t.publication?.kind
+        })));
+        console.log('👀 Viewer - Participants:', participants.length, participants.map(p => ({ identity: p.identity, isLocal: p.isLocal })));
+        console.log('👀 Viewer - Video Track:', videoTrack ? 'Found' : 'None');
         console.log('👀 Viewer - Display Track:', displayTrack ? 'Available' : 'None');
-    }, [connectionState, tracks, participants, displayTrack]);
+    }, [connectionState, tracks, participants, displayTrack, videoTrack]);
 
     return (
         <div
@@ -437,8 +496,8 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                 </div>
             )}
 
-            {/* Billing Error Alert */}
-            {billingError && (
+            {/* Billing Error Alert - Only show after billing has been attempted */}
+            {billingError && hasAttemptedBilling && (
                 <div className="absolute top-28 left-4 right-4 z-30 mx-auto max-w-md">
                     <div className="bg-red-500/95 backdrop-blur-sm text-white px-4 py-3 rounded-lg shadow-lg border-2 border-red-400">
                         <div className="flex items-start gap-3">
@@ -490,7 +549,7 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
             )}
 
             {/* Main Video Display */}
-            <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication?.isSubscribed ? (
+            <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication?.track ? (
                     <>
                         <VideoTrack
                             trackRef={displayTrack}
@@ -540,44 +599,35 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
             </div>
 
             {/* Professional Control Bar */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4">
-                <div className="flex items-center justify-between">
-                    {/* Left Controls */}
+            <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+                {/* Secondary Controls Row */}
+                <div className="flex items-center justify-between px-3 sm:px-4 py-2">
+                    {/* Left - Volume & Share */}
                     <div className="flex items-center space-x-2">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={toggleAudio}
-                            className="text-white hover:bg-white/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                            className="text-white hover:bg-white/20 h-9 w-9 p-0 backdrop-blur-sm border border-white/10 rounded-full"
                         >
                             {isAudioMuted ? (
-                                <VolumeX className="w-5 h-5" />
+                                <VolumeX className="w-4 h-4" />
                             ) : (
-                                <Volume2 className="w-5 h-5" />
+                                <Volume2 className="w-4 h-4" />
                             )}
                         </Button>
 
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={sendLike}
-                            className="text-white hover:bg-red-500/20 h-10 px-4 backdrop-blur-sm border border-white/10"
-                        >
-                            <Heart className={`w-5 h-5 ${likeCount > 0 ? 'fill-current text-red-500' : ''}`} />
-                            {likeCount > 0 && <span className="ml-1 text-xs">{likeCount}</span>}
-                        </Button>
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={shareStream}
-                            className="text-white hover:bg-blue-500/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                            className="text-white hover:bg-blue-500/20 h-9 w-9 p-0 backdrop-blur-sm border border-white/10 rounded-full"
                         >
-                            <Share2 className="w-5 h-5" />
+                            <Share2 className="w-4 h-4" />
                         </Button>
                     </div>
 
-                    {/* Right Controls */}
+                    {/* Right - View Switcher, Settings, Fullscreen */}
                     <div className="flex items-center space-x-2">
                         {/* View Switcher - Only show if both camera and screen are available */}
                         {videoTrack && screenTrack && (
@@ -586,9 +636,9 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="text-white hover:bg-white/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                                        className="text-white hover:bg-white/20 h-9 w-9 p-0 backdrop-blur-sm border border-white/10 rounded-full"
                                     >
-                                        <SwitchCamera className="w-5 h-5" />
+                                        <SwitchCamera className="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="bg-gray-900 border-gray-700 text-white">
@@ -616,26 +666,136 @@ function ViewerVideoView({ streamId, streamTitle, modelName }: ViewerVideoViewPr
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="text-white hover:bg-white/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                            className="text-white hover:bg-white/20 h-9 w-9 p-0 backdrop-blur-sm border border-white/10 rounded-full"
                         >
-                            <Settings className="w-5 h-5" />
+                            <Settings className="w-4 h-4" />
                         </Button>
 
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={toggleFullscreen}
-                            className="text-white hover:bg-white/20 h-10 px-4 backdrop-blur-sm border border-white/10"
+                            className="text-white hover:bg-white/20 h-9 w-9 p-0 backdrop-blur-sm border border-white/10 rounded-full"
                         >
                             {isFullscreen ? (
-                                <Minimize className="w-5 h-5" />
+                                <Minimize className="w-4 h-4" />
                             ) : (
-                                <Maximize className="w-5 h-5" />
+                                <Maximize className="w-4 h-4" />
                             )}
                         </Button>
                     </div>
                 </div>
+
+                {/* Main Action Bar Row */}
+                <div className="flex items-center justify-between px-3 sm:px-4 py-3 sm:py-4 border-t border-white/5">
+                    {/* Left side - Like button with count */}
+                    <button
+                        onClick={handleLike}
+                        className="flex items-center gap-2 group"
+                    >
+                        <div
+                            className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 active:scale-95 ${localLikeCount > 0 ? 'bg-red-500/20 border-red-500/40' : ''}`}
+                        >
+                            <Heart
+                                className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-200 ${localLikeCount > 0 ? 'text-red-500 fill-red-500' : 'text-white group-hover:text-red-400'}`}
+                            />
+                            {/* Like animation */}
+                            {showLike && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <Heart className="w-8 h-8 text-red-500 fill-red-500 animate-ping" />
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-white font-semibold text-sm sm:text-base min-w-[2.5rem]">
+                            {localLikeCount >= 1000 ? `${(localLikeCount / 1000).toFixed(1)}k` : localLikeCount}
+                        </span>
+                    </button>
+
+                    {/* Right side - Private Show & Send Tip */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {/* Private Show Button with Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="h-10 sm:h-11 px-3 sm:px-4 rounded-full bg-transparent border-2 border-yellow-500/80 text-white hover:bg-yellow-500/20 hover:border-yellow-400 transition-all duration-200 font-semibold text-xs sm:text-sm"
+                                >
+                                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    <span className="hidden sm:inline">Private-Show</span>
+                                    <span className="sm:hidden">Private</span>
+                                    <span className="text-yellow-400 ml-1 sm:ml-1.5">
+                                        {privateShowPrice} Tk
+                                    </span>
+                                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1 sm:ml-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="bg-gray-900/95 backdrop-blur-md border-gray-700 text-white min-w-[200px]"
+                                align="end"
+                            >
+                                <div className="px-3 py-2 border-b border-gray-700/50">
+                                    <p className="text-xs text-gray-400 font-medium">
+                                        Select Duration
+                                    </p>
+                                </div>
+                                <DropdownMenuItem
+                                    onClick={() => onPrivateShow?.(5)}
+                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-800 focus:bg-gray-800 py-2.5"
+                                >
+                                    <span className="text-sm">5 minutes</span>
+                                    <span className="text-yellow-400 font-semibold text-sm">90 Tk</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => onPrivateShow?.(10)}
+                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-800 focus:bg-gray-800 py-2.5"
+                                >
+                                    <span className="text-sm">10 minutes</span>
+                                    <span className="text-yellow-400 font-semibold text-sm">170 Tk</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => onPrivateShow?.(15)}
+                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-800 focus:bg-gray-800 py-2.5"
+                                >
+                                    <span className="text-sm">15 minutes</span>
+                                    <span className="text-yellow-400 font-semibold text-sm">250 Tk</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => onPrivateShow?.(30)}
+                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-800 focus:bg-gray-800 py-2.5"
+                                >
+                                    <span className="text-sm">30 minutes</span>
+                                    <span className="text-yellow-400 font-semibold text-sm">450 Tk</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Send Tip Button */}
+                        <Button
+                            onClick={handleOpenTipDialog}
+                            className="h-10 sm:h-11 px-4 sm:px-5 rounded-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-green-600/30 transition-all duration-200 active:scale-95"
+                        >
+                            <span className="hidden sm:inline">Send Tip</span>
+                            <span className="sm:hidden">Tip</span>
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-1.5 sm:ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                            </svg>
+                        </Button>
+                    </div>
+                </div>
             </div>
+
+            {/* Tip Dialog */}
+            <TipDialog
+                open={showTipDialog}
+                onOpenChange={setShowTipDialog}
+                modelId={modelId || ""}
+                modelName={modelName}
+                onTip={handleTip}
+            />
         </div>
     );
 }

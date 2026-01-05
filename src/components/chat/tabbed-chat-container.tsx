@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { ChatContainer, PrivateChatContainer } from "@/components/chat";
-import { TipsTab } from "./tips-tab";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Users, Wifi, WifiOff, DollarSign } from "lucide-react";
+import { MessageCircle, Users, Wifi, WifiOff } from "lucide-react";
 import { usePrivateChat } from "@/hooks/use-private-chat";
 import { useChat } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
@@ -22,27 +21,9 @@ export function TabbedChatContainer({
     className,
 }: TabbedChatContainerProps) {
     const { data: session } = useSession();
-    const [activeTab, setActiveTab] = useState<"public" | "private" | "tips">("public");
+    const [activeTab, setActiveTab] = useState<"public" | "private">("public");
     const [chatToken, setChatToken] = useState<string | null>(null);
     const [selectedPrivateUserId, setSelectedPrivateUserId] = useState<string | null>(null);
-    const [modelId, setModelId] = useState<string>("");
-
-    // Get stream info to get modelId
-    useEffect(() => {
-        const fetchStreamInfo = async () => {
-            try {
-                const response = await fetch(`/api/streams/${streamId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setModelId(data.stream?.modelId || "");
-                }
-            } catch (error) {
-                console.error("Error fetching stream info:", error);
-            }
-        };
-
-        fetchStreamInfo();
-    }, [streamId]);
 
     // Get chat token for private messages
     useEffect(() => {
@@ -76,10 +57,10 @@ export function TabbedChatContainer({
     });
 
     // Get connection status from chat hook for live chat
-    const { connected, connectionQuality, messages, sendMessage } = useChat({
+    const { connected, connectionQuality, messages } = useChat({
         streamId,
         token: chatToken,
-        enabled: !!chatToken, // Always enabled to allow sending tips from any tab
+        enabled: !!chatToken,
     });
 
     const totalUnreadPrivateMessages = conversations.reduce(
@@ -95,44 +76,6 @@ export function TabbedChatContainer({
     const handleStartPrivateChat = (userId: string, _userName: string) => {
         setSelectedPrivateUserId(userId);
         setActiveTab("private");
-    };
-
-    // Handle tip
-    const handleTip = async (tokens: number, activity?: string) => {
-        try {
-            console.log(`Tipping ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
-
-            // Check if chat is connected
-            if (!connected) {
-                alert("Chat is not connected. Please wait and try again.");
-                return;
-            }
-
-            // TODO: Implement actual tip API call to deduct tokens and credit the model
-            // const response = await fetch(`/api/streams/${streamId}/tip`, {
-            //     method: "POST",
-            //     headers: { "Content-Type": "application/json" },
-            //     body: JSON.stringify({ tokens, activity }),
-            // });
-
-            // Send tip message to live chat
-            const tipMessage = activity
-                ? `💝 Tipped ${tokens} tokens for ${activity}`
-                : `💝 Tipped ${tokens} tokens`;
-
-            const success = await sendMessage(tipMessage);
-
-            if (success) {
-                // Switch to live chat tab to show the message
-                setActiveTab("public");
-            } else {
-                console.error("sendMessage returned false");
-                alert("Failed to send tip message to chat. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error sending tip:", error);
-            alert(`Failed to send tip: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
     };
 
     return (
@@ -174,19 +117,6 @@ export function TabbedChatContainer({
                                     </span>
                                 </span>
                             )}
-                        </button>
-
-                        <button
-                            className={cn(
-                                "px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap",
-                                activeTab === "tips"
-                                    ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
-                                    : "text-gray-400 hover:text-white hover:bg-gray-700/50"
-                            )}
-                            onClick={() => setActiveTab("tips")}
-                        >
-                            <DollarSign className="w-3.5 h-3.5" />
-                            <span>Tips</span>
                         </button>
                     </div>
 
@@ -235,13 +165,6 @@ export function TabbedChatContainer({
                         className="h-full border-0 rounded-none"
                         initialPartnerId={selectedPrivateUserId}
                         isModel={canModerate}
-                    />
-                </div>
-                <div className={cn("absolute inset-0", activeTab === "tips" ? "block" : "hidden")}>
-                    <TipsTab
-                        onTip={handleTip}
-                        modelId={modelId}
-                        className="h-full border-0 rounded-none"
                     />
                 </div>
             </div>

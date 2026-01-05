@@ -291,7 +291,10 @@ export async function canUserChat(
     select: { balance: true },
   });
 
-  if (!wallet || wallet.balance.lte(0)) {
+  // Convert Decimal to number for reliable comparison
+  const balance = wallet ? Number(wallet.balance) : 0;
+
+  if (!wallet || balance < 1) {
     return {
       canChat: false,
       reason: "Chat requires credits. Please top up your balance.",

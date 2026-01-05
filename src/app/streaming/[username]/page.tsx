@@ -21,6 +21,7 @@ interface Stream {
   model: {
     id: string;
     name: string;
+    username?: string;
     image?: string;
   };
   participantCount?: number;
@@ -170,6 +171,7 @@ export default function StreamByUsernamePage() {
           model: {
             id: s.model?.id || s.creator?.id || '',
             name: s.model?.name || s.creator?.name || 'Unknown',
+            username: s.model?.username || s.creator?.username,
             image: s.model?.avatar || s.model?.image || s.creator?.avatar || s.creator?.image
           }
         }));
@@ -201,10 +203,18 @@ export default function StreamByUsernamePage() {
     }
   };
 
-  // Handle joining another stream
+  // Handle joining another stream - redirect to model's username URL
   const handleJoinStream = (streamId: string) => {
-    // Navigate to the stream - the API will provide the username
-    router.push(`/streaming?join=${streamId}`);
+    // Find the stream to get the model's username
+    const targetStream = recommendedStreams.find(s => s.id === streamId);
+    
+    if (targetStream?.model?.username) {
+      // Navigate directly to the model's username URL
+      router.push(`/streaming/${encodeURIComponent(targetStream.model.username)}`);
+    } else {
+      // Fallback: let the main page handle it
+      router.push(`/streaming?join=${streamId}`);
+    }
   };
 
   // Fetch stream by username - only once
@@ -284,6 +294,46 @@ export default function StreamByUsernamePage() {
   const handleStreamEnd = () => {
     clearStreamData();
     router.push('/streaming');
+  };
+
+  // Send tip and post message to chat
+  const handleSendTip = async (tokens: number, activity?: string) => {
+    if (!stream?.id) return;
+    
+    try {
+      // Create tip message for chat
+      const tipMessage = activity 
+        ? `💝 Tipped ${tokens} tokens for "${activity}"!`
+        : `💝 Tipped ${tokens} tokens!`;
+      
+      // Send tip message to chat API
+      const response = await fetch(`/api/streams/${stream.id}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: tipMessage,
+          type: 'tip'
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to send tip message');
+      }
+      
+      console.log(`✅ Sent tip: ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
+    } catch (error) {
+      console.error('Error sending tip:', error);
+    }
+  };
+
+  const handlePrivateShow = (minutes: number) => {
+    // TODO: Initiate private show request
+    console.log(`Private show requested for ${minutes} minutes`);
+  };
+
+  const handleLike = () => {
+    // TODO: Send like to server
+    console.log('Stream liked');
   };
 
   if (loading) {
@@ -393,8 +443,12 @@ export default function StreamByUsernamePage() {
                       token={streamToken}
                       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
                       modelName={stream.model?.name || 'Model'}
+                      modelId={stream.model?.id}
                       streamTitle={stream.title}
                       className="h-full w-full absolute inset-0"
+                      onSendTip={handleSendTip}
+                      onPrivateShow={handlePrivateShow}
+                      onLike={handleLike}
                     />
                   </div>
 
@@ -430,8 +484,12 @@ export default function StreamByUsernamePage() {
                   token={streamToken}
                   serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
                   modelName={stream.model?.name || 'Model'}
+                  modelId={stream.model?.id}
                   streamTitle={stream.title}
                   className="w-full h-full object-cover"
+                  onSendTip={handleSendTip}
+                  onPrivateShow={handlePrivateShow}
+                  onLike={handleLike}
                 />
               </div>
               {/* Floating Chat Overlay */}

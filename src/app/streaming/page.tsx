@@ -25,6 +25,7 @@ interface Stream {
   model: {
     id: string;
     name: string;
+    username?: string;
     image?: string;
   };
   participantCount?: number;
@@ -401,6 +402,7 @@ export default function StreamingPage() {
           model: {
             id: stream.model?.id || stream.creator?.id || '',
             name: stream.model?.name || stream.creator?.name || 'Unknown',
+            username: stream.model?.username || stream.creator?.username,
             image: stream.model?.avatar || stream.model?.image || stream.creator?.avatar || stream.creator?.image
           }
         }));
@@ -444,6 +446,7 @@ export default function StreamingPage() {
           model: {
             id: stream.model?.id || stream.creator?.id || '',
             name: stream.model?.name || stream.creator?.name || 'Unknown',
+            username: stream.model?.username || stream.creator?.username,
             image: stream.model?.avatar || stream.model?.image || stream.creator?.avatar || stream.creator?.image
           }
         }));
@@ -655,65 +658,42 @@ export default function StreamingPage() {
     setLoading(false);
   };
 
-  // Join a stream as viewer
+  // Join a stream as viewer - redirect to username URL for clean experience
   const handleJoinStream = async (streamId: string) => {
     setLoading(true);
     try {
       // Find the stream data
       const stream = streams.find(s => s.id === streamId);
 
-      const response = await fetch(`/api/streams/${streamId}/token`, {
-        method: 'POST'
-      });
+      if (stream?.model?.username) {
+        // Redirect to the model's username URL for a cleaner experience
+        console.log('✅ Redirecting to model username URL:', stream.model.username);
+        router.push(`/streaming/${encodeURIComponent(stream.model.username)}`);
+        return;
+      }
 
+      // Fallback: Fetch stream details to get username
+      const response = await fetch(`/api/streams/${streamId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Joined stream, role:', data.role);
-
-        // Set mode based on role from API
-        const newMode = data.role === 'creator' ? 'broadcast' : 'watch';
-
-        setStreamToken(data.token);
-        setSelectedStream(streamId);
-        setCurrentStreamData(stream || null);
-        setMode(newMode);
-
-        // Update stream context for header
-        if (stream) {
-          setStreamData({
-            id: stream.id,
-            title: stream.title,
-            description: stream.description,
-            model: stream.model,
-            category: stream.category
-          });
-
-          // Set current stream in context for navigation
-          setCurrentStreamById(streamId);
-          console.log('🎯 Set current stream in context:', streamId);
+        const modelUsername = data.stream?.model?.username;
+        
+        if (modelUsername) {
+          console.log('✅ Redirecting to model username URL:', modelUsername);
+          router.push(`/streaming/${encodeURIComponent(modelUsername)}`);
+          return;
         }
-
-        console.log('✅ Mode set to:', newMode);
-
-        // Track watch history (only for viewers, not broadcasters)
-        if (newMode === 'watch') {
-          fetch('/api/watch-history', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ streamId }),
-          }).catch(err => console.error('Failed to track watch history:', err));
-        }
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to join stream');
       }
+
+      // Last fallback: use the streamId directly (legacy behavior)
+      console.log('⚠️ No username found, using stream ID fallback');
+      router.push(`/streaming?join=${streamId}`);
     } catch (error) {
       console.error('Error joining stream:', error);
       alert('Failed to join stream');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // End stream and go back to browse
@@ -724,6 +704,46 @@ export default function StreamingPage() {
     clearStreamData(); // Clear stream context for header
     sessionStorage.removeItem('activeStreamState'); // Clear saved stream state
     fetchStreams(); // Refresh stream list
+  };
+
+  // Send tip and post message to chat
+  const handleSendTip = async (tokens: number, activity?: string) => {
+    if (!selectedStream) return;
+    
+    try {
+      // Create tip message for chat
+      const tipMessage = activity 
+        ? `💝 Tipped ${tokens} tokens for "${activity}"!`
+        : `💝 Tipped ${tokens} tokens!`;
+      
+      // Send tip message to chat API
+      const response = await fetch(`/api/streams/${selectedStream}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: tipMessage,
+          type: 'tip'
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to send tip message');
+      }
+      
+      console.log(`✅ Sent tip: ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
+    } catch (error) {
+      console.error('Error sending tip:', error);
+    }
+  };
+
+  const handlePrivateShow = (minutes: number) => {
+    // TODO: Initiate private show request
+    console.log(`Private show requested for ${minutes} minutes`);
+  };
+
+  const handleLike = () => {
+    // TODO: Send like to server
+    console.log('Stream liked');
   };
 
   const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
@@ -1183,7 +1203,11 @@ export default function StreamingPage() {
                             serverUrl={LIVEKIT_SERVER_URL}
                             streamTitle={currentStreamData?.title}
                             modelName={currentStreamData?.model?.name}
+                            modelId={currentStreamData?.model?.id}
                             className="h-full w-full absolute inset-0"
+                            onSendTip={handleSendTip}
+                            onPrivateShow={handlePrivateShow}
+                            onLike={handleLike}
                           />
                         </div>
                       </div>
@@ -1252,7 +1276,11 @@ export default function StreamingPage() {
                         serverUrl={LIVEKIT_SERVER_URL}
                         streamTitle={currentStreamData?.title}
                         modelName={currentStreamData?.model?.name}
+                        modelId={currentStreamData?.model?.id}
                         className="w-full h-full"
+                        onSendTip={handleSendTip}
+                        onPrivateShow={handlePrivateShow}
+                        onLike={handleLike}
                       />
                     </div>
                     {/* Floating Chat Overlay */}

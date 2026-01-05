@@ -68,14 +68,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       token = await generateCreatorToken(roomName, user.id);
       role = "creator";
     } else {
-      // Viewers need credits to watch
+      // Viewers need credits to watch (minimum 1 credit)
       const wallet = user.wallet;
-      if (!wallet || Number(wallet.balance) <= 0) {
+      const balance = wallet ? Number(wallet.balance) : 0;
+      if (!wallet || balance < 1) {
         return NextResponse.json(
           {
             error: "Insufficient credits to watch stream",
             code: "INSUFFICIENT_CREDITS",
-            balance: wallet?.balance ? Number(wallet.balance) : 0,
+            balance: balance,
           },
           { status: 402 }
         );

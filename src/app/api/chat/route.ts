@@ -194,6 +194,9 @@ export async function POST(request: NextRequest) {
           });
 
           return createdMessage;
+        }, {
+          maxWait: 10000, // Maximum time to wait for a transaction slot
+          timeout: 15000, // Maximum time the transaction can run
         });
       } catch (err) {
         if (err instanceof Error && err.message === "INSUFFICIENT_CREDITS") {
