@@ -132,11 +132,11 @@ function CategoryRow({ category, streams, onJoinStream, currentStreamId }: Categ
 
 export default function StreamByUsernamePage() {
   const { data: session } = useSession();
-  
+
   const router = useRouter();
   const params = useParams();
   const username = params.username as string;
-  const { setStreamData, clearStreamData } = useStream();
+  const { setStreamData, clearStreamData, updateStreamList, setCurrentStreamById } = useStream();
 
   const [stream, setStream] = useState<Stream | null>(null);
   const [streamToken, setStreamToken] = useState<string | null>(null);
@@ -183,6 +183,18 @@ export default function StreamByUsernamePage() {
         const shuffled = liveStreams.sort(() => Math.random() - 0.5);
 
         setRecommendedStreams(shuffled.slice(0, 20));
+
+        // Update stream list in context for navigation
+        const streamListItems = streamsWithDates
+          .filter((s: Stream) => s.status === 'LIVE')
+          .map((s: Stream) => ({
+            id: s.id,
+            modelId: s.model.id,
+            modelName: s.model.name,
+            title: s.title
+          }));
+        updateStreamList(streamListItems);
+        console.log('📋 Updated stream list in context:', streamListItems.length, 'streams');
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
@@ -245,6 +257,10 @@ export default function StreamByUsernamePage() {
             model: streamData.model,
             category: streamData.category
           });
+
+          // Set current stream in context for navigation
+          setCurrentStreamById(streamData.id);
+          console.log('🎯 Set current stream in context:', streamData.id);
         }
 
         setLoading(false);

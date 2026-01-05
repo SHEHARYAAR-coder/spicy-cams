@@ -137,7 +137,7 @@ function CategoryRow({ category, streams, onJoinStream, currentStreamId }: Categ
 export default function StreamingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { setStreamData, clearStreamData } = useStream();
+  const { setStreamData, clearStreamData, updateStreamList, setCurrentStreamById } = useStream();
   const [mode, setMode] = useState<'browse' | 'create' | 'broadcast' | 'watch'>('browse');
   const [streams, setStreams] = useState<Stream[]>([]);
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
@@ -405,6 +405,16 @@ export default function StreamingPage() {
           }
         }));
         setStreams(streamsWithDates);
+
+        // Update stream list in context for navigation
+        const streamListItems = streamsWithDates.map((stream: Stream) => ({
+          id: stream.id,
+          modelId: stream.model.id,
+          modelName: stream.model.name,
+          title: stream.title
+        }));
+        updateStreamList(streamListItems);
+        console.log('📋 Updated stream list in context:', streamListItems.length, 'streams');
       }
     } catch (error) {
       console.error('Error fetching streams:', error);
@@ -533,7 +543,7 @@ export default function StreamingPage() {
           // Only restore if it's relatively recent (within 24 hours)
           if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
             console.log('Restoring stream state from session:', state.selectedStream);
-            
+
             // If user is the broadcaster, redirect to username URL
             const sessionUser = session?.user as { username?: string } | undefined;
             if (state.mode === 'broadcast' && sessionUser?.username) {
@@ -541,7 +551,7 @@ export default function StreamingPage() {
               router.push(`/streaming/${encodeURIComponent(sessionUser.username)}`);
               return; // Don't restore state here, let the username page handle it
             }
-            
+
             setSelectedStream(state.selectedStream);
             setCurrentStreamData(state.streamData);
             setStreamToken(state.streamToken);
@@ -599,19 +609,19 @@ export default function StreamingPage() {
           const modelUsername = stream.model?.username;
           const sessionUser = session?.user as { username?: string } | undefined;
           const username = modelUsername || sessionUser?.username;
-          
+
           console.log('🔍 Model username from API:', modelUsername);
           console.log('🔍 Session username:', sessionUser?.username);
           console.log('🔍 Using username:', username || 'NO USERNAME');
           console.log('🔍 Mode:', newMode);
-          
+
           if (username && newMode === 'broadcast') {
             console.log('✅ Redirecting to username URL:', `/streaming/${username}`);
             setLoading(false); // Reset loading before redirect
             router.replace(`/streaming/${encodeURIComponent(username)}`);
             return; // Exit - the [username] page handles everything
           }
-          
+
           // For viewers (non-broadcast mode), set local state
           setStreamToken(tokenData.token);
           setCurrentStreamData(stream);
@@ -677,6 +687,10 @@ export default function StreamingPage() {
             model: stream.model,
             category: stream.category
           });
+
+          // Set current stream in context for navigation
+          setCurrentStreamById(streamId);
+          console.log('🎯 Set current stream in context:', streamId);
         }
 
         console.log('✅ Mode set to:', newMode);

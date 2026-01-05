@@ -31,7 +31,7 @@ import { useCategoryType, CategoryType } from "@/contexts/CategoryContext";
 
 export function Header() {
   const { data: session, status } = useSession();
-  const { isStreaming, streamData } = useStream();
+  const { isStreaming, streamData, streamList, navigateToStream, refreshStreamList } = useStream();
   const { selectedCategoryType, setSelectedCategoryType, showCategoryBar } = useCategoryType();
   const pathname = usePathname();
   const router = useRouter();
@@ -42,7 +42,7 @@ export function Header() {
   const [modelSignupOpen, setModelSignupOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [onlineModelsCount, setOnlineModelsCount] = useState<number>(0);
-  const [liveStreams, setLiveStreams] = useState<Array<{ id: string, modelId: string }>>([]);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Fetch online models count
   useEffect(() => {
@@ -63,46 +63,29 @@ export function Header() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch list of live streams for navigation
+  // Refresh stream list when starting to watch (if list is empty or outdated)
   useEffect(() => {
-    if (!isStreaming) return;
-
-    const fetchLiveStreams = async () => {
-      try {
-        const response = await fetch('/api/streams/list');
-        if (response.ok) {
-          const data = await response.json();
-          const streams = (data.streams || []).map((stream: any) => ({
-            id: stream.id,
-            modelId: stream.model?.id || stream.creator?.id
-          }));
-          setLiveStreams(streams);
-        }
-      } catch (error) {
-        console.error('Failed to fetch live streams:', error);
-      }
-    };
-
-    fetchLiveStreams();
-  }, [isStreaming]);
+    if (isStreaming && streamList.length === 0) {
+      console.log('🔄 Stream list empty, refreshing...');
+      refreshStreamList();
+    }
+  }, [isStreaming, streamList.length, refreshStreamList]);
 
   // Navigate to next/previous stream
-  const navigateStream = (direction: 'next' | 'prev') => {
-    if (!streamData || liveStreams.length === 0) return;
+  const handleNavigateStream = async (direction: 'next' | 'prev') => {
+    if (isNavigating) return; // Prevent double-clicks
 
-    const currentIndex = liveStreams.findIndex(s => s.modelId === streamData.model.id);
-    if (currentIndex === -1) return;
+    setIsNavigating(true);
+    const nextStreamId = navigateToStream(direction);
 
-    let newIndex;
-    if (direction === 'next') {
-      newIndex = (currentIndex + 1) % liveStreams.length;
+    if (nextStreamId) {
+      console.log(`🎯 Navigating to stream: ${nextStreamId}`);
+      // Use window.location for a full page reload to ensure clean state
+      window.location.href = `/streaming?join=${nextStreamId}`;
     } else {
-      newIndex = (currentIndex - 1 + liveStreams.length) % liveStreams.length;
+      console.log('⚠️ No stream found for navigation');
+      setIsNavigating(false);
     }
-
-    const newStream = liveStreams[newIndex];
-    // Navigate to the streaming page with the join parameter
-    router.push(`/streaming?join=${newStream.id}`);
   };
 
   const handleSignOut = () => {
@@ -418,12 +401,16 @@ export function Header() {
                 <div className="flex items-center justify-start gap-2 sm:gap-4 py-2 overflow-x-auto scrollbar-hide">
                   {/* Previous Button */}
                   <button
-                    onClick={() => navigateStream('prev')}
-                    className="flex-shrink-0 p-1.5 sm:p-2 rounded-full bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 transition-all duration-300 group"
-                    title="Previous Stream"
-                    disabled={liveStreams.length <= 1}
+                    onClick={() => handleNavigateStream('prev')}
+                    className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 group ${streamList.length <= 1 || isNavigating
+                        ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
+                        : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
+                      }`}
+                    title={streamList.length <= 1 ? 'No other streams' : 'Previous Stream'}
+                    disabled={streamList.length <= 1 || isNavigating}
                   >
-                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-purple-400" />
+                    <ChevronLeft className={`w-4 h-4 sm:w-5 sm:h-5 ${streamList.length <= 1 || isNavigating ? 'text-gray-500' : 'text-gray-300 group-hover:text-purple-400'
+                      }`} />
                   </button>
 
                   {/* Model Avatar and Name */}
@@ -440,18 +427,24 @@ export function Header() {
                     </Avatar>
                     <div className="min-w-0">
                       <p className="text-white font-semibold text-sm sm:text-base truncate max-w-[100px] sm:max-w-[150px]">{streamData.model.name}</p>
-                      <p className="text-[10px] sm:text-xs text-gray-400">Streaming now</p>
+                      <p className="text-[10px] sm:text-xs text-gray-400">
+                        {streamList.length > 0 ? `${streamList.length} live` : 'Streaming now'}
+                      </p>
                     </div>
                   </div>
 
                   {/* Next Button */}
                   <button
-                    onClick={() => navigateStream('next')}
-                    className="flex-shrink-0 p-1.5 sm:p-2 rounded-full bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 transition-all duration-300 group"
-                    title="Next Stream"
-                    disabled={liveStreams.length <= 1}
+                    onClick={() => handleNavigateStream('next')}
+                    className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 group ${streamList.length <= 1 || isNavigating
+                        ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
+                        : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
+                      }`}
+                    title={streamList.length <= 1 ? 'No other streams' : 'Next Stream'}
+                    disabled={streamList.length <= 1 || isNavigating}
                   >
-                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 group-hover:text-purple-400" />
+                    <ChevronRight className={`w-4 h-4 sm:w-5 sm:h-5 ${streamList.length <= 1 || isNavigating ? 'text-gray-500' : 'text-gray-300 group-hover:text-purple-400'
+                      }`} />
                   </button>
 
                   {/* Separator */}
