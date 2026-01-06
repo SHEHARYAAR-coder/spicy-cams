@@ -141,6 +141,7 @@ export default function StreamByUsernamePage() {
 
   const [stream, setStream] = useState<Stream | null>(null);
   const [streamToken, setStreamToken] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'watch' | 'broadcast'>('watch');
@@ -254,8 +255,15 @@ export default function StreamByUsernamePage() {
 
         if (tokenResponse.ok) {
           const tokenData = await tokenResponse.json();
-          console.log('Token received, role:', tokenData.role);
+          const wsUrl = tokenData.roomConfig?.serverUrl || '';
+          console.log('Token received, role:', tokenData.role, 'serverUrl:', wsUrl);
+          
+          if (!wsUrl) {
+            console.error('❌ No serverUrl received from token API!');
+          }
+          
           setStreamToken(tokenData.token);
+          setServerUrl(wsUrl);
           setMode(tokenData.role === 'creator' ? 'broadcast' : 'watch');
 
           // Update stream context
@@ -380,7 +388,7 @@ export default function StreamByUsernamePage() {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {mode === 'broadcast' && streamToken ? (
+      {mode === 'broadcast' && streamToken && serverUrl ? (
         <div className="h-full flex flex-col">
           {/* Render only one layout based on screen size to prevent duplicate hooks */}
           {!isMobile ? (
@@ -392,7 +400,7 @@ export default function StreamByUsernamePage() {
                   <ModelBroadcast
                     streamId={stream.id}
                     token={streamToken}
-                    serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
+                    serverUrl={serverUrl}
                     streamTitle={stream.title}
                     onStreamEnd={handleStreamEnd}
                     className="h-full w-full absolute inset-0"
@@ -416,7 +424,7 @@ export default function StreamByUsernamePage() {
                 <ModelBroadcast
                   streamId={stream.id}
                   token={streamToken}
-                  serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
+                  serverUrl={serverUrl}
                   streamTitle={stream.title}
                   onStreamEnd={handleStreamEnd}
                   className="w-full h-full object-cover"
@@ -427,7 +435,7 @@ export default function StreamByUsernamePage() {
             </div>
           )}
         </div>
-      ) : streamToken ? (
+      ) : streamToken && serverUrl ? (
         <div className="min-h-screen flex flex-col">
           {/* Render only one layout based on screen size to prevent duplicate hooks */}
           {!isMobile ? (
@@ -440,7 +448,7 @@ export default function StreamByUsernamePage() {
                     <ViewerPlayer
                       streamId={stream.id}
                       token={streamToken}
-                      serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
+                      serverUrl={serverUrl}
                       modelName={stream.model?.name || 'Model'}
                       modelId={stream.model?.id}
                       streamTitle={stream.title}
@@ -481,7 +489,7 @@ export default function StreamByUsernamePage() {
                 <ViewerPlayer
                   streamId={stream.id}
                   token={streamToken}
-                  serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || ''}
+                  serverUrl={serverUrl}
                   modelName={stream.model?.name || 'Model'}
                   modelId={stream.model?.id}
                   streamTitle={stream.title}

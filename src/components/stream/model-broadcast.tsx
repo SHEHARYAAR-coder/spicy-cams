@@ -201,7 +201,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     return () => clearTimeout(timer);
   }, [participants.length]);
 
-  // Update device states based on tracks - with cleanup
+  // Update device states based on tracks - NO cleanup here (cleanup is in unmount effect)
   useEffect(() => {
     const cameraTrack = tracks.find(track => track.source === Track.Source.Camera);
     const screenShareTrack = tracks.find(track => track.source === Track.Source.ScreenShare);
@@ -213,15 +213,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     if (screenShareTrack) {
       setIsScreenSharing(screenShareTrack.publication.isEnabled);
     }
-
-    // Cleanup function to stop tracks when component unmounts
-    return () => {
-      tracks.forEach(track => {
-        if (track.publication?.track) {
-          track.publication.track.stop();
-        }
-      });
-    };
+    // No cleanup here - tracks cleanup is handled in the unmount-only effect below
   }, [tracks, hasAutoEnabled]);
 
   // Cleanup on unmount

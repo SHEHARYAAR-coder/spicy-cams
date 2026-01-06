@@ -5,6 +5,7 @@ import {
   generateCreatorToken,
   generateViewerToken,
   getRoomNameFromStreamId,
+  getLiveKitWsUrl,
 } from "@/lib/livekit";
 
 const prisma = new PrismaClient();
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       token,
       role,
       roomConfig: {
-        serverUrl: process.env.LIVEKIT_WS_URL,
+        serverUrl: getLiveKitWsUrl(),
         roomName,
         participantName: user.profile?.displayName || user.email,
       },

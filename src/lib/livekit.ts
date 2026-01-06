@@ -1,19 +1,45 @@
 import { RoomServiceClient, AccessToken } from "livekit-server-sdk";
 
 export function validateLiveKitConfig() {
-  const config = {
-    url: process.env.LIVEKIT_URL,
-    apiKey: process.env.LIVEKIT_API_KEY,
-    apiSecret: process.env.LIVEKIT_API_SECRET,
-  };
+  const rawUrl = process.env.LIVEKIT_URL || "";
+  const apiKey = process.env.LIVEKIT_API_KEY;
+  const apiSecret = process.env.LIVEKIT_API_SECRET;
 
-  if (!config.url || !config.apiKey || !config.apiSecret) {
+  if (!rawUrl || !apiKey || !apiSecret) {
     throw new Error(
       "LiveKit configuration missing. Please set LIVEKIT_URL, LIVEKIT_API_KEY, and LIVEKIT_API_SECRET environment variables."
     );
   }
 
-  return config;
+  // RoomServiceClient needs HTTPS URL; convert wss:// to https://
+  let httpUrl = rawUrl;
+  if (rawUrl.startsWith("wss://")) {
+    httpUrl = rawUrl.replace("wss://", "https://");
+  } else if (rawUrl.startsWith("ws://")) {
+    httpUrl = rawUrl.replace("ws://", "http://");
+  }
+
+  // Client (browser) needs WSS URL
+  let wsUrl = rawUrl;
+  if (rawUrl.startsWith("https://")) {
+    wsUrl = rawUrl.replace("https://", "wss://");
+  } else if (rawUrl.startsWith("http://")) {
+    wsUrl = rawUrl.replace("http://", "ws://");
+  }
+
+  return {
+    url: rawUrl,
+    httpUrl,
+    wsUrl,
+    apiKey,
+    apiSecret,
+  };
+}
+
+// Expose the WebSocket URL for client-side use
+export function getLiveKitWsUrl(): string {
+  const config = validateLiveKitConfig();
+  return config.wsUrl;
 }
 
 let roomClient: RoomServiceClient | null = null;
@@ -22,7 +48,7 @@ function getRoomClient() {
   if (!roomClient) {
     const config = validateLiveKitConfig();
     roomClient = new RoomServiceClient(
-      config.url!,
+      config.httpUrl,
       config.apiKey!,
       config.apiSecret!
     );

@@ -143,6 +143,7 @@ export default function StreamingPage() {
   const [streams, setStreams] = useState<Stream[]>([]);
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
   const [streamToken, setStreamToken] = useState<string | null>(null);
+  const [liveKitServerUrl, setLiveKitServerUrl] = useState<string>('');
   const [currentStreamData, setCurrentStreamData] = useState<Stream | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasMediaPermissions, setHasMediaPermissions] = useState(false);
@@ -664,6 +665,7 @@ export default function StreamingPage() {
 
           // For viewers (non-broadcast mode), set local state
           setStreamToken(tokenData.token);
+          setLiveKitServerUrl(tokenData.roomConfig?.serverUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || '');
           setCurrentStreamData(stream);
           setSelectedStream(stream.id);
           setMode(newMode);
@@ -745,7 +747,8 @@ export default function StreamingPage() {
     console.log('Stream liked');
   };
 
-  const LIVEKIT_SERVER_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
+  // Use serverUrl from token API response, fallback to env var
+  const LIVEKIT_SERVER_URL = liveKitServerUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || '';
 
   if (status === 'loading') {
     return (
