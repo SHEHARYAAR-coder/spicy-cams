@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     LiveKitRoom,
     RoomAudioRenderer,
     useTracks,
     useParticipants,
     VideoTrack,
-    useConnectionState
+    useConnectionState,
+    useRoomContext
 } from '@livekit/components-react';
 import {
     ConnectionState,
@@ -180,6 +181,7 @@ function ViewerVideoView({
     likeCount: propLikeCount = 0,
     privateShowPrice = 90,
 }: ViewerVideoViewProps) {
+        const room = useRoomContext();
     const tracks = useTracks(
         [
             { source: Track.Source.Camera, withPlaceholder: true },
@@ -190,6 +192,7 @@ function ViewerVideoView({
 
     const connectionState = useConnectionState();
     const participants = useParticipants();
+    const cleanupRef = useRef(false);
 
     const [isAudioMuted, setIsAudioMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -410,6 +413,28 @@ function ViewerVideoView({
         console.log('👀 Viewer - Video Track:', videoTrack ? 'Found' : 'None');
         console.log('👀 Viewer - Display Track:', displayTrack ? 'Available' : 'None');
     }, [connectionState, tracks, participants, displayTrack, videoTrack]);
+
+    // Cleanup tracks on unmount
+    useEffect(() => {
+        return () => {
+            if (cleanupRef.current) return;
+            cleanupRef.current = true;
+            
+            console.log('🧹 Cleaning up viewer component...');
+            
+            // Stop all subscribed tracks
+            tracks.forEach(track => {
+                if (track.publication?.track) {
+                    track.publication.track.stop();
+                }
+            });
+
+            // Disconnect from room
+            if (room) {
+                room.disconnect();
+            }
+        };
+    }, [tracks, room]);
 
     return (
         <div

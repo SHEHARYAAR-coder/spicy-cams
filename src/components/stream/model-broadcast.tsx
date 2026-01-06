@@ -105,7 +105,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   const participants = useParticipants();
   const connectionState = useConnectionState();
   const { localParticipant } = useLocalParticipant();
-  const _room = useRoomContext();
+  const room = useRoomContext();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
@@ -189,20 +189,23 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
 
 
 
-  // Update viewer count and device states
+  // Throttled viewer count updates (every 2 seconds max)
   useEffect(() => {
-    setStreamStats(prev => ({
-      ...prev,
-      viewers: participants.length
-    }));
+    const timer = setTimeout(() => {
+      setStreamStats(prev => ({
+        ...prev,
+        viewers: participants.length
+      }));
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [participants.length]);
 
-  // Update device states based on tracks - only update if tracks exist
+  // Update device states based on tracks - with cleanup
   useEffect(() => {
     const cameraTrack = tracks.find(track => track.source === Track.Source.Camera);
     const screenShareTrack = tracks.find(track => track.source === Track.Source.ScreenShare);
 
-    // Only update camera state if we have a camera track (don't clear it during initialization)
     if (cameraTrack && hasAutoEnabled) {
       setIsCameraEnabled(cameraTrack.publication.isEnabled);
     }
@@ -210,7 +213,42 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     if (screenShareTrack) {
       setIsScreenSharing(screenShareTrack.publication.isEnabled);
     }
-  }, [tracks, hasAutoEnabled, selectedCamera, selectedMicrophone]);
+
+    // Cleanup function to stop tracks when component unmounts
+    return () => {
+      tracks.forEach(track => {
+        if (track.publication?.track) {
+          track.publication.track.stop();
+        }
+      });
+    };
+  }, [tracks, hasAutoEnabled]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Cleaning up broadcast component...');
+      
+      // Stop all local tracks
+      if (localParticipant) {
+        localParticipant.videoTrackPublications.forEach((pub) => {
+          if (pub.track) {
+            pub.track.stop();
+          }
+        });
+        localParticipant.audioTrackPublications.forEach((pub) => {
+          if (pub.track) {
+            pub.track.stop();
+          }
+        });
+      }
+
+      // Disconnect from room
+      if (room) {
+        room.disconnect();
+      }
+    };
+  }, [localParticipant, room]);
 
   const handleStartBroadcast = async () => {
     if (!localParticipant) {

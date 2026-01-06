@@ -471,7 +471,11 @@ export function PrivateChatContainer({
                                         <MessageCircle className="w-10 h-10 text-purple-400" />
                                     </div>
                                     <p className="text-lg text-white mb-2 font-semibold">No messages yet</p>
-                                    <p className="text-sm text-gray-300">Start the conversation!</p>
+                                    {requestStatus !== "ACCEPTED" ? (
+                                        <p className="text-sm text-gray-300">Send a chat request to start messaging.</p>
+                                    ) : (
+                                        <p className="text-sm text-gray-300">Start the conversation!</p>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -503,20 +507,32 @@ export function PrivateChatContainer({
                                 {error}
                             </div>
                         )}
+                        {requestStatus !== "ACCEPTED" && (
+                            <div className="text-xs text-yellow-300 bg-yellow-900/10 border border-yellow-500/30 p-2 rounded mb-2 flex items-center justify-between gap-2">
+                                <span>
+                                    Private chat is approval-based. {creatorInfo && selectedPartnerId === creatorInfo.id ? "Send a chat request to the model to begin." : "Wait for approval to start messaging."}
+                                </span>
+                                {creatorInfo && selectedPartnerId === creatorInfo.id && (
+                                    <Button size="sm" className="h-7 px-2 bg-purple-600 hover:bg-purple-700 text-white" onClick={() => setShowRequestDialog(true)}>
+                                        Send Request
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                         <div className="flex gap-2 mb-2">
                             <Input
                                 value={messageInput}
                                 onChange={(e) => setMessageInput(e.target.value)}
                                 onKeyDown={handleKeyPress}
                                 placeholder="Type a message..."
-                                disabled={sending || requestStatus === "PENDING" || requestStatus === "REJECTED" || requestStatus === "EXPIRED"}
+                                disabled={sending || requestStatus !== "ACCEPTED"}
                                 maxLength={500}
                                 className="flex-1 bg-gray-800/50 border-gray-700/50 text-white text-sm placeholder:text-gray-500 focus:border-purple-500/50 h-9"
                             />
                             <Button
                                 type="submit"
                                 size="sm"
-                                disabled={!messageInput.trim() || sending || requestStatus === "PENDING" || requestStatus === "REJECTED" || requestStatus === "EXPIRED"}
+                                disabled={!messageInput.trim() || sending || requestStatus !== "ACCEPTED"}
                                 className="bg-purple-600 hover:bg-purple-700 text-white h-9 w-9 p-0"
                             >
                                 {sending ? (

@@ -186,6 +186,18 @@ export function usePrivateChat({
         } else {
           const data = await response.json();
           setError(data.error || "Failed to fetch messages");
+          // If no chat request exists yet, reflect this in state for UI gating
+          if ((response as Response).status === 403) {
+            if (
+              typeof data.error === "string" &&
+              (data.error.toLowerCase().includes("no chat request") ||
+                data.error.toLowerCase().includes("please send a chat request"))
+            ) {
+              // Normalize to no active request so UI can gate input
+              setRequestStatus(null);
+              setMessages([]);
+            }
+          }
         }
       } catch (error) {
         setError("Failed to fetch messages");
