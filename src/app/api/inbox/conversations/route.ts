@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 // GET /api/inbox/conversations - Get all private conversations for logged-in user across all streams
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth();
 

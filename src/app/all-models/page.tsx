@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,7 +46,7 @@ export default function ModelsPage() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  const fetchModels = async () => {
+  const fetchModels = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -68,11 +68,11 @@ export default function ModelsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedCategory]);
 
   useEffect(() => {
     fetchModels();
-  }, [searchQuery, selectedCategory]);
+  }, [fetchModels]);
 
   const handleModelClick = (modelId: string) => {
     router.push(`/m/${modelId}`);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Heart, Gift, Gamepad2, Zap, Loader2 } from "lucide-react";
@@ -44,11 +44,7 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
     const [tipActivities, setTipActivities] = useState<TipActivity[]>(DEFAULT_TIP_ACTIVITIES);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchModelTipMenu();
-    }, [modelId]);
-
-    const fetchModelTipMenu = async () => {
+    const fetchModelTipMenu = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(`/api/tip-menu?modelId=${modelId}`);
@@ -69,7 +65,11 @@ export function TipsTab({ onTip, className, modelId }: TipsTabProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [modelId]);
+
+    useEffect(() => {
+        fetchModelTipMenu();
+    }, [modelId, fetchModelTipMenu]);
 
     const handleTipActivity = (activity: TipActivity) => {
         onTip(activity.tokens, activity.name);

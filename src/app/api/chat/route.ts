@@ -151,7 +151,22 @@ export async function POST(request: NextRequest) {
     const isModel = stream.modelId === userId;
 
     // Create message first (always succeeds for models, conditional for viewers)
-    let chatMessage: any;
+    let chatMessage: {
+      id: string;
+      createdAt: Date;
+      userId: string;
+      streamId: string;
+      message: string;
+      isDeleted: boolean;
+      user: {
+        id: string;
+        role: string;
+        profile: {
+          displayName: string | null;
+          avatarUrl: string | null;
+        } | null;
+      };
+    };
     let balanceAfter: Prisma.Decimal | null = null;
     
     if (!isModel) {

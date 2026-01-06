@@ -97,7 +97,7 @@ export default function RecommendedPage() {
             return;
         }
         fetchRecommendations(selectedCategory);
-    }, [session, selectedCategory]);
+    }, [session, selectedCategory, router]);
 
     const handleCategoryChange = (category: string | null) => {
         setSelectedCategory(category);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -21,7 +21,7 @@ export function MediaPermissions({ onPermissionsGranted, onPermissionsDenied }: 
     const [micStatus, setMicStatus] = useState<'pending' | 'granted' | 'denied'>('pending');
     const [isRequesting, setIsRequesting] = useState(false);
 
-    const requestPermissions = async () => {
+    const requestPermissions = useCallback(async () => {
         setIsRequesting(true);
 
         try {
@@ -51,14 +51,14 @@ export function MediaPermissions({ onPermissionsGranted, onPermissionsDenied }: 
 
             onPermissionsGranted();
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Media permissions error:', error);
 
-            if (error.name === 'NotAllowedError') {
+            if (error instanceof Error && error.name === 'NotAllowedError') {
                 setCameraStatus('denied');
                 setMicStatus('denied');
                 onPermissionsDenied('Camera and microphone access denied. Please enable permissions in your browser settings.');
-            } else if (error.name === 'NotFoundError') {
+            } else if (error instanceof Error && error.name === 'NotFoundError') {
                 onPermissionsDenied('No camera or microphone found. Please connect your devices and try again.');
             } else {
                 onPermissionsDenied('Failed to access media devices. Please check your camera and microphone.');
@@ -66,12 +66,12 @@ export function MediaPermissions({ onPermissionsGranted, onPermissionsDenied }: 
         } finally {
             setIsRequesting(false);
         }
-    };
+    }, [onPermissionsGranted, onPermissionsDenied]);
 
     // Auto-request permissions on mount
     useEffect(() => {
         requestPermissions();
-    }, []);
+    }, [requestPermissions]);
 
     const StatusIcon = ({ status }: { status: 'pending' | 'granted' | 'denied' }) => {
         switch (status) {

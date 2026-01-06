@@ -339,7 +339,7 @@ export default function LoginForm({ userType, compact = false }: LoginFormProps)
                     </form>
 
                     <p className="mt-8 text-center text-sm text-gray-400">
-                        Don't have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <Link
                             href={userType === 'model' ? '/m/register' : '/v/register'}
                             className="text-purple-400 hover:text-purple-300 font-semibold transition"

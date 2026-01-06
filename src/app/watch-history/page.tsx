@@ -85,7 +85,7 @@ export default function WatchHistoryPage() {
             return;
         }
         fetchWatchHistory();
-    }, [session]);
+    }, [session, router]);
 
     const handleJoinStream = (streamId: string) => {
         window.location.href = `/streaming?join=${streamId}`;

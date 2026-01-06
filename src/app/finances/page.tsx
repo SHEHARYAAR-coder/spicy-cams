@@ -134,7 +134,7 @@ export default async function FinancesPage() {
   // Get top spenders
   const userSpending = payments
     .filter((p) => p.status === "SUCCEEDED")
-    .reduce((acc: Record<string, { amount: number; user: any }>, payment) => {
+    .reduce((acc: Record<string, { amount: number; user: { profile?: { displayName: string | null; avatarUrl: string | null } | null; email: string } }>, payment) => {
       const userId = payment.userId;
       if (!acc[userId]) {
         acc[userId] = { amount: 0, user: payment.user };

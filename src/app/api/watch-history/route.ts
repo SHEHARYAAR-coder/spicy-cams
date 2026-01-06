@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // GET - Fetch user's watch history
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth();
 
@@ -29,8 +29,15 @@ export async function GET(request: NextRequest) {
             model: {
               select: {
                 id: true,
-                name: true,
-                image: true,
+                email: true,
+              },
+              include: {
+                profile: {
+                  select: {
+                    displayName: true,
+                    avatarUrl: true,
+                  },
+                },
               },
             },
           },
@@ -38,7 +45,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const streams = watchHistory.map((history: any) => ({
+    const streams = watchHistory.map((history: { stream: { model: { id: string; email: string; profile?: { displayName: string | null; avatarUrl: string | null } | null } }; watchedAt: Date }) => ({
       ...history.stream,
       watchedAt: history.watchedAt,
       model: {

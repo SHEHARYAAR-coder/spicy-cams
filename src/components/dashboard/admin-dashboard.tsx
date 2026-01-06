@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -257,12 +258,12 @@ export function AdminDashboard({
           >
             Financial Overview
           </a>
-          <a
+          <Link
             href="/streaming"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
             Monitor Streams
-          </a>
+          </Link>
           <a
             href="/profile"
             className="text-purple-400 hover:text-purple-300 transition-colors"

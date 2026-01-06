@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { ModelBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
 import { MediaPermissions } from '@/components/stream/media-permissions';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
-import { Loader2, Video, Users, Plus, Upload, X, Tag, FolderOpen, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Video, Plus, Upload, X, Tag, FolderOpen, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TabbedChatContainer, MobileChatOverlay } from '@/components/chat';
 import { useStream } from '@/contexts/StreamContext';
 
@@ -138,7 +138,7 @@ function CategoryRow({ category, streams, onJoinStream, currentStreamId }: Categ
 export default function StreamingPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { setStreamData, clearStreamData, updateStreamList, setCurrentStreamById } = useStream();
+  const { setStreamData, clearStreamData, updateStreamList } = useStream();
   const [mode, setMode] = useState<'browse' | 'create' | 'broadcast' | 'watch'>('browse');
   const [streams, setStreams] = useState<Stream[]>([]);
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
@@ -149,7 +149,6 @@ export default function StreamingPage() {
   const [permissionError, setPermissionError] = useState<string>('');
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [existingStreamId, setExistingStreamId] = useState<string | null>(null);
 
   // Detect mobile/desktop to render only one layout (prevents duplicate API calls from hooks)
   useEffect(() => {
@@ -166,7 +165,7 @@ export default function StreamingPage() {
   const sessionUser = session?.user as { username?: string } | undefined;
 
   // Handle "Go Live" button click - check for existing stream first
-  const handleGoLive = async () => {
+  const handleGoLive = useCallback(async () => {
     if (!isModel || !sessionUser?.username) {
       setMode('create');
       return;
@@ -176,7 +175,7 @@ export default function StreamingPage() {
       // Check if model has an existing active stream
       const response = await fetch(`/api/streams/by-username/${sessionUser.username}`);
       if (response.ok) {
-        const data = await response.json();
+        const _data = await response.json();
         // Model has an active stream - redirect to it
         console.log('Model has active stream, redirecting to:', sessionUser.username);
         router.replace(`/streaming/${encodeURIComponent(sessionUser.username)}`);
@@ -184,11 +183,49 @@ export default function StreamingPage() {
         // No active stream - proceed to create mode
         setMode('create');
       }
-    } catch (error) {
+    } catch (_error) {
       // Error checking - proceed to create mode
       setMode('create');
     }
-  };
+  }, [isModel, sessionUser?.username, router]);
+
+  // Join a stream as viewer - redirect to username URL for clean experience
+  const handleJoinStream = useCallback(async (streamId: string) => {
+    setLoading(true);
+    try {
+      // Find the stream data
+      const stream = streams.find(s => s.id === streamId);
+
+      if (stream?.model?.username) {
+        // Redirect to the model's username URL for a cleaner experience
+        console.log('✅ Redirecting to model username URL:', stream.model.username);
+        router.push(`/streaming/${encodeURIComponent(stream.model.username)}`);
+        return;
+      }
+
+      // Fallback: Fetch stream details to get username
+      const response = await fetch(`/api/streams/${streamId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const modelUsername = data.stream?.model?.username;
+
+        if (modelUsername) {
+          console.log('✅ Redirecting to model username URL:', modelUsername);
+          router.push(`/streaming/${encodeURIComponent(modelUsername)}`);
+          return;
+        }
+      }
+
+      // Last fallback: use the streamId directly (legacy behavior)
+      console.log('⚠️ No username found, using stream ID fallback');
+      router.push(`/streaming?join=${streamId}`);
+    } catch (error) {
+      console.error('Error joining stream:', error);
+      alert('Failed to join stream');
+    } finally {
+      setLoading(false);
+    }
+  }, [streams, router]);
 
   // If user is a model with an active stream and NOT watching another stream, redirect to username URL
   // This ensures broadcasters always see their shareable URL
@@ -217,7 +254,7 @@ export default function StreamingPage() {
           console.log('📺 Active stream detected, redirecting to username URL');
           router.replace(`/streaming/${encodeURIComponent(sessionUser.username)}`);
         }
-      } catch (error) {
+      } catch (_error) {
         // No active stream, stay on browse/create page
         console.log('No active stream found');
       }
@@ -387,16 +424,16 @@ export default function StreamingPage() {
     if (hasMediaPermissions) {
       getCameras();
     }
-  }, [hasMediaPermissions]);
+  }, [hasMediaPermissions, selectedCameraId]);
 
 
   // Fetch available streams
-  const fetchStreams = async () => {
+  const fetchStreams = useCallback(async () => {
     try {
       const response = await fetch('/api/streams/list');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+        const streamsWithDates = (data.streams || []).map((stream: { createdAt: string; model?: { id?: string; name?: string; username?: string; avatar?: string; image?: string }; creator?: { id?: string; name?: string; username?: string; avatar?: string; image?: string };[key: string]: unknown }) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           model: {
@@ -421,10 +458,10 @@ export default function StreamingPage() {
     } catch (error) {
       console.error('Error fetching streams:', error);
     }
-  };
+  }, [updateStreamList]);
 
   // Fetch recommended streams based on category
-  const fetchRecommendations = async (category?: string) => {
+  const fetchRecommendations = useCallback(async (category?: string) => {
     if (!category) {
       console.log('No category provided for recommendations');
       return;
@@ -440,7 +477,7 @@ export default function StreamingPage() {
         const data = await response.json();
         console.log('All streams received:', data.streams?.length);
 
-        const streamsWithDates = (data.streams || []).map((stream: any) => ({
+        const streamsWithDates = (data.streams || []).map((stream: { createdAt: string; model?: { id?: string; name?: string; username?: string; avatar?: string; image?: string }; creator?: { id?: string; name?: string; username?: string; avatar?: string; image?: string }; category?: string; status: string; id: string }) => ({
           ...stream,
           createdAt: new Date(stream.createdAt),
           model: {
@@ -480,14 +517,14 @@ export default function StreamingPage() {
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     }
-  };
+  }, [selectedStream]);
 
   useEffect(() => {
     fetchStreams();
     // Refresh streams every 30 seconds
     const interval = setInterval(fetchStreams, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchStreams]);
 
   // Fetch recommendations when watching a stream
   useEffect(() => {
@@ -495,7 +532,7 @@ export default function StreamingPage() {
       console.log('Watch mode detected, fetching recommendations for:', currentStreamData.category);
       fetchRecommendations(currentStreamData.category);
     }
-  }, [mode, currentStreamData?.category]);
+  }, [mode, currentStreamData?.category, fetchRecommendations]);
 
   // Save stream state to localStorage whenever it changes
   useEffect(() => {
@@ -564,12 +601,12 @@ export default function StreamingPage() {
             sessionStorage.removeItem('activeStreamState');
           }
         }
-      } catch (error) {
-        console.error('Error restoring stream state:', error);
+      } catch (_error) {
+        console.error('Error restoring stream state:', _error);
         sessionStorage.removeItem('activeStreamState');
       }
     }
-  }, [session, isModel, selectedStream, router]);
+  }, [session, isModel, selectedStream, router, handleGoLive, handleJoinStream, setStreamData]);
 
   // Create a new stream
   const handleCreateStream = async () => {
@@ -658,44 +695,6 @@ export default function StreamingPage() {
     setLoading(false);
   };
 
-  // Join a stream as viewer - redirect to username URL for clean experience
-  const handleJoinStream = async (streamId: string) => {
-    setLoading(true);
-    try {
-      // Find the stream data
-      const stream = streams.find(s => s.id === streamId);
-
-      if (stream?.model?.username) {
-        // Redirect to the model's username URL for a cleaner experience
-        console.log('✅ Redirecting to model username URL:', stream.model.username);
-        router.push(`/streaming/${encodeURIComponent(stream.model.username)}`);
-        return;
-      }
-
-      // Fallback: Fetch stream details to get username
-      const response = await fetch(`/api/streams/${streamId}`);
-      if (response.ok) {
-        const data = await response.json();
-        const modelUsername = data.stream?.model?.username;
-        
-        if (modelUsername) {
-          console.log('✅ Redirecting to model username URL:', modelUsername);
-          router.push(`/streaming/${encodeURIComponent(modelUsername)}`);
-          return;
-        }
-      }
-
-      // Last fallback: use the streamId directly (legacy behavior)
-      console.log('⚠️ No username found, using stream ID fallback');
-      router.push(`/streaming?join=${streamId}`);
-    } catch (error) {
-      console.error('Error joining stream:', error);
-      alert('Failed to join stream');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // End stream and go back to browse
   const handleStreamEnd = () => {
     setMode('browse');
@@ -709,27 +708,27 @@ export default function StreamingPage() {
   // Send tip and post message to chat
   const handleSendTip = async (tokens: number, activity?: string) => {
     if (!selectedStream) return;
-    
+
     try {
       // Create tip message for chat
-      const tipMessage = activity 
+      const tipMessage = activity
         ? `💝 Tipped ${tokens} tokens for "${activity}"!`
         : `💝 Tipped ${tokens} tokens!`;
-      
+
       // Send tip message to chat API
       const response = await fetch(`/api/streams/${selectedStream}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: tipMessage,
           type: 'tip'
         }),
       });
-      
+
       if (!response.ok) {
         console.error('Failed to send tip message');
       }
-      
+
       console.log(`✅ Sent tip: ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
     } catch (error) {
       console.error('Error sending tip:', error);

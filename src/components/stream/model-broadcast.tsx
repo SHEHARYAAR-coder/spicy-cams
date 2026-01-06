@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import {
   LiveKitRoom,
-  ControlBar,
   RoomAudioRenderer,
   useTracks,
   useParticipants,
@@ -14,11 +13,9 @@ import {
 } from '@livekit/components-react';
 import {
   ConnectionState,
-  Track,
-  Room
+  Track
 } from 'livekit-client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -35,17 +32,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
-  Radio,
   Video,
   VideoOff,
   Monitor,
   MonitorOff,
-  Users,
   Clock,
   Settings,
   Maximize2,
   Minimize2,
-  AlertCircle,
   Mic,
   MicOff,
   Loader2,
@@ -54,10 +48,7 @@ import {
   Wifi,
   Play,
   Pause,
-  MoreVertical,
-  Menu,
-  Camera,
-  SwitchCamera
+  Camera
 } from 'lucide-react';
 
 interface ModelBroadcastProps {
@@ -102,29 +93,6 @@ export function ModelBroadcast({
   );
 }
 
-// Live Timer Component
-function LiveTimer({ startTime }: { startTime: Date }) {
-  const [duration, setDuration] = useState('00:00:00');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const diff = now.getTime() - startTime.getTime();
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      setDuration(
-        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-      );
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [startTime]);
-
-  return <span className="font-mono">{duration}</span>;
-}
-
 interface CreatorVideoViewProps {
   streamId: string;
   streamTitle: string;
@@ -132,12 +100,12 @@ interface CreatorVideoViewProps {
   onStreamEnd?: () => void;
 }
 
-function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd }: CreatorVideoViewProps) {
+function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraId, onStreamEnd }: CreatorVideoViewProps) {
   const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare]);
   const participants = useParticipants();
   const connectionState = useConnectionState();
   const { localParticipant } = useLocalParticipant();
-  const room = useRoomContext();
+  const _room = useRoomContext();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
@@ -217,7 +185,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
     };
 
     enableDevices();
-  }, [connectionState, localParticipant, hasAutoEnabled, isInitializing]);
+  }, [connectionState, localParticipant, hasAutoEnabled, isInitializing, selectedCameraId]);
 
 
 
@@ -242,7 +210,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
     if (screenShareTrack) {
       setIsScreenSharing(screenShareTrack.publication.isEnabled);
     }
-  }, [tracks, hasAutoEnabled]);
+  }, [tracks, hasAutoEnabled, selectedCamera, selectedMicrophone]);
 
   const handleStartBroadcast = async () => {
     if (!localParticipant) {
@@ -399,7 +367,7 @@ function CreatorVideoView({ streamId, streamTitle, selectedCameraId, onStreamEnd
       }
     };
     getDevices();
-  }, []);
+  }, [selectedCamera, selectedMicrophone]);
 
   const switchCamera = async (deviceId: string) => {
     if (!localParticipant) return;

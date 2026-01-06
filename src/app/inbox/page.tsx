@@ -42,7 +42,6 @@ export default function InboxPage() {
         error,
         sending,
         sendMessage,
-        fetchMessages,
     } = useInbox({
         partnerId: selectedPartnerId || undefined,
         token: chatToken,

@@ -2,11 +2,8 @@
 
 import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import LoginForm from "./login-form";
-import RegisterForm from "./register-form";
-import { X } from "lucide-react";
-import { DialogTitle } from "@radix-ui/react-dialog";
 import Link from "next/link";
+import Image from "next/image";
 
 interface AuthModalProps {
     open: boolean;
@@ -18,7 +15,7 @@ interface AuthModalProps {
 export default function AuthModal({
     open,
     onOpenChange,
-    userType,
+    userType: _userType,
     initialTab = "login",
 }: AuthModalProps) {
     const [activeTab, setActiveTab] = useState<"login" | "signup">(initialTab);
@@ -36,11 +33,12 @@ export default function AuthModal({
                 <div className="flex-1 flex">
                     {activeTab === "login" ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 w-full">
-                            <div className="flex flex-col justify-center items-center text-center overflow-hidden">
-                                <img
+                            <div className="flex flex-col justify-center items-center text-center overflow-hidden relative">
+                                <Image
                                     src="/auth/forget.PNG"
                                     alt="Login Background"
-                                    className="w-full h-full object-cover opacity-80"
+                                    fill
+                                    className="object-cover opacity-80"
                                 />
                             </div>
                             <div className="flex justify-center items-start pt-20">
@@ -88,11 +86,12 @@ export default function AuthModal({
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex flex-col justify-center items-center text-center overflow-hidden">
-                                <img
+                            <div className="flex flex-col justify-center items-center text-center overflow-hidden relative">
+                                <Image
                                     src="/auth/login.PNG"
                                     alt="Login Background"
-                                    className="w-full h-full object-cover opacity-80"
+                                    fill
+                                    className="object-cover opacity-80"
                                 />
                             </div>
                         </div>

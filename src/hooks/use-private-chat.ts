@@ -79,9 +79,9 @@ export function usePrivateChat({
   const abortControllerRef = useRef<AbortController | null>(null);
   
   // Store refs to latest function versions to avoid dependency loops
-  const fetchConversationsRef = useRef<any>(null);
-  const fetchChatRequestsRef = useRef<any>(null);
-  const fetchMessagesRef = useRef<any>(null);
+  const fetchConversationsRef = useRef<(() => Promise<void>) | null>(null);
+  const fetchChatRequestsRef = useRef<(() => Promise<void>) | null>(null);
+  const fetchMessagesRef = useRef<((receiverId: string) => Promise<void>) | null>(null);
   const receiverIdRef = useRef<string | undefined>(receiverId);
 
   // Fetch conversations list
@@ -532,7 +532,7 @@ export function usePrivateChat({
     }
 
     return () => stopPolling();
-  }, [enabled, token, startPolling, stopPolling]);
+  }, [enabled, token, startPolling, stopPolling, conversations.length]);
 
   // Effect to fetch messages when receiverId changes
   useEffect(() => {

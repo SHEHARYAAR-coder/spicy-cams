@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -93,12 +94,12 @@ export function ViewerDashboard({ userData }: ViewerDashboardProps) {
           <CardTitle className="text-white">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4">
-          <a
+          <Link
             href="/streaming"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
             Browse Streams
-          </a>
+          </Link>
           <a
             href="/pricing"
             className="text-purple-400 hover:text-purple-300 transition-colors"

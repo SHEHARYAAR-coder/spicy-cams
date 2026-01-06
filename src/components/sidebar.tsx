@@ -16,18 +16,18 @@ import { useCategoryType } from "@/contexts/CategoryContext";
 
 interface Category {
     name: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     count: number;
     active?: boolean;
 }
 
 interface SidebarProps {
-    streams?: any[];
+    streams?: Array<{ id: string; category?: string }>;
     selectedCategory?: string;
     onCategoryChange?: (category: string) => void;
 }
 
-export function Sidebar({ streams = [], selectedCategory = "Home", onCategoryChange }: SidebarProps) {
+export function Sidebar({ streams: _streams = [], selectedCategory = "Home", onCategoryChange }: SidebarProps) {
     const { data: session } = useSession();
     const router = useRouter();
     const pathname = usePathname();

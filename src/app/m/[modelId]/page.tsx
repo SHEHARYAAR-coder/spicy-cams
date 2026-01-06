@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ export default function ModelProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
-  const fetchModel = async () => {
+  const fetchModel = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/users/models/${modelId}`);
@@ -90,7 +90,7 @@ export default function ModelProfilePage() {
         const modelWithDates = {
           ...data.model,
           createdAt: new Date(data.model.createdAt),
-          streams: (data.model.streams || []).map((stream: any) => ({
+          streams: (data.model.streams || []).map((stream: { createdAt: string; scheduledAt?: string; startedAt?: string }) => ({
             ...stream,
             createdAt: new Date(stream.createdAt),
             scheduledAt: stream.scheduledAt
@@ -109,13 +109,13 @@ export default function ModelProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [modelId, router]);
 
   useEffect(() => {
     if (modelId) {
       fetchModel();
     }
-  }, [modelId]);
+  }, [modelId, fetchModel]);
 
   const handleFollowToggle = async () => {
     if (!session) {
@@ -149,17 +149,17 @@ export default function ModelProfilePage() {
     setSelectedImageIndex(null);
   };
 
-  const handlePreviousImage = () => {
+  const handlePreviousImage = useCallback(() => {
     if (selectedImageIndex !== null && creator) {
       setSelectedImageIndex((selectedImageIndex - 1 + creator.profileImages.length) % creator.profileImages.length);
     }
-  };
+  }, [selectedImageIndex, creator]);
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
     if (selectedImageIndex !== null && creator) {
       setSelectedImageIndex((selectedImageIndex + 1) % creator.profileImages.length);
     }
-  };
+  }, [selectedImageIndex, creator]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function ModelProfilePage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImageIndex, creator]);
+  }, [selectedImageIndex, creator, handleNextImage, handlePreviousImage]);
 
   // --- Loading State ---
   if (loading) {

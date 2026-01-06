@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, XCircle } from "lucide-react";
@@ -14,16 +14,7 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!planId) {
-      setError("No plan selected");
-      return;
-    }
-
-    handleCheckout();
-  }, [planId]);
-
-  const handleCheckout = async () => {
+  const handleCheckout = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -54,7 +45,16 @@ function CheckoutContent() {
       setError(errorMessage);
       setLoading(false);
     }
-  };
+  }, [planId]);
+
+  useEffect(() => {
+    if (!planId) {
+      setError("No plan selected");
+      return;
+    }
+
+    handleCheckout();
+  }, [planId, handleCheckout]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center p-4">

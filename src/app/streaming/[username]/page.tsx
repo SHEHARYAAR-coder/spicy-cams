@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
@@ -132,7 +132,7 @@ function CategoryRow({ category, streams, onJoinStream, currentStreamId }: Categ
 }
 
 export default function StreamByUsernamePage() {
-  const { data: session } = useSession();
+  const { data: _session } = useSession();
 
   const router = useRouter();
   const params = useParams();
@@ -155,17 +155,16 @@ export default function StreamByUsernamePage() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-  const [showMobileChat, setShowMobileChat] = useState(false);
   const [hasFetched, setHasFetched] = useState(false);
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
 
   // Fetch random live streams for recommendations
-  const fetchRecommendations = async (currentStreamId?: string) => {
+  const fetchRecommendations = useCallback(async (currentStreamId?: string) => {
     try {
       const response = await fetch('/api/streams/list?status=live');
       if (response.ok) {
         const data = await response.json();
-        const streamsWithDates = (data.streams || []).map((s: any) => ({
+        const streamsWithDates = (data.streams || []).map((s: { createdAt: string; model?: { id?: string; name?: string; username?: string; avatar?: string; image?: string }; creator?: { id?: string; name?: string; username?: string; avatar?: string; image?: string } }) => ({
           ...s,
           createdAt: new Date(s.createdAt),
           model: {
@@ -201,13 +200,13 @@ export default function StreamByUsernamePage() {
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     }
-  };
+  }, [updateStreamList]);
 
   // Handle joining another stream - redirect to model's username URL
   const handleJoinStream = (streamId: string) => {
     // Find the stream to get the model's username
     const targetStream = recommendedStreams.find(s => s.id === streamId);
-    
+
     if (targetStream?.model?.username) {
       // Navigate directly to the model's username URL
       router.push(`/streaming/${encodeURIComponent(targetStream.model.username)}`);
@@ -282,14 +281,14 @@ export default function StreamByUsernamePage() {
     };
 
     fetchStreamByUsername();
-  }, [username, hasFetched]); // Only depend on username and hasFetched
+  }, [username, hasFetched, setStreamData, setCurrentStreamById]); // Only depend on username and hasFetched
 
   // Fetch recommendations when stream is loaded and user is viewing (not broadcasting)
   useEffect(() => {
     if (stream && mode === 'watch') {
       fetchRecommendations(stream.id);
     }
-  }, [stream, mode]);
+  }, [stream, mode, fetchRecommendations]);
 
   const handleStreamEnd = () => {
     clearStreamData();
@@ -299,27 +298,27 @@ export default function StreamByUsernamePage() {
   // Send tip and post message to chat
   const handleSendTip = async (tokens: number, activity?: string) => {
     if (!stream?.id) return;
-    
+
     try {
       // Create tip message for chat
-      const tipMessage = activity 
+      const tipMessage = activity
         ? `💝 Tipped ${tokens} tokens for "${activity}"!`
         : `💝 Tipped ${tokens} tokens!`;
-      
+
       // Send tip message to chat API
       const response = await fetch(`/api/streams/${stream.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: tipMessage,
           type: 'tip'
         }),
       });
-      
+
       if (!response.ok) {
         console.error('Failed to send tip message');
       }
-      
+
       console.log(`✅ Sent tip: ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
     } catch (error) {
       console.error('Error sending tip:', error);

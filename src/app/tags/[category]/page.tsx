@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -320,23 +320,23 @@ export default function CategoryTagsPage() {
   // Filter function
   const filterByLetter = (items: CategoryData[]) => {
     let filtered = items;
-    
+
     if (searchQuery) {
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     if (selectedLetter !== "Main") {
       if (selectedLetter === "#") {
         filtered = filtered.filter(item => /^[0-9]/.test(item.name));
       } else {
-        filtered = filtered.filter(item => 
+        filtered = filtered.filter(item =>
           item.name.toUpperCase().startsWith(selectedLetter)
         );
       }
     }
-    
+
     return filtered;
   };
 
@@ -363,7 +363,7 @@ export default function CategoryTagsPage() {
   const renderSection = (title: string, items: CategoryData[]) => {
     const filtered = filterByLetter(items);
     if (filtered.length === 0) return null;
-    
+
     return (
       <div>
         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 pb-2 border-b border-gray-800">
@@ -405,9 +405,8 @@ export default function CategoryTagsPage() {
               <button
                 key={letter}
                 onClick={() => setSelectedLetter(letter)}
-                className={`text-sm font-medium transition-colors relative pb-1 ${
-                  selectedLetter === letter ? "text-purple-500" : "text-gray-400 hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors relative pb-1 ${selectedLetter === letter ? "text-purple-500" : "text-gray-400 hover:text-white"
+                  }`}
               >
                 {letter}
                 {selectedLetter === letter && (

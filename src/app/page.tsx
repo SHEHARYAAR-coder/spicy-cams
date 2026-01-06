@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { StreamCard } from "@/components/stream";
@@ -161,7 +161,6 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
 export default function Home() {
   const [viewerSignupOpen, setViewerSignupOpen] = useState(false);
   const { data: session } = useSession();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [streams, setStreams] = useState<Stream[]>([]);
   const [filteredStreams, setFilteredStreams] = useState<Stream[]>([]);
@@ -533,9 +532,11 @@ export default function Home() {
                                   <div className="flex flex-col justify-center items-start p-8 md:p-12 space-y-4 bg-black">
                                     <div className="flex items-center gap-3 mb-2">
                                       <div className="">
-                                        <img
+                                        <Image
                                           src={'/logo/SC-Logo.png'}
-                                          alt=""
+                                          alt="Spicy Cams Logo"
+                                          width={208}
+                                          height={52}
                                           className="object-cover w-52"
                                         />
                                       </div>

@@ -12,7 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Edit2, Save, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, X, Loader2 } from "lucide-react";
 
 interface TipMenuItem {
     id: string;
@@ -33,7 +33,7 @@ const COMMON_EMOJIS = [
 export function TipMenuManager() {
     const [items, setItems] = useState<TipMenuItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [editingId, setEditingId] = useState<string | null>(null);
+    const [_editingId, _setEditingId] = useState<string | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
     // Form state
@@ -90,7 +90,7 @@ export function TipMenuManager() {
         }
     };
 
-    const handleUpdate = async (itemId: string, updates: Partial<TipMenuItem>) => {
+    const _handleUpdate = async (itemId: string, updates: Partial<TipMenuItem>) => {
         try {
             const response = await fetch(`/api/tip-menu/${itemId}`, {
                 method: "PATCH",
@@ -100,7 +100,7 @@ export function TipMenuManager() {
 
             if (response.ok) {
                 await fetchTipMenu();
-                setEditingId(null);
+                _setEditingId(null);
             } else {
                 alert("Failed to update item");
             }

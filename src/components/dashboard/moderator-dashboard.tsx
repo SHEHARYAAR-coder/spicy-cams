@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -146,12 +147,12 @@ export function ModeratorDashboard({ userData }: ModeratorDashboardProps) {
           <CardTitle className="text-white">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex gap-4 flex-wrap">
-          <a
+          <Link
             href="/streaming"
             className="text-purple-400 hover:text-purple-300 transition-colors"
           >
             Monitor Streams
-          </a>
+          </Link>
           <a
             href="/profile"
             className="text-purple-400 hover:text-purple-300 transition-colors"

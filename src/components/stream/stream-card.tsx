@@ -1,17 +1,11 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-    Eye,
     Clock,
     Play,
-    Users,
-    Tag,
-    FolderOpen,
-    Star,
     Share2,
     Check
 } from 'lucide-react';
@@ -45,7 +39,7 @@ export function StreamCard({
     className = ""
 }: StreamCardProps) {
     const [participantCount, setParticipantCount] = useState(stream.participantCount || 0);
-    const [isHovered, setIsHovered] = useState(false);
+    const [_isHovered, setIsHovered] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
 
     // Poll for participant count if stream is live
@@ -119,7 +113,7 @@ export function StreamCard({
         }
     };
 
-    const getTimeDisplay = () => {
+    const _getTimeDisplay = () => {
         if (stream.status === 'SCHEDULED' && stream.scheduledFor) {
             return `Starts ${formatDistanceToNow(new Date(stream.scheduledFor), { addSuffix: true })}`;
         }
@@ -140,10 +134,11 @@ export function StreamCard({
             <div className="relative w-full aspect-[4/3] bg-gray-700 overflow-hidden">
                 {/* Thumbnail Image */}
                 {stream.thumbnailUrl ? (
-                    <img
+                    <Image
                         src={stream.thumbnailUrl}
                         alt={stream.title}
-                        className="w-full h-full object-cover object-center"
+                        fill
+                        className="object-cover object-center"
                     />
                 ) : (
                     <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { ChatContainer, PrivateChatContainer } from "@/components/chat";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Users, Wifi, WifiOff } from "lucide-react";
 import { usePrivateChat } from "@/hooks/use-private-chat";
 import { useChat } from "@/hooks/use-chat";

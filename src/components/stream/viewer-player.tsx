@@ -7,15 +7,13 @@ import {
     useTracks,
     useParticipants,
     VideoTrack,
-    useConnectionState,
-    AudioTrack
+    useConnectionState
 } from '@livekit/components-react';
 import {
     ConnectionState,
     Track
 } from 'livekit-client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
     Volume2,
     VolumeX,
@@ -26,7 +24,6 @@ import {
     WifiOff,
     Play,
     Users,
-    Eye,
     Heart,
     Share2,
     Settings,
@@ -35,10 +32,8 @@ import {
     Clock,
     SwitchCamera,
     Wallet,
-    AlertTriangle,
-    DollarSign
+    AlertTriangle
 } from 'lucide-react';
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -46,7 +41,6 @@ import {
     DropdownMenuTrigger,
     DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { StreamActionBar } from "./stream-action-bar";
 import { TipDialog } from "./tip-dialog";
 
 
@@ -123,7 +117,7 @@ interface ViewerVideoViewProps {
     privateShowPrice?: number;
 }
 
-function LiveViewerStats({ streamTitle, modelName, startTime, isPaused }: {
+function LiveViewerStats({ streamTitle, modelName, startTime: _startTime, isPaused }: {
     streamTitle?: string;
     modelName?: string;
     startTime?: Date;
@@ -175,9 +169,9 @@ function LiveViewerStats({ streamTitle, modelName, startTime, isPaused }: {
     );
 }
 
-function ViewerVideoView({ 
-    streamId, 
-    streamTitle, 
+function ViewerVideoView({
+    streamId,
+    streamTitle,
     modelName,
     modelId,
     onSendTip,
@@ -366,14 +360,14 @@ function ViewerVideoView({
 
     // Find video tracks - check for track presence rather than just publication kind
     const videoTrack = tracks.find(
-        (trackRef) => 
-            trackRef.source === Track.Source.Camera && 
+        (trackRef) =>
+            trackRef.source === Track.Source.Camera &&
             trackRef.publication?.track
     );
 
     const screenTrack = tracks.find(
-        (trackRef) => 
-            trackRef.source === Track.Source.ScreenShare && 
+        (trackRef) =>
+            trackRef.source === Track.Source.ScreenShare &&
             trackRef.publication?.track
     );
 
@@ -542,7 +536,7 @@ function ViewerVideoView({
                         </p>
                         <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
                             <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                            <span>You'll continue watching when the stream resumes</span>
+                            <span>You&apos;ll continue watching when the stream resumes</span>
                         </div>
                     </div>
                 </div>
@@ -550,52 +544,52 @@ function ViewerVideoView({
 
             {/* Main Video Display */}
             <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication?.track ? (
-                    <>
-                        <VideoTrack
-                            trackRef={displayTrack}
-                            className="w-full h-full object-contain"
-                        />
+                <>
+                    <VideoTrack
+                        trackRef={displayTrack}
+                        className="w-full h-full object-contain"
+                    />
 
-                        {/* Track Type Indicator - Repositioned to bottom left */}
-                        <div className="absolute bottom-20 left-4 z-10">
-                            <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center">
-                                {screenTrack && displayTrack === screenTrack ? (
-                                    <>
-                                        <Monitor className="w-3.5 h-3.5 mr-1.5" />
-                                        Screen Share
-                                    </>
-                                ) : (
-                                    <>
-                                        <Video className="w-3.5 h-3.5 mr-1.5" />
-                                        Camera
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
-                        <div className="text-center text-gray-400">
-                            <div className="w-32 h-32 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center border-4 border-gray-700">
-                                {connectionState === ConnectionState.Connecting ? (
-                                    <Loader2 className="w-16 h-16 animate-spin text-blue-500" />
-                                ) : (
-                                    <Play className="w-16 h-16 text-gray-500" />
-                                )}
-                            </div>
-                            <p className="text-xl font-semibold mb-2">
-                                {connectionState === ConnectionState.Connecting
-                                    ? 'Connecting to stream...'
-                                    : 'Stream will start soon'}
-                            </p>
-                            <p className="text-sm text-gray-500 max-w-md mx-auto">
-                                {connectionState === ConnectionState.Connecting
-                                    ? 'Please wait while we connect you to the live stream'
-                                    : `${modelName || 'The broadcaster'} will be with you shortly`}
-                            </p>
+                    {/* Track Type Indicator - Repositioned to bottom left */}
+                    <div className="absolute bottom-20 left-4 z-10">
+                        <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium flex items-center">
+                            {screenTrack && displayTrack === screenTrack ? (
+                                <>
+                                    <Monitor className="w-3.5 h-3.5 mr-1.5" />
+                                    Screen Share
+                                </>
+                            ) : (
+                                <>
+                                    <Video className="w-3.5 h-3.5 mr-1.5" />
+                                    Camera
+                                </>
+                            )}
                         </div>
                     </div>
-                )}
+                </>
+            ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
+                    <div className="text-center text-gray-400">
+                        <div className="w-32 h-32 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center border-4 border-gray-700">
+                            {connectionState === ConnectionState.Connecting ? (
+                                <Loader2 className="w-16 h-16 animate-spin text-blue-500" />
+                            ) : (
+                                <Play className="w-16 h-16 text-gray-500" />
+                            )}
+                        </div>
+                        <p className="text-xl font-semibold mb-2">
+                            {connectionState === ConnectionState.Connecting
+                                ? 'Connecting to stream...'
+                                : 'Stream will start soon'}
+                        </p>
+                        <p className="text-sm text-gray-500 max-w-md mx-auto">
+                            {connectionState === ConnectionState.Connecting
+                                ? 'Please wait while we connect you to the live stream'
+                                : `${modelName || 'The broadcaster'} will be with you shortly`}
+                        </p>
+                    </div>
+                </div>
+            )}
             </div>
 
             {/* Professional Control Bar */}

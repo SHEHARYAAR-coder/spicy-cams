@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   DollarSign,
   MessageSquare,
-  Activity,
   Database,
   Bell,
   Menu,

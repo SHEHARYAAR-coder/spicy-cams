@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, X, Image as ImageIcon, Video } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { X, Image as ImageIcon, Video } from "lucide-react";
 
 interface MediaGalleryUploadProps {
   images: string[];
@@ -152,11 +152,12 @@ export default function MediaGalleryUpload({
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {images.map((url, index) => (
-              <div key={index} className="relative group">
-                <img
+              <div key={index} className="relative group h-40">
+                <Image
                   src={url}
                   alt={`Gallery image ${index + 1}`}
-                  className="w-full h-40 object-cover rounded-lg"
+                  fill
+                  className="object-cover rounded-lg"
                 />
                 <button
                   onClick={() => handleRemoveMedia(url, "image")}

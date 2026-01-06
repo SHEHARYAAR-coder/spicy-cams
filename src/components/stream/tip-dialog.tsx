@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -60,20 +60,7 @@ export function TipDialog({
     const [loading, setLoading] = useState(true);
     const [selectedActivity, setSelectedActivity] = useState<TipActivity | null>(null);
 
-    // Reset selected activity when dialog opens/closes
-    useEffect(() => {
-        if (!open) {
-            setSelectedActivity(null);
-        }
-    }, [open]);
-
-    useEffect(() => {
-        if (open && modelId) {
-            fetchModelTipMenu();
-        }
-    }, [modelId, open]);
-
-    const fetchModelTipMenu = async () => {
+    const fetchModelTipMenu = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(`/api/tip-menu?modelId=${modelId}`);
@@ -93,7 +80,20 @@ export function TipDialog({
         } finally {
             setLoading(false);
         }
-    };
+    }, [modelId]);
+
+    // Reset selected activity when dialog opens/closes
+    useEffect(() => {
+        if (!open) {
+            setSelectedActivity(null);
+        }
+    }, [open]);
+
+    useEffect(() => {
+        if (open && modelId) {
+            fetchModelTipMenu();
+        }
+    }, [modelId, open, fetchModelTipMenu]);
 
     // Select an activity (don't send yet)
     const handleSelectActivity = (activity: TipActivity) => {
@@ -349,7 +349,7 @@ export function TipDialog({
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-bold text-purple-400">{selectedActivity.tokens} Tk</span>
-                                <button 
+                                <button
                                     onClick={() => setSelectedActivity(null)}
                                     className="text-gray-400 hover:text-white p-1"
                                 >
@@ -411,7 +411,7 @@ export function TipDialog({
 
                     {selectedActivity && (
                         <p className="text-xs text-purple-400 mt-2 text-center">
-                            Click "Send Tip" to send <span className="font-semibold">{selectedActivity.tokens} tokens</span> for "{selectedActivity.name}"
+                            Click &ldquo;Send Tip&rdquo; to send <span className="font-semibold">{selectedActivity.tokens} tokens</span> for &ldquo;{selectedActivity.name}&rdquo;
                         </p>
                     )}
                 </div>

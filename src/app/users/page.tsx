@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -115,7 +115,7 @@ export default function UsersManagementPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Fetch users
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -148,11 +148,11 @@ export default function UsersManagementPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, search, roleFilter, statusFilter, router]);
 
   useEffect(() => {
     fetchUsers();
-  }, [pagination.page, search, roleFilter, statusFilter]);
+  }, [fetchUsers]);
 
   // Handle delete user
   const handleDeleteUser = async () => {
@@ -235,9 +235,9 @@ export default function UsersManagementPage() {
       setBanDuration("7d");
       setSuspendDuration("3h");
       fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating user:", error);
-      toast.error(error.message || "Failed to update user");
+      toast.error(error instanceof Error ? error.message : "Failed to update user");
     } finally {
       setActionLoading(false);
     }

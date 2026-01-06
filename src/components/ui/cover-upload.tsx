@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import { Camera, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -118,10 +119,11 @@ export const CoverUpload: React.FC<CoverUploadProps> = ({
 
             <div className="relative w-full h-48 md:h-64 bg-gradient-to-br from-purple-900/50 to-purple-700/50 rounded-lg overflow-hidden group">
                 {coverUrl ? (
-                    <img
+                    <Image
                         src={coverUrl}
                         alt="Cover"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">

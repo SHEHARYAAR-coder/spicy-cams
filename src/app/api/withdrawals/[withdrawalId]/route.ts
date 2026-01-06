@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
-import { Prisma } from "@prisma/client";
 
 // Lazy initialization to avoid build-time errors
 const getStripe = () => {
@@ -191,7 +190,7 @@ export async function PATCH(
       // Note: For production, you'll need to set up Stripe Connect for models
       // For now, we'll mark as approved and store the payout ID
       
-      const stripe = getStripe();
+      getStripe(); // Initialize stripe to check configuration
       
       // In a real implementation, you would:
       // model (if not exists)

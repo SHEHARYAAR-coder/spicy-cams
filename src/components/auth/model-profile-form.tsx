@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -723,11 +724,14 @@ export default function ModelProfileForm({
                                             >
                                                 {idFrontPreview ? (
                                                     <div className="relative">
-                                                        <img
-                                                            src={idFrontPreview}
-                                                            alt="ID Front"
-                                                            className="max-h-48 mx-auto rounded"
-                                                        />
+                                                        <div className="relative w-full h-48 mx-auto">
+                                                            <Image
+                                                                src={idFrontPreview}
+                                                                alt="ID Front"
+                                                                fill
+                                                                className="object-contain rounded"
+                                                            />
+                                                        </div>
                                                         <div className="mt-2 text-green-400 flex items-center justify-center gap-2">
                                                             <CheckCircle2 className="w-5 h-5" />
                                                             <span>Uploaded successfully</span>
@@ -761,11 +765,14 @@ export default function ModelProfileForm({
                                             >
                                                 {idBackPreview ? (
                                                     <div className="relative">
-                                                        <img
-                                                            src={idBackPreview}
-                                                            alt="ID Back"
-                                                            className="max-h-48 mx-auto rounded"
-                                                        />
+                                                        <div className="relative w-full h-48 mx-auto">
+                                                            <Image
+                                                                src={idBackPreview}
+                                                                alt="ID Back"
+                                                                fill
+                                                                className="object-contain rounded"
+                                                            />
+                                                        </div>
                                                         <div className="mt-2 text-green-400 flex items-center justify-center gap-2">
                                                             <CheckCircle2 className="w-5 h-5" />
                                                             <span>Uploaded successfully</span>
@@ -799,11 +806,14 @@ export default function ModelProfileForm({
                                             >
                                                 {facePhotoPreview ? (
                                                     <div className="relative">
-                                                        <img
-                                                            src={facePhotoPreview}
-                                                            alt="Face Photo"
-                                                            className="max-h-48 mx-auto rounded"
-                                                        />
+                                                        <div className="relative w-full h-48 mx-auto">
+                                                            <Image
+                                                                src={facePhotoPreview}
+                                                                alt="Face Photo"
+                                                                fill
+                                                                className="object-contain rounded"
+                                                            />
+                                                        </div>
                                                         <div className="mt-2 text-green-400 flex items-center justify-center gap-2">
                                                             <CheckCircle2 className="w-5 h-5" />
                                                             <span>Uploaded successfully</span>
@@ -940,11 +950,12 @@ export default function ModelProfileForm({
                                                 </h4>
                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                     {profileImages.map((url, index) => (
-                                                        <div key={index} className="relative group">
-                                                            <img
+                                                        <div key={index} className="relative group h-40">
+                                                            <Image
                                                                 src={url}
                                                                 alt={`Gallery image ${index + 1}`}
-                                                                className="w-full h-40 object-cover rounded-lg"
+                                                                fill
+                                                                className="object-cover rounded-lg"
                                                             />
                                                             <button
                                                                 type="button"

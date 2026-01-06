@@ -119,7 +119,7 @@ export function StreamProvider({ children }: { children: ReactNode }) {
             const response = await fetch('/api/streams/list');
             if (response.ok) {
                 const data = await response.json();
-                const streams: StreamListItem[] = (data.streams || []).map((stream: any) => ({
+                const streams: StreamListItem[] = (data.streams || []).map((stream: { id: string; model?: { id?: string; name?: string }; creator?: { id?: string; name?: string }; title?: string }) => ({
                     id: stream.id,
                     modelId: stream.model?.id || stream.creator?.id,
                     modelName: stream.model?.name || stream.creator?.name || 'Unknown',

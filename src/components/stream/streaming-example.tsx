@@ -141,7 +141,7 @@ export function StreamingExample() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {streams.map((stream: any) => (
+                        {streams.map((stream: { id: string; title: string; description?: string; category?: string; tags?: string[]; status: 'LIVE' | 'SCHEDULED' | 'ENDED'; createdAt: Date; scheduledFor?: Date; model: { id: string; name: string; image?: string }; participantCount?: number; thumbnailUrl?: string }) => (
                             <StreamCard
                                 key={stream.id}
                                 stream={stream}

@@ -7,11 +7,11 @@ import { usePathname } from 'next/navigation';
 export function Footer() {
     const pathname = usePathname();
     const isHomePage = pathname === '/';
-    
+
     // Hide footer on dashboard routes
     const hiddenRoutes = ['/dashboard', '/m', '/inbox', '/finances', '/streaming', '/profile'];
     const shouldHideFooter = hiddenRoutes.some(route => pathname.startsWith(route));
-    
+
     if (shouldHideFooter) {
         return null;
     }
@@ -25,16 +25,19 @@ export function Footer() {
                     <div className="space-y-4">
                         <Link href="/" className="flex items-center space-x-2">
                             <div className="flex flex-column items-center space-x-2">
-                                <img
-                                    src="/logo/logo.png"
-                                    alt="SpicyCams Logo"
-                                    className="h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                                />
+                                <div className="relative h-24 w-24">
+                                    <Image
+                                        src="/logo/logo.png"
+                                        alt="SpicyCams Logo"
+                                        fill
+                                        className="object-contain transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                </div>
                                 <p className="text-white font-bold text-xl">SPICYCAMS</p>
                             </div>
                         </Link>
                         <p className="text-sm text-gray-400 leading-relaxed">
-                            Welcome to spicycams! We're a free online community where you can come and watch our amazing amateur models perform live interactive shows.
+                            Welcome to spicycams! We&apos;re a free online community where you can come and watch our amazing amateur models perform live interactive shows.
                         </p>
                         <p className="text-sm text-gray-400 leading-relaxed">
                             spicycams is 100% free and access is instant. Browse through hundreds of models from Women, Men, Couples, and Transsexuals performing live sex shows 24/7. Besides watching free live cam shows, you also have the option for Private shows, spying, Cam to Cam, and messaging models.

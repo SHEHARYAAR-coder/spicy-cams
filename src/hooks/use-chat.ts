@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getCachedMessages, setCachedMessages, addMessageToCache, removeMessageFromCache } from "@/lib/chat-cache";
+import { getCachedMessages, setCachedMessages, removeMessageFromCache } from "@/lib/chat-cache";
 
 export interface ChatMessage {
   id: string;
@@ -17,7 +17,7 @@ export interface ChatMessage {
 
 export interface ChatEvent {
   type: "message" | "delete" | "mute" | "ban" | "connection" | "moderation";
-  data?: any;
+  data?: { id?: string; message?: string; userId?: string; user?: { id: string; displayName: string; avatarUrl: string | null; role: string }; createdAt?: string; [key: string]: unknown };
   status?: string;
   role?: string;
   timestamp: string;
@@ -61,8 +61,8 @@ export function useChat({
   const reconnectAttemptsRef = useRef(0);
   const messageSeenRef = useRef<Set<string>>(new Set()); // Deduplication
   const lastHeartbeatRef = useRef<number>(Date.now());
-  const pendingMessagesRef = useRef<Map<string, ChatMessage>>(new Map());
-  const sendQueueRef = useRef<Array<{message: string, resolve: (value: boolean) => void, reject: (reason?: any) => void}>>([]);
+  const _pendingMessagesRef = useRef<Map<string, ChatMessage>>(new Map());
+  const sendQueueRef = useRef<Array<{message: string, resolve: (value: boolean) => void, reject: (reason?: unknown) => void}>>([]);
   const isSendingRef = useRef(false);
 
   // Monitor connection quality
@@ -271,15 +271,16 @@ export function useChat({
                 chatEvent.data?.type === "delete" &&
                 chatEvent.data?.messageId
               ) {
+                const messageId = chatEvent.data.messageId as string;
                 setMessages((prev) => {
-                  const filtered = prev.filter((msg) => msg.id !== chatEvent.data.messageId);
+                  const filtered = prev.filter((msg) => msg.id !== messageId);
                   
                   // Update cache
-                  removeMessageFromCache(streamId, chatEvent.data.messageId);
+                  removeMessageFromCache(streamId, messageId);
                   
                   return filtered;
                 });
-                messageSeenRef.current.delete(chatEvent.data.messageId);
+                messageSeenRef.current.delete(messageId);
               }
               break;
           }

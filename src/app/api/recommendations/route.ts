@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { StreamStatus } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,15 +37,12 @@ export async function GET(request: NextRequest) {
 
     // Extract categories and tags from watch history
     const watchedCategories = watchHistory
-      .map((h: any) => h.stream.category)
-      .filter(Boolean);
-    const watchedTags = watchHistory
-      .flatMap((h: any) => h.stream.tags || [])
-      .filter(Boolean);
+      .map((h: { stream: { category: string | null } }) => h.stream.category)
+      .filter((c): c is string => c !== null);
 
     // Build query for recommendations
-    const whereClause: any = {
-      status: "LIVE",
+    const whereClause: { status: StreamStatus; category?: { in: string[] } | { contains: string; mode: "insensitive" }; OR?: Array<{ category: { contains: string; mode: "insensitive" } }> } = {
+      status: StreamStatus.LIVE,
     };
 
     // Apply category filter if provided
@@ -90,7 +88,7 @@ export async function GET(request: NextRequest) {
     if (streams.length < 10) {
       const popularStreams = await prisma.stream.findMany({
         where: {
-          status: "LIVE",
+          status: StreamStatus.LIVE,
           ...(category
             ? {
                 OR: [
@@ -113,15 +111,15 @@ export async function GET(request: NextRequest) {
       });
 
       // Merge and deduplicate
-      const streamIds = new Set(streams.map((s: any) => s.id));
+      const streamIds = new Set(streams.map((s) => s.id));
       const additionalStreams = popularStreams.filter(
-        (s: any) => !streamIds.has(s.id)
+        (s) => !streamIds.has(s.id)
       );
       streams = [...streams, ...additionalStreams];
     }
 
     // Transform streams to match expected format
-    const transformedStreams = streams.map((stream: any) => ({
+    const transformedStreams = streams.map((stream) => ({
       ...stream,
       model: {
         id: stream.model.id,

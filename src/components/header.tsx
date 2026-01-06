@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,10 +28,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
 import { useStream } from "@/contexts/StreamContext";
-import { useCategoryType, CategoryType } from "@/contexts/CategoryContext";
+import { useCategoryType } from "@/contexts/CategoryContext";
 
 export function Header() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { isStreaming, streamData, streamList, navigateToStream, refreshStreamList } = useStream();
   const { selectedCategoryType, setSelectedCategoryType, showCategoryBar } = useCategoryType();
   const pathname = usePathname();
@@ -134,11 +135,14 @@ export function Header() {
           <div className="flex justify-between items-center h-12">
             <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/" className="flex items-center space-x-2 group transition-all duration-300 hover:opacity-80">
-                <img
-                  src="/logo/logo.png"
-                  alt="SpicyCams Logo"
-                  className="h-14 sm:h-20 lg:h-24 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-                />
+                <div className="relative h-14 sm:h-20 lg:h-24 w-14 sm:w-20 lg:w-24">
+                  <Image
+                    src="/logo/logo.png"
+                    alt="SpicyCams Logo"
+                    fill
+                    className="object-contain transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
               </Link>
 
               {(sessionUser?.role !== "MODEL") && (
@@ -403,8 +407,8 @@ export function Header() {
                   <button
                     onClick={() => handleNavigateStream('prev')}
                     className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 group ${streamList.length <= 1 || isNavigating
-                        ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
-                        : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
+                      ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
+                      : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
                       }`}
                     title={streamList.length <= 1 ? 'No other streams' : 'Previous Stream'}
                     disabled={streamList.length <= 1 || isNavigating}
@@ -437,8 +441,8 @@ export function Header() {
                   <button
                     onClick={() => handleNavigateStream('next')}
                     className={`flex-shrink-0 p-1.5 sm:p-2 rounded-full transition-all duration-300 group ${streamList.length <= 1 || isNavigating
-                        ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
-                        : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
+                      ? 'bg-gray-800/30 border border-gray-700/30 cursor-not-allowed opacity-50'
+                      : 'bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 hover:border-purple-500 cursor-pointer'
                       }`}
                     title={streamList.length <= 1 ? 'No other streams' : 'Next Stream'}
                     disabled={streamList.length <= 1 || isNavigating}
