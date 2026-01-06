@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -159,6 +161,14 @@ function CategoryRow({ category, streams, onJoinStream }: CategoryRowProps) {
 }
 
 export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const [viewerSignupOpen, setViewerSignupOpen] = useState(false);
   const { data: session } = useSession();
   const searchParams = useSearchParams();

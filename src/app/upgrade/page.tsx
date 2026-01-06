@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -96,6 +96,14 @@ const SHOW_CATEGORIES = [
 ];
 
 export default function UpgradePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">Loading...</div>}>
+      <UpgradePageContent />
+    </Suspense>
+  );
+}
+
+function UpgradePageContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);

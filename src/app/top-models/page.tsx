@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +44,7 @@ interface TopModel {
 
 type TimePeriod = "week" | "month" | "all-time";
 
-export default function TopModelsPage() {
+function TopModelsContent() {
     const { data: _session } = useSession();
     const router = useRouter();
     const [models, setModels] = useState<TopModel[]>([]);
@@ -374,5 +374,17 @@ export default function TopModelsPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function TopModelsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white pt-16 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+            </div>
+        }>
+            <TopModelsContent />
+        </Suspense>
     );
 }

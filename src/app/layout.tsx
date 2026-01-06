@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { AgeVerificationDialog } from "@/components/age-verification-dialog";
 import { Header } from "@/components/header";
@@ -27,8 +28,10 @@ export default function RootLayout({
         <AuthProvider>
           <StreamProvider>
             <CategoryProvider>
-              <AgeVerificationDialog />
-              <Header />
+              <Suspense fallback={null}>
+                <AgeVerificationDialog />
+                <Header />
+              </Suspense>
               {children}
               <Footer />
               <Toaster position="top-right" richColors />

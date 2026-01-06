@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+
+export const dynamic = 'force-dynamic';
 import Link from "next/link";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
@@ -45,6 +47,14 @@ interface StreamApiResponse {
 }
 
 export default function RecommendedPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />}>
+            <RecommendedPageContent />
+        </Suspense>
+    );
+}
+
+function RecommendedPageContent() {
     const { data: session } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, Suspense } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -46,7 +46,7 @@ interface RegisterFormProps {
     compact?: boolean
 }
 
-export default function RegisterForm({ userType: propUserType, compact = false }: RegisterFormProps) {
+function RegisterFormContent({ userType: propUserType, compact = false }: RegisterFormProps) {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [userType, setUserType] = useState<'viewer' | 'model'>(propUserType || 'viewer')
@@ -631,5 +631,17 @@ export default function RegisterForm({ userType: propUserType, compact = false }
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function RegisterForm(props: RegisterFormProps) {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
+                <div className="text-white">Loading...</div>
+            </div>
+        }>
+            <RegisterFormContent {...props} />
+        </Suspense>
     )
 }

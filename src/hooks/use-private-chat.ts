@@ -79,7 +79,7 @@ export function usePrivateChat({
   const abortControllerRef = useRef<AbortController | null>(null);
   
   // Store refs to latest function versions to avoid dependency loops
-  const fetchConversationsRef = useRef<(() => Promise<void>) | null>(null);
+  const fetchConversationsRef = useRef<((showLoading?: boolean) => Promise<void>) | null>(null);
   const fetchChatRequestsRef = useRef<(() => Promise<void>) | null>(null);
   const fetchMessagesRef = useRef<((receiverId: string) => Promise<void>) | null>(null);
   const receiverIdRef = useRef<string | undefined>(receiverId);
