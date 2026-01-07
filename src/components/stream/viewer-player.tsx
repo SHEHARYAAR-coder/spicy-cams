@@ -12,7 +12,9 @@ import {
 } from '@livekit/components-react';
 import {
     ConnectionState,
-    Track
+    Track,
+    RoomEvent,
+    DisconnectReason
 } from 'livekit-client';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +35,8 @@ import {
     Clock,
     SwitchCamera,
     Wallet,
-    AlertTriangle
+    AlertTriangle,
+    PhoneOff
 } from 'lucide-react';
 import {
     DropdownMenu,
@@ -57,6 +60,7 @@ interface ViewerPlayerProps {
     onSendTip?: (tokens: number, activity?: string) => void;
     onPrivateShow?: (minutes: number) => void;
     onLike?: () => void;
+    onStreamEnd?: () => void;
     likeCount?: number;
     privateShowPrice?: number;
 }
@@ -72,6 +76,7 @@ export function ViewerPlayer({
     onSendTip,
     onPrivateShow,
     onLike,
+    onStreamEnd,
     likeCount = 0,
     privateShowPrice = 90,
 }: ViewerPlayerProps) {
@@ -97,6 +102,7 @@ export function ViewerPlayer({
                     onSendTip={onSendTip}
                     onPrivateShow={onPrivateShow}
                     onLike={onLike}
+                    onStreamEnd={onStreamEnd}
                     likeCount={likeCount}
                     privateShowPrice={privateShowPrice}
                 />
@@ -114,6 +120,7 @@ interface ViewerVideoViewProps {
     onSendTip?: (tokens: number, activity?: string) => void;
     onPrivateShow?: (minutes: number) => void;
     onLike?: () => void;
+    onStreamEnd?: () => void;
     likeCount?: number;
     privateShowPrice?: number;
 }
@@ -178,10 +185,11 @@ function ViewerVideoView({
     onSendTip,
     onPrivateShow,
     onLike,
+    onStreamEnd,
     likeCount: propLikeCount = 0,
     privateShowPrice = 90,
 }: ViewerVideoViewProps) {
-        const room = useRoomContext();
+    const room = useRoomContext();
     const tracks = useTracks(
         [
             { source: Track.Source.Camera, withPlaceholder: true },
@@ -206,6 +214,8 @@ function ViewerVideoView({
     const [isPaused, setIsPaused] = useState(false);
     const [hasAttemptedBilling, setHasAttemptedBilling] = useState(false);
     const [showTipDialog, setShowTipDialog] = useState(false);
+    const [streamEnded, setStreamEnded] = useState(false);
+    const [showStreamEndedMessage, setShowStreamEndedMessage] = useState(false);
 
     const toggleAudio = () => {
         setIsAudioMuted(!isAudioMuted);
@@ -261,30 +271,93 @@ function ViewerVideoView({
         return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
     }, []);
 
-    // Check if stream is paused
+    // Check if stream is paused or ended
     useEffect(() => {
-        const checkPauseState = async () => {
+        const checkStreamState = async () => {
             try {
-                const response = await fetch(`/api/streams/${streamId}/pause`);
-                if (response.ok) {
-                    const data = await response.json();
+                // Check pause state
+                const pauseResponse = await fetch(`/api/streams/${streamId}/pause`);
+                if (pauseResponse.ok) {
+                    const data = await pauseResponse.json();
                     setIsPaused(data.paused);
                 }
+
+                // Check if stream has ended
+                const streamResponse = await fetch(`/api/streams/${streamId}`);
+                if (streamResponse.ok) {
+                    const streamData = await streamResponse.json();
+                    if (streamData.stream.status === 'ENDED') {
+                        console.log('🔴 Stream has ended - detected by polling');
+                        setStreamEnded(true);
+                        setShowStreamEndedMessage(true);
+                        onStreamEnd?.();
+                    }
+                } else if (streamResponse.status === 404) {
+                    // Stream not found - it was deleted
+                    console.log('🔴 Stream not found - was deleted');
+                    setStreamEnded(true);
+                    setShowStreamEndedMessage(true);
+                    onStreamEnd?.();
+                }
             } catch (error) {
-                console.error('Failed to check pause state:', error);
+                console.error('Failed to check stream state:', error);
             }
         };
 
-        checkPauseState();
-        // Increased from 15s to 30s to reduce API load
-        const interval = setInterval(checkPauseState, 30000);
+        checkStreamState();
+        // Check every 10 seconds for stream status
+        const interval = setInterval(checkStreamState, 10000);
         return () => clearInterval(interval);
     }, [streamId]);
 
+    // Listen for room disconnection and participant events
+    useEffect(() => {
+        if (!room) return;
+
+        const handleDisconnected = (reason?: DisconnectReason) => {
+            console.log('🔴 Room disconnected, reason:', reason);
+            // If room was deleted or closed by host, mark stream as ended
+            if (reason === DisconnectReason.ROOM_DELETED || reason === DisconnectReason.STATE_MISMATCH) {
+                console.log('🔴 Stream ended - room deleted or closed');
+                setStreamEnded(true);
+                setShowStreamEndedMessage(true);
+                onStreamEnd?.();
+            }
+        };
+
+        const handleParticipantDisconnected = (participant: { identity: string; isLocal: boolean }) => {
+            // Check if the broadcaster/host left
+            // The host is typically the first non-local participant or has specific identity
+            if (!participant.isLocal) {
+                console.log('👋 Participant disconnected:', participant.identity);
+
+                // Check if all non-local participants have left (meaning the broadcaster left)
+                setTimeout(() => {
+                    const remainingParticipants = room.remoteParticipants;
+                    if (remainingParticipants.size === 0) {
+                        console.log('🔴 All broadcasters have left - stream likely ended');
+                        setStreamEnded(true);
+                        setShowStreamEndedMessage(true);
+                        onStreamEnd?.();
+                    }
+                }, 1000); // Small delay to ensure participant list updates
+            }
+        };
+
+        // Register event listeners
+        room.on(RoomEvent.Disconnected, handleDisconnected);
+        room.on(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+
+        return () => {
+            room.off(RoomEvent.Disconnected, handleDisconnected);
+            room.off(RoomEvent.ParticipantDisconnected, handleParticipantDisconnected);
+        };
+    }, [room]);
+
     // Billing mechanism - charge every 60 seconds
     useEffect(() => {
-        // Only bill if connected to stream and stream is not paused
-        if (connectionState !== ConnectionState.Connected || isPaused) {
+        // Only bill if connected to stream, stream is not paused, and stream hasn't ended
+        if (connectionState !== ConnectionState.Connected || isPaused || streamEnded) {
             return;
         }
 
@@ -342,7 +415,7 @@ function ViewerVideoView({
             clearTimeout(initialTimer);
             clearInterval(interval);
         };
-    }, [streamId, connectionState, isPaused]);
+    }, [streamId, connectionState, isPaused, streamEnded]);
 
     // Fetch initial balance
     useEffect(() => {
@@ -419,9 +492,9 @@ function ViewerVideoView({
         return () => {
             if (cleanupRef.current) return;
             cleanupRef.current = true;
-            
+
             console.log('🧹 Cleaning up viewer component...');
-            
+
             // Stop all subscribed tracks
             tracks.forEach(track => {
                 if (track.publication?.track) {
@@ -541,6 +614,37 @@ function ViewerVideoView({
                 <div className="absolute top-1/2 right-8 z-30 pointer-events-none">
                     <div className="animate-bounce">
                         <Heart className="w-12 h-12 text-red-500 fill-current" />
+                    </div>
+                </div>
+            )}
+
+            {/* Stream Ended Overlay */}
+            {showStreamEndedMessage && (
+                <div className="absolute inset-0 bg-black/95 backdrop-blur-lg z-30 flex items-center justify-center">
+                    <div className="text-center text-white px-4 max-w-lg">
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-600">
+                            <PhoneOff className="w-12 h-12 sm:w-16 sm:h-16 text-red-500" />
+                        </div>
+                        <h3 className="text-2xl sm:text-3xl font-bold mb-3">Stream Has Ended</h3>
+                        <p className="text-gray-300 text-sm sm:text-lg mb-6 max-w-md mx-auto">
+                            {modelName || 'The broadcaster'} has ended this stream.
+                            <br />
+                            Thank you for watching!
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <button
+                                onClick={() => window.location.href = '/streaming'}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg"
+                            >
+                                Browse Live Streams
+                            </button>
+                            <button
+                                onClick={() => window.location.href = `/m/${modelId}`}
+                                className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+                            >
+                                View Model Profile
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

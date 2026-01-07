@@ -257,11 +257,11 @@ export default function StreamByUsernamePage() {
           const tokenData = await tokenResponse.json();
           const wsUrl = tokenData.roomConfig?.serverUrl || '';
           console.log('Token received, role:', tokenData.role, 'serverUrl:', wsUrl);
-          
+
           if (!wsUrl) {
             console.error('❌ No serverUrl received from token API!');
           }
-          
+
           setStreamToken(tokenData.token);
           setServerUrl(wsUrl);
           setMode(tokenData.role === 'creator' ? 'broadcast' : 'watch');
@@ -299,6 +299,7 @@ export default function StreamByUsernamePage() {
   }, [stream, mode, fetchRecommendations]);
 
   const handleStreamEnd = () => {
+    console.log('🔴 Stream ended - cleaning up and redirecting');
     clearStreamData();
     router.push('/streaming');
   };
@@ -456,6 +457,7 @@ export default function StreamByUsernamePage() {
                       onSendTip={handleSendTip}
                       onPrivateShow={handlePrivateShow}
                       onLike={handleLike}
+                      onStreamEnd={handleStreamEnd}
                     />
                   </div>
 
@@ -497,6 +499,7 @@ export default function StreamByUsernamePage() {
                   onSendTip={handleSendTip}
                   onPrivateShow={handlePrivateShow}
                   onLike={handleLike}
+                  onStreamEnd={handleStreamEnd}
                 />
               </div>
               {/* Floating Chat Overlay */}

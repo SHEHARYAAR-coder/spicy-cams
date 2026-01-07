@@ -1210,6 +1210,7 @@ export default function StreamingPage() {
                             onSendTip={handleSendTip}
                             onPrivateShow={handlePrivateShow}
                             onLike={handleLike}
+                            onStreamEnd={handleStreamEnd}
                           />
                         </div>
                       </div>
@@ -1283,6 +1284,7 @@ export default function StreamingPage() {
                         onSendTip={handleSendTip}
                         onPrivateShow={handlePrivateShow}
                         onLike={handleLike}
+                        onStreamEnd={handleStreamEnd}
                       />
                     </div>
                     {/* Floating Chat Overlay */}
