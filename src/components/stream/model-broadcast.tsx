@@ -48,7 +48,8 @@ import {
   Wifi,
   Play,
   Pause,
-  Camera
+  Camera,
+  Heart
 } from 'lucide-react';
 
 interface ModelBroadcastProps {
@@ -119,6 +120,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   const [selectedMicrophone, setSelectedMicrophone] = useState<string>('');
   const [streamStats, setStreamStats] = useState({
     viewers: 0,
+    likes: 0,
     duration: 0,
     quality: 'HD'
   });
@@ -201,6 +203,31 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     return () => clearTimeout(timer);
   }, [participants.length]);
 
+  // Fetch likes count periodically
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const response = await fetch(`/api/streams/${streamId}/likes`);
+        if (response.ok) {
+          const data = await response.json();
+          setStreamStats(prev => ({
+            ...prev,
+            likes: data.likesCount
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch likes:', error);
+      }
+    };
+
+    // Fetch initially
+    fetchLikes();
+
+    // Then fetch every 10 seconds
+    const interval = setInterval(fetchLikes, 10000);
+    return () => clearInterval(interval);
+  }, [streamId]);
+
   // Update device states based on tracks - NO cleanup here (cleanup is in unmount effect)
   useEffect(() => {
     const cameraTrack = tracks.find(track => track.source === Track.Source.Camera);
@@ -220,7 +247,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   useEffect(() => {
     return () => {
       console.log('🧹 Cleaning up broadcast component...');
-      
+
       // Stop all local tracks
       if (localParticipant) {
         localParticipant.videoTrackPublications.forEach((pub) => {
@@ -455,6 +482,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   const hasVideo = tracks.some(track =>
     track.source === Track.Source.Camera && track.publication.isEnabled
   );
+
   const hasScreenShare = tracks.some(track =>
     track.source === Track.Source.ScreenShare && track.publication.isEnabled
   );
@@ -484,6 +512,12 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
               <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="font-semibold text-xs sm:text-sm">{streamStats.viewers}</span>
               <span className="text-gray-300 text-xs hidden sm:inline">viewers</span>
+            </div>
+
+            <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+              <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-500" />
+              <span className="font-semibold text-xs sm:text-sm">{streamStats.likes}</span>
+              <span className="text-gray-300 text-xs hidden sm:inline">likes</span>
             </div>
 
             <div className="hidden sm:flex items-center gap-1.5 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
@@ -542,13 +576,20 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
 
             {/* Stream Stats */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-1">
                     <Eye className="w-4 h-4" />
                     <span>Viewers</span>
                   </div>
                   <div className="text-2xl font-bold text-white">{streamStats.viewers}</div>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-1">
+                    <Heart className="w-4 h-4 text-red-500" />
+                    <span>Likes</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white">{streamStats.likes}</div>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2 text-gray-400 text-sm mb-1">

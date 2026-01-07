@@ -158,6 +158,8 @@ export default function StreamByUsernamePage() {
   }, []);
   const [hasFetched, setHasFetched] = useState(false);
   const [recommendedStreams, setRecommendedStreams] = useState<Stream[]>([]);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLikedByUser, setIsLikedByUser] = useState(false);
 
   // Fetch random live streams for recommendations
   const fetchRecommendations = useCallback(async (currentStreamId?: string) => {
@@ -246,6 +248,19 @@ export default function StreamByUsernamePage() {
         const streamData = data.stream;
 
         console.log('Stream data received:', streamData.id);
+
+        // Fetch likes count for this stream
+        try {
+          const likesResponse = await fetch(`/api/streams/${streamData.id}/likes`);
+          if (likesResponse.ok) {
+            const likesData = await likesResponse.json();
+            setLikesCount(likesData.likesCount);
+            setIsLikedByUser(likesData.isLikedByUser);
+            console.log('Likes data:', likesData);
+          }
+        } catch (likesError) {
+          console.error('Failed to fetch likes:', likesError);
+        }
         setStream(streamData);
 
         // Get token for this stream
@@ -339,9 +354,26 @@ export default function StreamByUsernamePage() {
     console.log(`Private show requested for ${minutes} minutes`);
   };
 
-  const handleLike = () => {
-    // TODO: Send like to server
-    console.log('Stream liked');
+  const handleLike = async () => {
+    if (!stream?.id) return;
+
+    try {
+      const response = await fetch(`/api/streams/${stream.id}/likes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLikesCount(data.likesCount);
+        setIsLikedByUser(data.isLikedByUser);
+        console.log(`✅ Stream ${data.action}:`, data.likesCount, 'total likes');
+      } else {
+        console.error('Failed to like stream');
+      }
+    } catch (error) {
+      console.error('Error liking stream:', error);
+    }
   };
 
   if (loading) {
@@ -458,6 +490,7 @@ export default function StreamByUsernamePage() {
                       onPrivateShow={handlePrivateShow}
                       onLike={handleLike}
                       onStreamEnd={handleStreamEnd}
+                      likeCount={likesCount}
                     />
                   </div>
 
@@ -500,6 +533,7 @@ export default function StreamByUsernamePage() {
                   onPrivateShow={handlePrivateShow}
                   onLike={handleLike}
                   onStreamEnd={handleStreamEnd}
+                  likeCount={likesCount}
                 />
               </div>
               {/* Floating Chat Overlay */}

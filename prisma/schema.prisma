@@ -129,6 +129,7 @@ model User {
   streams                 Stream[]
   follows                 Follow[]             @relation("UserFollows")
   followers               Follow[]             @relation("ModelFollowers")
+  streamLikes             StreamLike[]         @relation("StreamLikes")
   chatMessages            ChatMessage[]
   sentPrivateMessages     PrivateMessage[]     @relation("SentPrivateMessages")
   receivedPrivateMessages PrivateMessage[]     @relation("ReceivedPrivateMessages")
@@ -228,14 +229,15 @@ model Stream {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-
   // Relations
   model           User                 @relation(fields: [modelId], references: [id], onDelete: Cascade)
   sessions        StreamSession[]
+  likes           StreamLike[]
   chatMessages    ChatMessage[]
   privateMessages PrivateMessage[]
   chatRequests    PrivateChatRequest[]
   watchHistory    WatchHistory[]
+  // moderationActions ModerationAction[] @relation("TargetStream")
   // moderationActions ModerationAction[] @relation("TargetStream")
 
   @@index([modelId])
@@ -412,6 +414,23 @@ model Follow {
   @@index([userId])
   @@index([modelId])
   @@map("follows")
+}
+
+model StreamLike {
+  id       String @id @default(cuid())
+  streamId String @map("stream_id")
+  userId   String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  stream Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  user   User   @relation("StreamLikes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([streamId, userId])
+  @@index([streamId])
+  @@index([userId])
+  @@map("stream_likes")
 }
 
 // ============================================
