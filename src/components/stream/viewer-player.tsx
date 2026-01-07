@@ -205,7 +205,6 @@ function ViewerVideoView({
     const [isAudioMuted, setIsAudioMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showLike, setShowLike] = useState(false);
-    const [localLikeCount, setLocalLikeCount] = useState(propLikeCount);
     const [selectedView, setSelectedView] = useState<'camera' | 'screen'>('camera');
     const [videoContainerRef, setVideoContainerRef] = useState<HTMLDivElement | null>(null);
     const [balance, setBalance] = useState<number | null>(null);
@@ -232,7 +231,6 @@ function ViewerVideoView({
 
     const handleLike = () => {
         setShowLike(true);
-        setLocalLikeCount(prev => prev + 1);
         setTimeout(() => setShowLike(false), 1000);
         onLike?.();
     };
@@ -817,10 +815,10 @@ function ViewerVideoView({
                         className="flex items-center gap-2 group"
                     >
                         <div
-                            className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 active:scale-95 ${localLikeCount > 0 ? 'bg-red-500/20 border-red-500/40' : ''}`}
+                            className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all duration-200 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 active:scale-95 ${propLikeCount > 0 ? 'bg-red-500/20 border-red-500/40' : ''}`}
                         >
                             <Heart
-                                className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-200 ${localLikeCount > 0 ? 'text-red-500 fill-red-500' : 'text-white group-hover:text-red-400'}`}
+                                className={`w-5 h-5 sm:w-6 sm:h-6 transition-all duration-200 ${propLikeCount > 0 ? 'text-red-500 fill-red-500' : 'text-white group-hover:text-red-400'}`}
                             />
                             {/* Like animation */}
                             {showLike && (
@@ -830,7 +828,7 @@ function ViewerVideoView({
                             )}
                         </div>
                         <span className="text-white font-semibold text-sm sm:text-base min-w-[2.5rem]">
-                            {localLikeCount >= 1000 ? `${(localLikeCount / 1000).toFixed(1)}k` : localLikeCount}
+                            {propLikeCount >= 1000 ? `${(propLikeCount / 1000).toFixed(1)}k` : propLikeCount}
                         </span>
                     </button>
 

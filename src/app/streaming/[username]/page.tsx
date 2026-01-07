@@ -358,6 +358,11 @@ export default function StreamByUsernamePage() {
     if (!stream?.id) return;
 
     try {
+      // Optimistically update UI before API call
+      const wasLiked = isLikedByUser;
+      setIsLikedByUser(!wasLiked);
+      setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
+
       const response = await fetch(`/api/streams/${stream.id}/likes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -365,14 +370,22 @@ export default function StreamByUsernamePage() {
 
       if (response.ok) {
         const data = await response.json();
+        // Update with actual values from server
         setLikesCount(data.likesCount);
         setIsLikedByUser(data.isLikedByUser);
         console.log(`✅ Stream ${data.action}:`, data.likesCount, 'total likes');
       } else {
+        // Revert optimistic update on error
+        setIsLikedByUser(wasLiked);
+        setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
         console.error('Failed to like stream');
       }
     } catch (error) {
       console.error('Error liking stream:', error);
+      // Revert optimistic update on error
+      const wasLiked = !isLikedByUser;
+      setIsLikedByUser(wasLiked);
+      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
     }
   };
 
