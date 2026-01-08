@@ -197,10 +197,49 @@ function ViewerVideoView({
         ],
         { onlySubscribed: false },
     );
+    
+    // Force subscribe to all remote tracks when room connects
+    useEffect(() => {
+        if (!room) return;
+        
+        const subscribeToTracks = () => {
+            room.remoteParticipants.forEach((participant) => {
+                participant.trackPublications.forEach((publication) => {
+                    if (publication.kind === 'video' && !publication.isSubscribed) {
+                        console.log('🔄 Force subscribing to track:', publication.trackSid);
+                        publication.setSubscribed(true);
+                    }
+                });
+            });
+        };
+        
+        // Subscribe when connected
+        subscribeToTracks();
+        
+        // Also subscribe when new tracks are published
+        const handleTrackPublished = () => {
+            console.log('📡 New track published, subscribing...');
+            setTimeout(subscribeToTracks, 100);
+        };
+        
+        room.on(RoomEvent.TrackPublished, handleTrackPublished);
+        room.on(RoomEvent.ParticipantConnected, subscribeToTracks);
+        
+        return () => {
+            room.off(RoomEvent.TrackPublished, handleTrackPublished);
+            room.off(RoomEvent.ParticipantConnected, subscribeToTracks);
+        };
+    }, [room]);
 
     const connectionState = useConnectionState();
     const participants = useParticipants();
     const cleanupRef = useRef(false);
+    const onStreamEndRef = useRef(onStreamEnd);
+    
+    // Keep the ref updated
+    useEffect(() => {
+        onStreamEndRef.current = onStreamEnd;
+    }, [onStreamEnd]);
 
     const [isAudioMuted, setIsAudioMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -288,14 +327,14 @@ function ViewerVideoView({
                         console.log('🔴 Stream has ended - detected by polling');
                         setStreamEnded(true);
                         setShowStreamEndedMessage(true);
-                        onStreamEnd?.();
+                        onStreamEndRef.current?.();
                     }
                 } else if (streamResponse.status === 404) {
                     // Stream not found - it was deleted
                     console.log('🔴 Stream not found - was deleted');
                     setStreamEnded(true);
                     setShowStreamEndedMessage(true);
-                    onStreamEnd?.();
+                    onStreamEndRef.current?.();
                 }
             } catch (error) {
                 console.error('Failed to check stream state:', error);
@@ -319,7 +358,7 @@ function ViewerVideoView({
                 console.log('🔴 Stream ended - room deleted or closed');
                 setStreamEnded(true);
                 setShowStreamEndedMessage(true);
-                onStreamEnd?.();
+                onStreamEndRef.current?.();
             }
         };
 
@@ -336,7 +375,7 @@ function ViewerVideoView({
                         console.log('🔴 All broadcasters have left - stream likely ended');
                         setStreamEnded(true);
                         setShowStreamEndedMessage(true);
-                        onStreamEnd?.();
+                        onStreamEndRef.current?.();
                     }
                 }, 1000); // Small delay to ensure participant list updates
             }
@@ -432,17 +471,30 @@ function ViewerVideoView({
         fetchBalance();
     }, []);
 
-    // Find video tracks - check for track presence rather than just publication kind
+    // Find video tracks - be more lenient with detection for production
+    // First try to find tracks with actual track object, then fall back to subscribed publications
     const videoTrack = tracks.find(
         (trackRef) =>
             trackRef.source === Track.Source.Camera &&
-            trackRef.publication?.track
+            trackRef.publication &&
+            (trackRef.publication.track || trackRef.publication.isSubscribed)
+    ) || tracks.find(
+        (trackRef) =>
+            trackRef.source === Track.Source.Camera &&
+            trackRef.publication &&
+            trackRef.publication.kind === 'video'
     );
 
     const screenTrack = tracks.find(
         (trackRef) =>
             trackRef.source === Track.Source.ScreenShare &&
-            trackRef.publication?.track
+            trackRef.publication &&
+            (trackRef.publication.track || trackRef.publication.isSubscribed)
+    ) || tracks.find(
+        (trackRef) =>
+            trackRef.source === Track.Source.ScreenShare &&
+            trackRef.publication &&
+            trackRef.publication.kind === 'video'
     );
 
     // Prioritize screen share over camera, or use selected view
@@ -670,7 +722,7 @@ function ViewerVideoView({
             )}
 
             {/* Main Video Display */}
-            <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication?.track ? (
+            <div className="w-full h-full relative flex items-center justify-center">{displayTrack && displayTrack.publication && (displayTrack.publication.track || displayTrack.publication.isSubscribed) ? (
                 <>
                     <VideoTrack
                         trackRef={displayTrack}
