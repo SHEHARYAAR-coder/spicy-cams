@@ -8,6 +8,7 @@ import { ModelBroadcast, ViewerPlayer, StreamCard } from '@/components/stream';
 import { TabbedChatContainer, MobileChatOverlay } from '@/components/chat';
 import { useStream } from '@/contexts/StreamContext';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Stream {
   id: string;
@@ -324,28 +325,47 @@ export default function StreamByUsernamePage() {
     if (!stream?.id) return;
 
     try {
-      // Create tip message for chat
-      const tipMessage = activity
-        ? `💝 Tipped ${tokens} tokens for "${activity}"!`
-        : `💝 Tipped ${tokens} tokens!`;
-
-      // Send tip message to chat API
-      const response = await fetch(`/api/streams/${stream.id}/messages`, {
+      // Process tip through new API endpoint (deducts from wallet)
+      const response = await fetch(`/api/streams/${stream.id}/tip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: tipMessage,
-          type: 'tip'
+          tokens,
+          activity: activity || null,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        console.error('Failed to send tip message');
+        // Handle insufficient funds
+        if (data.insufficientFunds) {
+          toast.error(`Insufficient balance. You need ${data.required} tokens but only have ${data.current}.`);
+          // Optionally redirect to purchase page
+          return;
+        }
+
+        toast.error(data.error || 'Failed to send tip');
+        console.error('Failed to send tip:', data.error);
+        return;
       }
 
+      // Success!
+      toast.success(
+        activity
+          ? `Tipped ${tokens} tokens for "${activity}"!`
+          : `Tipped ${tokens} tokens!`
+      );
+
       console.log(`✅ Sent tip: ${tokens} tokens${activity ? ` for ${activity}` : ''}`);
+      console.log(`💰 Remaining balance: ${data.wallet.remainingBalance} tokens`);
+
+      // Optionally refresh balance display or trigger a balance update
+      // You can emit an event or call a function to update the balance in the UI
+
     } catch (error) {
       console.error('Error sending tip:', error);
+      toast.error('Failed to send tip. Please try again.');
     }
   };
 
