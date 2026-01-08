@@ -88,11 +88,31 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       role = "viewer";
     }
 
+    // Get the server URL and log it for debugging
+    const serverUrl = getLiveKitWsUrl();
+    console.log("Token API - LiveKit config:", {
+      serverUrl,
+      hasServerUrl: !!serverUrl,
+      roomName,
+      role,
+      userId: user.id,
+    });
+
+    if (!serverUrl) {
+      console.error("Token API - No serverUrl! Check LIVEKIT_URL env var");
+      return NextResponse.json(
+        {
+          error: "LiveKit server not configured",
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       token,
       role,
       roomConfig: {
-        serverUrl: getLiveKitWsUrl(),
+        serverUrl,
         roomName,
         participantName: user.profile?.displayName || user.email,
       },

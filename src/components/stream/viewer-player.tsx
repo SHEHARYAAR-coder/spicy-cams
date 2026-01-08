@@ -80,6 +80,60 @@ export function ViewerPlayer({
     likeCount = 0,
     privateShowPrice = 90,
 }: ViewerPlayerProps) {
+    // Debug: Log connection parameters
+    useEffect(() => {
+        console.log('🎬 ViewerPlayer mounting with:', {
+            streamId,
+            hasToken: !!token,
+            tokenLength: token?.length,
+            serverUrl,
+            serverUrlValid: serverUrl?.startsWith('wss://') || serverUrl?.startsWith('ws://'),
+        });
+        
+        if (!serverUrl) {
+            console.error('❌ ViewerPlayer: No serverUrl provided!');
+        }
+        if (!token) {
+            console.error('❌ ViewerPlayer: No token provided!');
+        }
+    }, [streamId, token, serverUrl]);
+
+    // Handle connection errors
+    const handleError = (error: Error) => {
+        console.error('❌ LiveKit Room Error:', error);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+        });
+    };
+
+    // Handle connection state changes
+    const handleConnected = () => {
+        console.log('✅ LiveKit Room Connected successfully');
+    };
+
+    const handleDisconnected = () => {
+        console.log('🔴 LiveKit Room Disconnected');
+    };
+
+    // Show error if no serverUrl
+    if (!serverUrl || !token) {
+        return (
+            <div className={`relative ${className} bg-black flex items-center justify-center min-h-[300px]`}>
+                <div className="text-center text-white p-4">
+                    <p className="text-red-500 font-semibold mb-2">Connection Error</p>
+                    <p className="text-sm text-gray-400">
+                        {!serverUrl ? 'LiveKit server URL not configured' : 'No access token available'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                        Please refresh the page or contact support.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className={`relative ${className}`}>
             <LiveKitRoom
@@ -92,6 +146,9 @@ export function ViewerPlayer({
                     adaptiveStream: true,
                     dynacast: true,
                 }}
+                onError={handleError}
+                onConnected={handleConnected}
+                onDisconnected={handleDisconnected}
                 className="w-full h-full min-h-[300px] rounded-lg border bg-black"
             >
                 <ViewerVideoView
