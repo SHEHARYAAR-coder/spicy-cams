@@ -470,12 +470,14 @@ function HomeContent() {
                     <p className="hidden md:inline text-white text-xs font-medium">
                       Warm up your nights with someone special!
                     </p>
-                    <Button
-                      onClick={() => setViewerSignupOpen(true)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto"
-                    >
-                      GET DISCOUNT
-                    </Button>
+                    <Link href={session ? "/pricing" : "#"}>
+                      <Button
+                        onClick={() => !session && setViewerSignupOpen(true)}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto"
+                      >
+                        GET DISCOUNT
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Loader2, Video, Plus, Upload, X, Tag, FolderOpen, Camera, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TabbedChatContainer, MobileChatOverlay } from '@/components/chat';
 import { useStream } from '@/contexts/StreamContext';
@@ -1269,9 +1270,11 @@ export default function StreamingPage() {
                             <p className="hidden md:inline text-white text-xs font-medium">
                               Warm up your nights with someone special!
                             </p>
-                            <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
-                              GET DISCOUNT
-                            </Button>
+                            <Link href="/pricing">
+                              <Button className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold px-3 py-1 text-xs rounded shadow-lg whitespace-nowrap h-auto">
+                                GET DISCOUNT
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </div>
