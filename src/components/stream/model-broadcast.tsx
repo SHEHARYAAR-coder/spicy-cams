@@ -71,6 +71,58 @@ export function ModelBroadcast({
   onStreamEnd,
   className = ""
 }: ModelBroadcastProps) {
+  // Debug: Log connection parameters on mount
+  useEffect(() => {
+    console.log('🎬 ModelBroadcast mounting with:', {
+      streamId,
+      hasToken: !!token,
+      tokenLength: token?.length,
+      serverUrl,
+      serverUrlValid: serverUrl?.startsWith('wss://') || serverUrl?.startsWith('ws://'),
+    });
+    
+    if (!serverUrl) {
+      console.error('❌ ModelBroadcast: No serverUrl provided!');
+    }
+    if (!token) {
+      console.error('❌ ModelBroadcast: No token provided!');
+    }
+  }, [streamId, token, serverUrl]);
+
+  // Handle connection errors
+  const handleError = (error: Error) => {
+    console.error('❌ LiveKit Room Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+    });
+  };
+
+  const handleConnected = () => {
+    console.log('✅ LiveKit Room Connected successfully for broadcaster');
+  };
+
+  const handleDisconnected = () => {
+    console.log('🔴 LiveKit Room Disconnected for broadcaster');
+  };
+
+  // Show error if no serverUrl or token
+  if (!serverUrl || !token) {
+    return (
+      <div className={`relative ${className} bg-black flex items-center justify-center min-h-[400px]`}>
+        <div className="text-center text-white p-4">
+          <p className="text-red-500 font-semibold mb-2">Connection Error</p>
+          <p className="text-sm text-gray-400">
+            {!serverUrl ? 'LiveKit server URL not configured' : 'No access token available'}
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            Please refresh the page or contact support.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
       <LiveKitRoom
@@ -79,7 +131,9 @@ export function ModelBroadcast({
         connectOptions={{
           autoSubscribe: false, // Model doesn't need to subscribe to their own tracks
         }}
-
+        onError={handleError}
+        onConnected={handleConnected}
+        onDisconnected={handleDisconnected}
         className="w-full h-full min-h-[400px] rounded-lg border bg-black"
       >
         <CreatorVideoView
@@ -107,6 +161,13 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   const connectionState = useConnectionState();
   const { localParticipant } = useLocalParticipant();
   const room = useRoomContext();
+
+  // Debug: Log connection state changes
+  useEffect(() => {
+    console.log('🔌 Broadcaster Connection State:', connectionState);
+    console.log('👤 Local Participant:', localParticipant?.identity);
+    console.log('🏠 Room:', room?.name, room?.state);
+  }, [connectionState, localParticipant, room]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);

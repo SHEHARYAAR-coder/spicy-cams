@@ -139,10 +139,10 @@ export async function POST(
       });
     }
 
-    // Calculate interval index (how many billing cycles have passed)
-    const intervalIndex = Math.floor(
-      streamSession.totalWatchMs / (watchTimeSeconds * 1000)
-    );
+    // Calculate interval index based on current total watch time
+    // This ensures each billing cycle gets a unique index
+    const currentTotalMs = streamSession.totalWatchMs || 0;
+    const intervalIndex = Math.floor(currentTotalMs / (60 * 1000)) + 1; // Based on minutes watched + 1 for next interval
 
     // model, create ledger entries
     // Increased timeout to 15 seconds to handle slow database connections
@@ -236,14 +236,28 @@ export async function POST(
         },
       });
 
-      // Create meter event for tracking
-      await tx.meterEvent.create({
-        data: {
+      // Create or update meter event for tracking (use upsert to handle duplicates)
+      await tx.meterEvent.upsert({
+        where: {
+          sessionId_intervalIndex: {
+            sessionId: streamSession!.id,
+            intervalIndex,
+          },
+        },
+        create: {
           sessionId: streamSession!.id,
           userId,
           intervalIndex,
           playbackMs: watchTimeSeconds * 1000,
           creditsDebited: viewerTokenCharge,
+        },
+        update: {
+          playbackMs: {
+            increment: watchTimeSeconds * 1000,
+          },
+          creditsDebited: {
+            increment: viewerTokenCharge,
+          },
         },
       });
 
