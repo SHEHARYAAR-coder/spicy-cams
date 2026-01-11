@@ -261,14 +261,14 @@ export default function ProfileContent() {
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
-                  {userData?.role !== "MODEL" && (
+                  {/* {userData?.role !== "MODEL" && (
                     <Link href={"/upgrade"}>
                       <button className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-colors flex items-center gap-2 font-semibold cursor-pointer">
                         <Crown className="w-4 h-4" />
                         Upgrade to Model
                       </button>
                     </Link>
-                  )}
+                  )} */}
                 </div>
               </div>
               {userData.profile?.bio && (
