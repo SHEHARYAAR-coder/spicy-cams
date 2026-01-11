@@ -814,7 +814,7 @@ export default function ProfileContent() {
           {personalInfo}
           {creatorInfo}
           {mediaGallery}
-          {walletActivity}
+          {userData?.role !== 'MODEL' && walletActivity}
           {accountSettings}
 
           {/* Model Profile Edit Dialog */}
