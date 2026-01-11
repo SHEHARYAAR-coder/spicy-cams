@@ -448,7 +448,7 @@ function HomeContent() {
 
           {/* Promotional Banner - Only for viewers */}
           {selectedCategory !== "Private Messages" && !isModel && (
-            <div className="px-2 py-5 md:px-3 mb-2">
+            <div className="px-2 py-5 md:px-3">
               <div className="relative bg-gradient-to-r from-green-800 via-green-700 to-green-800 rounded-lg px-3 py-1.5 overflow-hidden shadow-lg">
                 {/* Decorative elements */}
                 <div className="absolute top-0 left-0 w-6 h-6 opacity-15">
@@ -481,6 +481,43 @@ function HomeContent() {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Show promotional card after 2nd category row */}
+          {!session && (
+            <div className="px-2">
+              <Link href="/m/register" className="block group">
+                <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-lg px-4 py-3 overflow-hidden border-2 border-pink-500/30 hover:border-pink-500 transition-all duration-300 shadow-lg hover:shadow-pink-500/20">
+                  {/* Animated shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/30 to-transparent animate-shimmer" />
+
+                  <div className="relative z-10 flex flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div>
+
+                        <h2 className="">
+                          Get popular fast — stream in the region!
+                        </h2>
+                      </div>
+                    </div>
+                    <button className="relative bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 hover:from-violet-500 hover:via-fuchsia-500 hover:to-pink-500 text-white font-bold px-8 md:px-10 py-3 text-xs md:text-sm rounded-lg shadow-2xl shadow-fuchsia-500/50 hover:shadow-fuchsia-500/70 hover:scale-105 transition-all duration-300 uppercase tracking-wider overflow-hidden group">
+                      {/* Glowing effect overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-violet-400/0 via-white/20 to-fuchsia-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+
+                      {/* Inner glow */}
+                      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400"></div>
+
+                      {/* Button text */}
+                      <span className="relative z-10">Become A Model</span>
+
+                      {/* Animated border glow */}
+                      <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-300 animate-pulse"></div>
+                    </button>
+
+                  </div>
+                </div>
+              </Link>
             </div>
           )}
 
@@ -522,56 +559,6 @@ function HomeContent() {
                       streams={categoryStreams}
                       onJoinStream={handleJoinStream}
                     />
-                    {/* Show promotional card after 2nd category row */}
-                    {index === 1 && !session && (
-                      <div className="px-2 md:px-3 my-8">
-                        <Link href="/m/register">
-                          <div className="grid grid-cols-1 sm:grid-cols-2">
-                            <div className="w-full overflow-hidden bg-black border-2 border-gray-800 hover:border-pink-500/50 transition-all duration-300 cursor-pointer group">
-                              <div className="p-0">
-                                <div className="grid md:grid-cols-2 gap-0">
-                                  {/* Image Column */}
-                                  <div className="relative h-full overflow-hidden bg-black">
-                                    <Image
-                                      src="/imgs/model_placeholder.png"
-                                      alt="Become a Model"
-                                      fill
-                                      className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                  </div>
-
-                                  {/* Text Column */}
-                                  <div className="flex flex-col justify-center items-start p-8 md:p-12 space-y-4 bg-black">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <div className="">
-                                        <Image
-                                          src={'/logo/SC-Logo.png'}
-                                          alt="Spicy Cams Logo"
-                                          width={208}
-                                          height={52}
-                                          className="object-cover w-52"
-                                        />
-                                      </div>
-                                    </div>
-                                    <h2 className="text-2xl md:text-3xl font-bold text-white">
-                                      Become a Model
-                                    </h2>
-                                    <p className="text-base md:text-lg text-gray-400">
-                                      Get popular fast — stream in the region!
-                                    </p>
-                                    <div className="pt-2">
-                                      <span className="text-pink-500 font-bold text-lg hover:text-pink-400 transition-colors">
-                                        Earn as Model
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    )}
                   </>
                 ))}
               </div>
