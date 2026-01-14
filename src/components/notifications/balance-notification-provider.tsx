@@ -2,7 +2,7 @@
 
 import { useBalanceNotifications } from "@/hooks/use-balance";
 import { LowBalanceNotification } from "@/components/notifications/low-balance-notification";
-import { TokenPurchaseModal } from "@/components/notifications/token-purchase-modal";
+import { CustomTokenPurchaseModal } from "@/components/notifications/custom-token-purchase-modal";
 
 /**
  * BalanceNotificationProvider
@@ -41,10 +41,9 @@ export function BalanceNotificationProvider() {
 
             {/* Token Purchase Modal */}
             {showTokenModal && (
-                <TokenPurchaseModal
+                <CustomTokenPurchaseModal
                     isOpen={showTokenModal}
                     onClose={handleCloseTokenModal}
-                    isNewUser={isNewUser}
                 />
             )}
         </>
