@@ -60,7 +60,7 @@ const MIN_TOKENS = 5;
 const MAX_TOKENS = 1000;
 
 export function CustomTokenPurchaseModal({ isOpen, onClose }: CustomTokenPurchaseModalProps) {
-    const router = useRouter();
+    const _router = useRouter();
     const [selectedMode, setSelectedMode] = useState<"preset" | "custom">("preset");
     const [selectedPlan, setSelectedPlan] = useState("plus");
     const [customTokens, setCustomTokens] = useState(25);

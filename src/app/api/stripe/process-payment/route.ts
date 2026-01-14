@@ -12,12 +12,6 @@ const getStripe = () => {
   });
 };
 
-const PRICING_PLANS = {
-  basic: { tokens: 10, name: "Basic Plan" },
-  plus: { tokens: 50, name: "Plus Plan" },
-  pro: { tokens: 200, name: "Pro Plan" },
-};
-
 /**
  * POST /api/stripe/process-payment
  * 
@@ -73,7 +67,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract metadata
-    const userId = stripeSession.metadata?.userId!;
+    const userId = stripeSession.metadata?.userId ?? '';
     const planId = stripeSession.metadata?.planId;
     const tokens = parseInt(stripeSession.metadata?.tokens || "0");
 
@@ -185,9 +179,10 @@ export async function POST(req: NextRequest) {
           tokensAdded: result.tokens,
         },
       });
-    } catch (txError: any) {
+    } catch (txError: unknown) {
       // Handle unique constraint violation (race condition)
-      if (txError.code === 'P2002' && txError.meta?.target?.includes('provider_ref')) {
+      const prismaError = txError as { code?: string; meta?: { target?: string[] } };
+      if (prismaError.code === 'P2002' && prismaError.meta?.target?.includes('provider_ref')) {
         console.log(`⚠️ Race condition detected - payment already exists for session ${sessionId}, fetching existing payment...`);
         
         // Payment was created by another request, fetch it

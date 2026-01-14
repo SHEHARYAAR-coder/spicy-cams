@@ -55,7 +55,7 @@ const PRICING_PLANS = {
 };
 
 export function TokenPurchaseModal({ isOpen, onClose, isNewUser = false }: TokenPurchaseModalProps) {
-    const router = useRouter();
+    const _router = useRouter();
     const [selectedPlan, setSelectedPlan] = useState("plus");
     const [isLoading, setIsLoading] = useState(false);
 
@@ -133,7 +133,7 @@ export function TokenPurchaseModal({ isOpen, onClose, isNewUser = false }: Token
                                 <h3 className="font-semibold text-white">Welcome to SpicyCams!</h3>
                             </div>
                             <p className="text-sm text-gray-300">
-                                To enjoy live streams, private messaging, and exclusive content, you'll need tokens.
+                                To enjoy live streams, private messaging, and exclusive content, you&apos;ll need tokens.
                                 Choose a plan that suits your needs - you can always upgrade later!
                             </p>
                         </div>

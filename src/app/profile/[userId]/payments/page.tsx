@@ -13,7 +13,6 @@ import {
   DollarSign,
   CreditCard,
   Loader2,
-  AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -77,6 +76,7 @@ export default function PaymentsPage({
         handlePaymentSuccess(sessionId);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, userId, router]);
 
   const handlePaymentSuccess = async (sessionId: string) => {

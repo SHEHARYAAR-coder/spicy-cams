@@ -94,7 +94,7 @@ export function LowBalanceNotification({
                                 <p className="text-gray-300 text-sm">
                                     Welcome to SpicyCams! You currently have {balance.toFixed(0)} tokens.
                                     To enjoy all our features including live streams, private messages, and exclusive content,
-                                    you'll need more tokens.
+                                    you&apos;ll need more tokens.
                                 </p>
                                 <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
                                     <p className="text-purple-300 text-xs font-medium">

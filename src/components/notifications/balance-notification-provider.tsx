@@ -17,7 +17,7 @@ import { CustomTokenPurchaseModal } from "@/components/notifications/custom-toke
 export function BalanceNotificationProvider() {
     const {
         balance,
-        isLowBalance,
+        isLowBalance: _isLowBalance,
         isNewUser,
         showNotification,
         showTokenModal,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { User, Edit2, Crown } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 import AvatarUpload from "@/components/ui/avatar-upload";
 import CoverUpload from "@/components/ui/cover-upload";
@@ -20,16 +20,58 @@ import { Button } from "@/components/ui/button";
 import ModelProfileEditDialog from "./model-profile-edit-dialog";
 import MediaGalleryUpload from "./media-gallery-upload";
 
+interface UserData {
+  id: string;
+  email?: string;
+  emailVerified?: boolean;
+  role?: string;
+  status?: string;
+  createdAt: string;
+  lastLoginAt?: string;
+  googleId?: string;
+  appleId?: string;
+  profile?: {
+    displayName?: string;
+    bio?: string;
+    avatarUrl?: string;
+    coverUrl?: string;
+    category?: string;
+    language?: string;
+    isModel?: boolean;
+    profileImages?: string[];
+    profileVideos?: string[];
+    // Model profile fields
+    hairColor?: string;
+    physique?: string;
+    breastSize?: string;
+    pubicHair?: string;
+    displayedAge?: string | number;
+    relationship?: string;
+    ethnicity?: string;
+    piercings?: string;
+    tattoos?: string;
+    displayedCity?: string;
+    spokenLanguages?: string[];
+    myShows?: string[];
+  };
+  wallet?: {
+    balance: number;
+  };
+  _count?: {
+    streams?: number;
+  };
+}
+
 export default function ProfileContent() {
   const { data: session } = useSession();
 
-  const [userData, setUserData] = React.useState<any>(null);
+  const [userData, setUserData] = React.useState<UserData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isEditingAvatar, setIsEditingAvatar] = useState(false);
   const [isEditingCover, setIsEditingCover] = useState(false);
-  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
-  const [roleLoading, setRoleLoading] = useState(false);
-  const [roleError, setRoleError] = useState<string | null>(null);
+  const [_roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [_roleLoading, setRoleLoading] = useState(false);
+  const [_roleError, setRoleError] = useState<string | null>(null);
 
   // Memoize the fetch function to prevent recreation on every render
   const fetchProfile = useCallback(async (userId: string) => {
@@ -85,7 +127,7 @@ export default function ProfileContent() {
           ...userData,
           profile: {
             ...userData.profile,
-            avatarUrl: newAvatarUrl,
+            avatarUrl: newAvatarUrl ?? undefined,
           },
         });
       }
@@ -102,7 +144,7 @@ export default function ProfileContent() {
           ...userData,
           profile: {
             ...userData.profile,
-            coverUrl: newCoverUrl,
+            coverUrl: newCoverUrl ?? undefined,
           },
         });
       }
@@ -111,7 +153,7 @@ export default function ProfileContent() {
     [userData]
   );
 
-  const handleRoleChange = useCallback(async () => {
+  const _handleRoleChange = useCallback(async () => {
     if (!userData) return;
 
     setRoleLoading(true);
@@ -274,7 +316,7 @@ export default function ProfileContent() {
               {userData.profile?.bio && (
                 <div className="py-2 italic">
                   <p className="text-gray-300 text-sm leading-relaxed">
-                    "{userData.profile.bio}"
+                    &ldquo;{userData.profile.bio}&rdquo;
                   </p>
                 </div>
               )}
@@ -303,17 +345,13 @@ export default function ProfileContent() {
         </div>
       </div>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     userData,
     isEditingAvatar,
     isEditingCover,
     handleAvatarChange,
     handleCoverChange,
-    session,
-    roleDialogOpen,
-    roleLoading,
-    roleError,
-    handleRoleChange,
   ]);
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -345,13 +383,29 @@ export default function ProfileContent() {
       const updated = await res.json();
       setUserData(updated);
       setEditDialogOpen(false);
-    } catch (err) {
+    } catch (_err) {
       alert("Failed to update profile");
     }
     setEditLoading(false);
   };
 
-  const handleModelProfileSave = async (modelData: any) => {
+  interface ModelProfileData {
+    hairColor?: string | null;
+    physique?: string | null;
+    breastSize?: string | null;
+    pubicHair?: string | null;
+    displayedAge?: string | number | null;
+    spokenLanguages?: string[];
+    relationship?: string | null;
+    ethnicity?: string | null;
+    piercings?: string | null;
+    tattoos?: string | null;
+    displayedCity?: string | null;
+    myShows?: string[];
+    profileDescription?: string | null;
+  }
+
+  const handleModelProfileSave = async (modelData: ModelProfileData) => {
     const res = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -369,7 +423,7 @@ export default function ProfileContent() {
     setUserData(updated);
   };
 
-  const handleMediaUpdate = async (images: string[], videos: string[]) => {
+  const handleMediaUpdate = useCallback(async (images: string[], videos: string[]) => {
     const res = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -386,7 +440,7 @@ export default function ProfileContent() {
     if (!res.ok) throw new Error("Failed to update media gallery");
     const updated = await res.json();
     setUserData(updated);
-  };
+  }, [userData]);
 
   const personalInfo = useMemo(() => {
     if (!userData) return null;
@@ -545,6 +599,7 @@ export default function ProfileContent() {
         </div>
       </div>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     userData,
     editDialogOpen,

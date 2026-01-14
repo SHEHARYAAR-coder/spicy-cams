@@ -30,7 +30,7 @@ export function useBalance(): UseBalanceReturn {
   // Use ref to track if we've already shown notifications to prevent repeated shows
   const hasShownNotification = useRef(false);
 
-  const isViewer = session?.user && (session.user as any).role === "VIEWER";
+  const isViewer = session?.user && (session.user as { role?: string }).role === "VIEWER";
   const isAuthenticated = status === "authenticated";
 
   const fetchBalance = useCallback(async (): Promise<number | null> => {

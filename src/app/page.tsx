@@ -6,7 +6,6 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { StreamCard } from "@/components/stream";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -551,15 +550,13 @@ function HomeContent() {
               </div>
             ) : Object.keys(groupedStreams).length > 0 ? (
               <div className="space-y-6">
-                {Object.entries(groupedStreams).map(([category, categoryStreams], index) => (
-                  <>
-                    <CategoryRow
-                      key={category}
-                      category={category}
-                      streams={categoryStreams}
-                      onJoinStream={handleJoinStream}
-                    />
-                  </>
+                {Object.entries(groupedStreams).map(([category, categoryStreams]) => (
+                  <CategoryRow
+                    key={category}
+                    category={category}
+                    streams={categoryStreams}
+                    onJoinStream={handleJoinStream}
+                  />
                 ))}
               </div>
             ) : (
