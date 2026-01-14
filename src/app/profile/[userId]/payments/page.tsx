@@ -49,6 +49,7 @@ export default function PaymentsPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentProcessed, setPaymentProcessed] = useState(false);
 
   // Unwrap params using React.use()
   const { userId } = use(params);
@@ -71,16 +72,22 @@ export default function PaymentsPage({
     if (status === "authenticated") {
       fetchPayments();
 
-      // Handle payment success callback
-      if (success === "true" && sessionId) {
+      // Handle payment success callback - only once
+      if (success === "true" && sessionId && !paymentProcessed) {
         handlePaymentSuccess(sessionId);
       }
     }
-  }, [session, status, userId, router, success, sessionId]);
+  }, [session, status, userId, router]);
 
   const handlePaymentSuccess = async (sessionId: string) => {
+    // Prevent multiple calls
+    if (processingPayment || paymentProcessed) {
+      return;
+    }
+
     try {
       setProcessingPayment(true);
+      setPaymentProcessed(true);
       console.log("Processing payment for session:", sessionId);
 
       const response = await fetch("/api/stripe/process-payment", {
@@ -119,6 +126,8 @@ export default function PaymentsPage({
             position: "top-right",
           }
         );
+        // Reset if failed so user can retry
+        setPaymentProcessed(false);
       }
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -129,6 +138,8 @@ export default function PaymentsPage({
           position: "top-right",
         }
       );
+      // Reset if error so user can retry
+      setPaymentProcessed(false);
     } finally {
       setProcessingPayment(false);
     }

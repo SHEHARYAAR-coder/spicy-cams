@@ -86,82 +86,136 @@ export async function POST(req: NextRequest) {
 
     console.log(`🔄 Manually processing payment for user ${userId}: session ${sessionId}`);
 
-    // Process payment in transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Create or update wallet
-      const wallet = await tx.wallet.upsert({
-        where: { userId },
-        update: {
-          balance: { increment: tokens },
-          updatedAt: new Date(),
-        },
-        create: {
-          userId,
-          balance: tokens,
-          currency: "USD",
-        },
+    try {
+      // Process payment in transaction with proper error handling
+      const result = await prisma.$transaction(async (tx) => {
+        // First, try to find existing payment
+        let payment = await tx.payment.findUnique({
+          where: { providerRef: sessionId },
+        });
+
+        const isNewPayment = !payment;
+        let wallet;
+        let updatedWallet;
+        
+        if (isNewPayment) {
+          // Create new payment record
+          payment = await tx.payment.create({
+            data: {
+              userId,
+              provider: "STRIPE",
+              providerRef: sessionId,
+              status: "SUCCEEDED",
+              amount: (stripeSession.amount_total || 0) / 100,
+              currency: stripeSession.currency?.toUpperCase() || "USD",
+              credits: tokens,
+              webhookData: JSON.parse(JSON.stringify(stripeSession)),
+              completedAt: new Date(),
+            },
+          });
+
+          // Update wallet balance
+          wallet = await tx.wallet.upsert({
+            where: { userId },
+            update: {
+              balance: { increment: tokens },
+              updatedAt: new Date(),
+            },
+            create: {
+              userId,
+              balance: tokens,
+              currency: "USD",
+            },
+          });
+
+          updatedWallet = await tx.wallet.findUnique({
+            where: { userId },
+            select: { balance: true },
+          });
+
+          // Create ledger entry
+          await tx.ledgerEntry.create({
+            data: {
+              userId,
+              type: "DEPOSIT",
+              amount: tokens,
+              currency: "USD",
+              balanceAfter: updatedWallet?.balance || wallet.balance,
+              referenceType: "PAYMENT",
+              referenceId: sessionId,
+              description: `Purchased ${planId} plan - ${tokens} tokens (Manual processing)`,
+              metadata: {
+                planId,
+                stripeSessionId: sessionId,
+                manualProcessing: true,
+              },
+            },
+          });
+        } else {
+          // Payment already exists, just get current wallet balance
+          updatedWallet = await tx.wallet.findUnique({
+            where: { userId },
+            select: { balance: true },
+          });
+        }
+
+        return {
+          payment,
+          wallet: updatedWallet,
+          tokens: isNewPayment ? tokens : 0,
+          alreadyProcessed: !isNewPayment,
+        };
+      }, {
+        maxWait: 5000, // Maximum wait time for a transaction to start
+        timeout: 10000, // Maximum time for the transaction to complete
       });
 
-      // Get updated balance
-      const updatedWallet = await tx.wallet.findUnique({
-        where: { userId },
-        select: { balance: true },
-      });
+      const message = result.alreadyProcessed 
+        ? `⚠️ Payment already processed for user ${userId}: session ${sessionId} (Balance: ${result.wallet?.balance})`
+        : `✅ Successfully processed payment manually for user ${userId}: +${result.tokens} tokens (New balance: ${result.wallet?.balance})`;
+      
+      console.log(message);
 
-      // Create payment record
-      const payment = await tx.payment.create({
-        data: {
-          userId,
-          provider: "STRIPE",
-          providerRef: sessionId,
-          status: "SUCCEEDED",
-          amount: (stripeSession.amount_total || 0) / 100,
-          currency: stripeSession.currency?.toUpperCase() || "USD",
-          credits: tokens,
-          webhookData: JSON.parse(JSON.stringify(stripeSession)),
-          completedAt: new Date(),
+      return NextResponse.json({
+        success: true,
+        message: result.alreadyProcessed ? "Payment already processed" : "Payment processed successfully",
+        payment: result.payment,
+        wallet: {
+          balance: Number(result.wallet?.balance || 0),
+          tokensAdded: result.tokens,
         },
       });
+    } catch (txError: any) {
+      // Handle unique constraint violation (race condition)
+      if (txError.code === 'P2002' && txError.meta?.target?.includes('provider_ref')) {
+        console.log(`⚠️ Race condition detected - payment already exists for session ${sessionId}, fetching existing payment...`);
+        
+        // Payment was created by another request, fetch it
+        const existingPayment = await prisma.payment.findUnique({
+          where: { providerRef: sessionId },
+        });
 
-      // Create ledger entry
-      await tx.ledgerEntry.create({
-        data: {
-          userId,
-          type: "DEPOSIT",
-          amount: tokens,
-          currency: "USD",
-          balanceAfter: updatedWallet?.balance || wallet.balance,
-          referenceType: "PAYMENT",
-          referenceId: sessionId,
-          description: `Purchased ${planId} plan - ${tokens} tokens (Manual processing)`,
-          metadata: {
-            planId,
-            stripeSessionId: sessionId,
-            manualProcessing: true,
+        const wallet = await prisma.wallet.findUnique({
+          where: { userId },
+          select: { balance: true },
+        });
+
+        console.log(`✅ Returning existing payment for user ${userId}: session ${sessionId} (Balance: ${wallet?.balance})`);
+
+        return NextResponse.json({
+          success: true,
+          message: "Payment already processed",
+          payment: existingPayment,
+          wallet: {
+            balance: Number(wallet?.balance || 0),
+            tokensAdded: 0, // Already added by the other request
           },
-        },
-      });
-
-      return {
-        payment,
-        wallet: updatedWallet,
-        tokens,
-      };
-    });
-
-    console.log(
-      `✅ Successfully processed payment manually for user ${userId}: +${tokens} tokens (New balance: ${result.wallet?.balance})`
-    );
-
-    return NextResponse.json({
-      success: true,
-      message: "Payment processed successfully",
-      payment: result.payment,
-      wallet: {
-        balance: Number(result.wallet?.balance || 0),
-        tokensAdded: tokens,
-      },
-    });
+        });
+      }
+      
+      // Re-throw if it's a different error
+      throw txError;
+    }
   } catch (error) {
     console.error("Error processing payment:", error);
     const errorMessage =
