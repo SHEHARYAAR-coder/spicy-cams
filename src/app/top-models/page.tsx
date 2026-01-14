@@ -107,7 +107,7 @@ function TopModelsContent() {
         <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white pt-16">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-8 mt-8">
                     <div className="flex items-center gap-3 mb-2">
                         <Award className="w-10 h-10 text-yellow-400" />
                         <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
