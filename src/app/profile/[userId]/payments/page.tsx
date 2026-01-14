@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,10 @@ import {
   DollarSign,
   CreditCard,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Payment {
   id: string;
@@ -40,14 +42,20 @@ export default function PaymentsPage({
   params: Promise<{ userId: string }>;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   // Unwrap params using React.use()
   const { userId } = use(params);
+
+  // Check for payment success callback
+  const success = searchParams.get("success");
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -62,8 +70,69 @@ export default function PaymentsPage({
 
     if (status === "authenticated") {
       fetchPayments();
+
+      // Handle payment success callback
+      if (success === "true" && sessionId) {
+        handlePaymentSuccess(sessionId);
+      }
     }
-  }, [session, status, userId, router]);
+  }, [session, status, userId, router, success, sessionId]);
+
+  const handlePaymentSuccess = async (sessionId: string) => {
+    try {
+      setProcessingPayment(true);
+      console.log("Processing payment for session:", sessionId);
+
+      const response = await fetch("/api/stripe/process-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          `Payment successful! ${data.wallet?.tokensAdded || 0} tokens added to your account.`,
+          {
+            duration: 5000,
+            position: "top-right",
+          }
+        );
+
+        // Refresh payments and wallet data
+        await fetchPayments();
+
+        // Clean up URL parameters
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("success");
+        newUrl.searchParams.delete("session_id");
+        window.history.replaceState({}, "", newUrl.toString());
+      } else {
+        console.error("Payment processing failed:", data.error);
+        toast.error(
+          data.error || "Failed to process payment. Please contact support.",
+          {
+            duration: 8000,
+            position: "top-right",
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      toast.error(
+        "Failed to process payment. Please refresh the page or contact support.",
+        {
+          duration: 8000,
+          position: "top-right",
+        }
+      );
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
 
   const fetchPayments = async () => {
     try {
@@ -123,10 +192,15 @@ export default function PaymentsPage({
     }
   };
 
-  if (loading) {
+  if (loading || processingPayment) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-300">
+            {processingPayment ? "Processing your payment..." : "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }

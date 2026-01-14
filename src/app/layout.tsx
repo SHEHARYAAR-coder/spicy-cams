@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { StreamProvider } from "@/contexts/StreamContext";
 import { CategoryProvider } from "@/contexts/CategoryContext";
+import { BalanceNotificationProvider } from "@/components/notifications/balance-notification-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
               </Suspense>
               {children}
               <Footer />
+              <BalanceNotificationProvider />
               <Toaster position="top-right" richColors />
             </CategoryProvider>
           </StreamProvider>
