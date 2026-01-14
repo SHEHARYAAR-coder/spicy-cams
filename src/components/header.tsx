@@ -178,8 +178,8 @@ export function Header() {
               )}
             </div>
 
-            {/* Center nav pill - Only show when logged in */}
-            {session?.user && (
+            {/* Center nav pill - Only show when NOT logged in */}
+            {!session?.user && (
               <nav className="hidden md:flex flex-1 items-center justify-center">
                 <div className="relative rounded-full border border-gray-700/50 bg-gray-800/60 backdrop-blur-lg px-2 py-1 shadow-xl">
                   <ul className="flex items-center gap-0.5">
