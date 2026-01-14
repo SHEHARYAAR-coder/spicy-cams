@@ -20,7 +20,7 @@ import {
   User,
   Hand,
   LayoutDashboard,
-  Search, Star, Image as ImageIcon, PlaySquare, ChevronLeft, ChevronRight,
+  Search, Star, Image as ImageIcon, PlaySquare, ChevronLeft, ChevronRight, Wallet,
 } from "lucide-react";
 
 import React, { useState, useEffect } from "react";
@@ -29,6 +29,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/auth-modal";
 import { useStream } from "@/contexts/StreamContext";
 import { useCategoryType } from "@/contexts/CategoryContext";
+import { CustomTokenPurchaseModal } from "@/components/notifications/custom-token-purchase-modal";
 
 export function Header() {
   const { data: session } = useSession();
@@ -44,6 +45,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || "");
   const [onlineModelsCount, setOnlineModelsCount] = useState<number>(0);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showTokenModal, setShowTokenModal] = useState(false);
 
   // Fetch online models count
   useEffect(() => {
@@ -264,6 +266,18 @@ export function Header() {
                         <span className="font-medium">Profile</span>
                       </Link>
                     </DropdownMenuItem>
+
+                    {(session.user as import("../../lib/auth-utils").SessionUser)
+                      .role === "VIEWER" && (
+                        <DropdownMenuItem
+                          onSelect={() => setShowTokenModal(true)}
+                          className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20"
+                        >
+                          <Wallet className="w-4 h-4 mr-3 text-purple-400" />
+                          <span className="font-medium">Buy Tokens</span>
+                        </DropdownMenuItem>
+                      )}
+
                     <DropdownMenuItem asChild>
                       <Link href="/streaming" className="cursor-pointer px-3 py-2.5 transition-colors hover:bg-purple-600/20 focus:bg-purple-600/20">
                         <Video className="w-4 h-4 mr-3 text-purple-400" />
@@ -545,6 +559,12 @@ export function Header() {
             </div>
           </div>
         )}
+
+      {/* Custom Token Purchase Modal */}
+      <CustomTokenPurchaseModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+      />
     </>
   );
 }

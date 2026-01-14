@@ -44,17 +44,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planId } = await req.json();
+    const { planId, customAmount, customTokens } = await req.json();
 
-    // Validate plan
-    if (!planId || !PRICING_PLANS[planId as keyof typeof PRICING_PLANS]) {
-      return NextResponse.json(
-        { error: "Invalid plan selected" },
-        { status: 400 }
-      );
+    let plan;
+    let amount;
+    let tokens;
+    let planName;
+    let planDescription;
+
+    if (planId === "custom" && customAmount && customTokens) {
+      // Handle custom amounts
+      amount = customAmount; // Already in cents
+      tokens = customTokens;
+      planName = "Custom Token Package";
+      planDescription = `${tokens} tokens - Custom amount`;
+      
+      // Validate custom amount (minimum $2.50 for 5 tokens, maximum $500 for 1000 tokens)
+      if (amount < 250 || amount > 50000 || tokens < 5 || tokens > 1000) {
+        return NextResponse.json(
+          { error: "Invalid custom amount. Min: $2.50 (5 tokens), Max: $500 (1000 tokens)" },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Handle preset plans
+      if (!planId || !PRICING_PLANS[planId as keyof typeof PRICING_PLANS]) {
+        return NextResponse.json(
+          { error: "Invalid plan selected" },
+          { status: 400 }
+        );
+      }
+
+      plan = PRICING_PLANS[planId as keyof typeof PRICING_PLANS];
+      amount = plan.amount;
+      tokens = plan.tokens;
+      planName = plan.name;
+      planDescription = plan.description;
     }
-
-    const plan = PRICING_PLANS[planId as keyof typeof PRICING_PLANS];
 
     // Create Stripe checkout session
     const stripe = getStripe();
@@ -66,18 +92,18 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: plan.name,
-              description: plan.description,
+              name: planName,
+              description: planDescription,
             },
-            unit_amount: plan.amount,
+            unit_amount: amount,
           },
           quantity: 1,
         },
       ],
       metadata: {
         userId: session.user.id!,
-        planId,
-        tokens: plan.tokens.toString(),
+        planId: planId === "custom" ? "custom" : planId,
+        tokens: tokens.toString(),
       },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/profile/${session.user.id}/payments?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
