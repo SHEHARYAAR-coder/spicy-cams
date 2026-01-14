@@ -194,7 +194,7 @@ export default function PaymentsPage({
 
   if (loading || processingPayment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white flex items-center justify-center">
+      <div className="min-h-screen text-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
           <p className="text-gray-300">
@@ -206,8 +206,8 @@ export default function PaymentsPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-white">
-      <div className="container mx-auto px-4 py-16 max-w-7xl">
+    <div className="min-h-screen text-white">
+      <div className="max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           {/* <Button
