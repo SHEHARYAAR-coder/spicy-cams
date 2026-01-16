@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import Link from "next/link";
 import Image from "next/image";
 import { Sparkles, Eye, Camera, ArrowRight } from "lucide-react";
@@ -31,6 +32,11 @@ export default function AuthModal({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 border border-gray-700/50 text-white !max-w-3xl p-0 overflow-hidden rounded-2xl shadow-2xl">
+                <VisuallyHidden>
+                    <DialogTitle>
+                        {activeTab === "login" ? "Login to SpicyCams" : "Sign Up for SpicyCams"}
+                    </DialogTitle>
+                </VisuallyHidden>
                 <div className="flex">
                     {activeTab === "login" ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 w-full min-h-[450px]">
@@ -52,21 +58,21 @@ export default function AuthModal({
                                     <p className="text-gray-300 text-sm">Access exclusive live streams from your favorite creators</p>
                                 </div>
                             </div>
-                            
+
                             {/* Right Side - Login Options */}
                             <div className="flex flex-col justify-center items-center p-8 lg:p-12">
                                 <div className="w-full max-w-sm">
                                     {/* Logo/Icon */}
                                     <div className="flex justify-center mb-6">
-                                            <Image
-                                                src="/logo/logo.png"
-                                                alt="SpicyCams Logo"
-                                                width={100}
-                                                height={100}
-                                                className="object-contain"
-                                            />
+                                        <Image
+                                            src="/logo/logo.png"
+                                            alt="SpicyCams Logo"
+                                            width={100}
+                                            height={100}
+                                            className="object-contain"
+                                        />
                                     </div>
-                                    
+
                                     <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                                         Welcome Back!
                                     </h2>
@@ -111,7 +117,7 @@ export default function AuthModal({
                                     <div className="mt-8 text-center">
                                         <p className="text-gray-500 text-sm">
                                             Don&apos;t have an account?{" "}
-                                            <button 
+                                            <button
                                                 onClick={() => setActiveTab("signup")}
                                                 className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
                                             >
@@ -129,15 +135,15 @@ export default function AuthModal({
                                 <div className="w-full max-w-sm">
                                     {/* Logo/Icon */}
                                     <div className="flex justify-center mb-6">
-                                            <Image
-                                                src="/logo/logo.png"
-                                                alt="SpicyCams Logo"
-                                                width={100}
-                                                height={100}
-                                                className="object-contain"
-                                            />
+                                        <Image
+                                            src="/logo/logo.png"
+                                            alt="SpicyCams Logo"
+                                            width={100}
+                                            height={100}
+                                            className="object-contain"
+                                        />
                                     </div>
-                                    
+
                                     <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                                         Join Us Today!
                                     </h2>
@@ -182,7 +188,7 @@ export default function AuthModal({
                                     <div className="mt-8 text-center">
                                         <p className="text-gray-500 text-sm">
                                             Already have an account?{" "}
-                                            <button 
+                                            <button
                                                 onClick={() => setActiveTab("login")}
                                                 className="text-pink-400 hover:text-pink-300 font-medium transition-colors"
                                             >
@@ -192,7 +198,7 @@ export default function AuthModal({
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Right Side - Image */}
                             <div className="relative hidden lg:block">
                                 <Image
