@@ -177,7 +177,7 @@ model Profile {
   myShows            String[] @default([]) @map("my_shows") // Category selections
   profileDescription String?  @map("profile_description") @db.Text // 350 character limit
 
-  // Media Gallery
+  // Media Gallery (Deprecated - kept for backward compatibility during migration)
   profileImages String[] @default([]) @map("profile_images") // Array of image URLs
   profileVideos String[] @default([]) @map("profile_videos") // Array of video URLs
   coverUrl      String?  @map("cover_url") // Cover photo URL
@@ -193,10 +193,68 @@ model Profile {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profileMedia ProfileMedia[]
 
   @@index([userId])
   @@map("profiles")
+}
+
+// ============================================
+// PROFILE MEDIA (Public/Private Gallery)
+// ============================================
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model ProfileMedia {
+  id        String    @id @default(cuid())
+  profileId String    @map("profile_id")
+  type      MediaType
+  url       String
+  isPublic  Boolean   @default(true) @map("is_public") // true = public, false = private (requires tokens)
+  
+  // Token pricing for private content
+  tokenCost Int     @default(10) @map("token_cost") // Cost to unlock private content
+  
+  // Metadata
+  fileName    String?  @map("file_name")
+  fileSize    Int?     @map("file_size") // in bytes
+  mimeType    String?  @map("mime_type")
+  sortOrder   Int      @default(0) @map("sort_order") // For ordering media display
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  profile        Profile              @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  unlockedByUsers MediaUnlock[]
+
+  @@index([profileId, isPublic])
+  @@index([profileId, sortOrder])
+  @@map("profile_media")
+}
+
+// Track which users have unlocked which private media
+model MediaUnlock {
+  id      String @id @default(cuid())
+  userId  String @map("user_id")
+  mediaId String @map("media_id")
+  
+  // Payment tracking
+  tokensPaid Decimal @map("tokens_paid") @db.Decimal(10, 2)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  media ProfileMedia @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, mediaId])
+  @@index([userId])
+  @@index([mediaId])
+  @@map("media_unlocks")
 }
 
 // ============================================

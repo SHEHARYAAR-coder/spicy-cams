@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ModelProfileEditDialog from "./model-profile-edit-dialog";
-import MediaGalleryUpload from "./media-gallery-upload";
+import MediaGalleryUploadV2 from "./media-gallery-upload-v2";
 
 interface UserData {
   id: string;
@@ -767,16 +767,14 @@ export default function ProfileContent() {
       <div className="bg-gray-800/50 border-gray-700 backdrop-blur-sm rounded-lg shadow-sm p-8 mb-6">
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-white mb-2">Media Gallery</h3>
-          <p className="text-sm text-gray-400">Upload images and videos to showcase on your public profile</p>
+          <p className="text-sm text-gray-400">Upload images and videos with public/private settings</p>
         </div>
-        <MediaGalleryUpload
-          images={userData.profile.profileImages || []}
-          videos={userData.profile.profileVideos || []}
-          onUpdate={handleMediaUpdate}
+        <MediaGalleryUploadV2
+          userId={userData.id}
         />
       </div>
     );
-  }, [userData, handleMediaUpdate]);
+  }, [userData]);
 
   const walletActivity = useMemo(() => {
     if (!userData) return null;

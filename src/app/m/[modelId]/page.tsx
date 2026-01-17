@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { StreamCard } from "@/components/stream";
+import MediaGalleryDisplay from "@/components/profile/media-gallery-display";
 
 // --- Interfaces (Kept same as original) ---
 interface Stream {
@@ -435,68 +436,11 @@ export default function ModelProfilePage() {
                 </div>
               )}
 
-              {/* Media Gallery */}
-              {(creator.profileImages.length > 0 || creator.profileVideos.length > 0) && (
-                <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6">
-                  <h2 className="text-2xl font-bold flex items-center gap-3 mb-6">
-                    <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
-                      <Sparkles className="w-6 h-6" />
-                    </div>
-                    Media Gallery
-                  </h2>
-
-                  {/* Images Section */}
-                  {creator.profileImages.length > 0 && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">Photos</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {creator.profileImages.map((imageUrl, index) => (
-                          <div
-                            key={index}
-                            className="relative group aspect-square overflow-hidden rounded-xl bg-gray-900 cursor-pointer"
-                            onClick={() => handleImageClick(index)}
-                          >
-                            <Image
-                              src={imageUrl}
-                              alt={`${creator.displayName} photo ${index + 1}`}
-                              fill
-                              className="object-cover transition-transform duration-300 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
-                                <Sparkles className="w-6 h-6 text-white" />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Videos Section */}
-                  {creator.profileVideos.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-4">Videos</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {creator.profileVideos.map((videoUrl, index) => (
-                          <div
-                            key={index}
-                            className="relative group rounded-xl overflow-hidden bg-gray-900"
-                          >
-                            <video
-                              src={videoUrl}
-                              className="w-full h-auto rounded-xl"
-                              controls
-                              preload="metadata"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Media Gallery - New component with public/private support */}
+              <MediaGalleryDisplay
+                userId={creator.id}
+                onImageClick={handleImageClick}
+              />
 
               {/* Streams Tab Section */}
               <div>
