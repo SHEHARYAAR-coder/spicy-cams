@@ -75,7 +75,7 @@ export function Header() {
   }, [userId, userData, fetchProfile]);
 
   const handleSignOut = () => {
-    void signOut({ callbackUrl: "/" });
+    void signOut({ callbackUrl: `${window.location.origin}/` });
   };
 
   // Show skeleton only while auth is resolving or while profile is fetching for an authenticated user
