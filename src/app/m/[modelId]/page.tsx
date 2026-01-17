@@ -81,6 +81,8 @@ export default function ModelProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
   const fetchModel = useCallback(async () => {
     setLoading(true);
@@ -142,25 +144,34 @@ export default function ModelProfilePage() {
     router.push(`/profile?message=${modelId}`);
   };
 
-  const handleImageClick = (index: number) => {
-    setSelectedImageIndex(index);
+  const handleImageClick = (imageUrl: string, allImageUrls: string[]) => {
+    setPreviewImages(allImageUrls);
+    setSelectedImageUrl(imageUrl);
+    const index = allImageUrls.indexOf(imageUrl);
+    setSelectedImageIndex(index >= 0 ? index : 0);
   };
 
   const handleClosePreview = () => {
     setSelectedImageIndex(null);
+    setSelectedImageUrl(null);
+    setPreviewImages([]);
   };
 
   const handlePreviousImage = useCallback(() => {
-    if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex - 1 + creator.profileImages.length) % creator.profileImages.length);
+    if (selectedImageIndex !== null && previewImages.length > 0) {
+      const newIndex = (selectedImageIndex - 1 + previewImages.length) % previewImages.length;
+      setSelectedImageIndex(newIndex);
+      setSelectedImageUrl(previewImages[newIndex]);
     }
-  }, [selectedImageIndex, creator]);
+  }, [selectedImageIndex, previewImages]);
 
   const handleNextImage = useCallback(() => {
-    if (selectedImageIndex !== null && creator) {
-      setSelectedImageIndex((selectedImageIndex + 1) % creator.profileImages.length);
+    if (selectedImageIndex !== null && previewImages.length > 0) {
+      const newIndex = (selectedImageIndex + 1) % previewImages.length;
+      setSelectedImageIndex(newIndex);
+      setSelectedImageUrl(previewImages[newIndex]);
     }
-  }, [selectedImageIndex, creator]);
+  }, [selectedImageIndex, previewImages]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -507,11 +518,11 @@ export default function ModelProfilePage() {
 
           {/* Image Counter */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-gray-800/80 px-4 py-2 rounded-full text-white text-sm z-10">
-            {selectedImageIndex + 1} / {creator.profileImages.length}
+            {selectedImageIndex !== null ? selectedImageIndex + 1 : 1} / {previewImages.length}
           </div>
 
           {/* Previous Button */}
-          {creator.profileImages.length > 1 && (
+          {previewImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -524,7 +535,7 @@ export default function ModelProfilePage() {
           )}
 
           {/* Next Button */}
-          {creator.profileImages.length > 1 && (
+          {previewImages.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -543,8 +554,8 @@ export default function ModelProfilePage() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={creator.profileImages[selectedImageIndex]}
-              alt={`${creator.displayName} photo ${selectedImageIndex + 1}`}
+              src={selectedImageUrl || (selectedImageIndex !== null && previewImages[selectedImageIndex]) || ''}
+              alt={`${creator.displayName} photo ${selectedImageIndex !== null ? selectedImageIndex + 1 : 1}`}
               className="max-w-full max-h-full object-contain rounded-lg"
             />
           </div>

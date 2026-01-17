@@ -18,7 +18,7 @@ interface MediaItem {
 
 interface MediaGalleryDisplayProps {
     userId: string;
-    onImageClick?: (index: number) => void;
+    onImageClick?: (imageUrl: string, allImageUrls: string[]) => void;
 }
 
 export default function MediaGalleryDisplay({ userId, onImageClick }: MediaGalleryDisplayProps) {
@@ -106,6 +106,10 @@ export default function MediaGalleryDisplay({ userId, onImageClick }: MediaGalle
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {images.map((item, index) => {
                             const isPrivateAndLocked = !item.isPublic && !item.isUnlocked;
+                            // Get all unlocked image URLs for the preview modal
+                            const unlockedImageUrls = images
+                                .filter(img => img.isPublic || img.isUnlocked)
+                                .map(img => img.url);
 
                             return (
                                 <div
@@ -125,7 +129,7 @@ export default function MediaGalleryDisplay({ userId, onImageClick }: MediaGalle
                                     ) : (
                                         <div
                                             className="relative w-full h-full cursor-pointer"
-                                            onClick={() => onImageClick && onImageClick(index)}
+                                            onClick={() => onImageClick && onImageClick(item.url, unlockedImageUrls)}
                                         >
                                             <Image
                                                 src={item.url}
