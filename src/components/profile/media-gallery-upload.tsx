@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { X, Image as ImageIcon, Video } from "lucide-react";
 
 interface MediaGalleryUploadProps {
@@ -153,11 +152,14 @@ export default function MediaGalleryUpload({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {images.map((url, index) => (
               <div key={index} className="relative group h-40">
-                <Image
+                <img
                   src={url}
                   alt={`Gallery image ${index + 1}`}
-                  fill
-                  className="object-cover rounded-lg"
+                  className="w-full h-full object-cover rounded-lg"
+                  onError={(e) => {
+                    console.error('Failed to load image:', url);
+                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext fill="%23999" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage not found%3C/text%3E%3C/svg%3E';
+                  }}
                 />
                 <button
                   onClick={() => handleRemoveMedia(url, "image")}
