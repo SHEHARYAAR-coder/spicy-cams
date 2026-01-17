@@ -119,7 +119,7 @@ export default function ModelProfilePage() {
 
   const handleFollowToggle = async () => {
     if (!session) {
-      router.push("/login");
+      router.push("/v/login");
       return;
     }
     setIsFollowing(!isFollowing);
@@ -127,7 +127,7 @@ export default function ModelProfilePage() {
 
   const handleJoinStream = (streamId: string) => {
     if (!session) {
-      window.location.href = `/login?callbackUrl=/streaming?join=${streamId}`;
+      window.location.href = `/v/login?callbackUrl=/streaming?join=${streamId}`;
     } else {
       window.location.href = `/streaming?join=${streamId}`;
     }
@@ -135,7 +135,7 @@ export default function ModelProfilePage() {
 
   const handleMessage = () => {
     if (!session) {
-      router.push("/login");
+      router.push("/v/login");
       return;
     }
     router.push(`/profile?message=${modelId}`);

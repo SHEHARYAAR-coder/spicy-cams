@@ -26,7 +26,7 @@ export default async function DashboardPage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   const userId = (session.user as { id: string }).id;
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
   });
 
   if (!user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   // Render different dashboards based on user role

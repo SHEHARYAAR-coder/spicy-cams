@@ -12,7 +12,7 @@ export default async function StreamsLayoutWrapper({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   const userId = (session.user as { id: string; role?: string }).id;
@@ -34,7 +34,7 @@ export default async function StreamsLayoutWrapper({
   });
 
   if (!user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   // Redirect if not admin

@@ -16,8 +16,10 @@ const PROFILE_SETUP_EXCLUDED_ROUTES = [
   "/m/profile-setup",
   "/api",
   "/_next",
-  "/login",
-  "/register",
+  "/v/login",
+  "/m/login",
+  "/v/register",
+  "/m/register",
   "/logout",
   "/verify",
   "/unauthorized",
@@ -41,7 +43,7 @@ export async function middleware(request: NextRequest) {
 
     // If no session, redirect to login
     if (!session?.user) {
-      const loginUrl = new URL("/login", request.url);
+      const loginUrl = new URL("/v/login", request.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -88,7 +90,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     console.error("Middleware error:", error);
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/v/login", request.url));
   }
 }
 

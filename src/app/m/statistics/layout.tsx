@@ -12,7 +12,7 @@ export default async function StatisticsLayout({
     const session = await auth();
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/m/login");
     }
 
     const userId = (session.user as { id: string; role?: string }).id;
@@ -40,7 +40,7 @@ export default async function StatisticsLayout({
     });
 
     if (!user) {
-        redirect("/login");
+        redirect("/m/login");
     }
 
     const layoutProps = {

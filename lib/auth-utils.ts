@@ -44,7 +44,7 @@ export function generateVerificationToken(): string {
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
-    redirect("/login");
+    redirect("/v/login");
   }
   // Cast session.user to SessionUser
   session.user = session.user as SessionUser;

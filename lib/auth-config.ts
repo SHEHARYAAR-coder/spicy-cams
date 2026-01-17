@@ -207,18 +207,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             // Check existing user's account status with detailed messages
             if (restrictionInfo.restricted) {
               if (restrictionInfo.type === "SUSPENDED") {
-                return `/login?error=AccountSuspended&time=${encodeURIComponent(
+                return `/v/login?error=AccountSuspended&time=${encodeURIComponent(
                   restrictionInfo.timeRemaining
                 )}&reason=${encodeURIComponent(restrictionInfo.reason)}`;
               }
 
               if (restrictionInfo.type === "BANNED") {
                 if (restrictionInfo.isPermanent) {
-                  return `/login?error=AccountBanned&permanent=true&reason=${encodeURIComponent(
+                  return `/v/login?error=AccountBanned&permanent=true&reason=${encodeURIComponent(
                     restrictionInfo.reason
                   )}`;
                 } else {
-                  return `/login?error=AccountBanned&time=${encodeURIComponent(
+                  return `/v/login?error=AccountBanned&time=${encodeURIComponent(
                     restrictionInfo.timeRemaining
                   )}&reason=${encodeURIComponent(restrictionInfo.reason)}`;
                 }
@@ -230,7 +230,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               currentUser.status !== "ACTIVE" &&
               currentUser.status !== "PENDING_VERIFICATION"
             ) {
-              return `/login?error=AccountInactive`;
+              return `/v/login?error=AccountInactive`;
             }
 
             if (!existingUser.profile) {
@@ -324,8 +324,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: {
-    signIn: "/login",
-    error: "/login",
+    signIn: "/v/login",
+    error: "/v/login",
   },
   events: {
     async signIn({ user, account }) {

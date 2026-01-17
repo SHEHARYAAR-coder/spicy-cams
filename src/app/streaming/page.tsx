@@ -788,7 +788,7 @@ export default function StreamingPage() {
               <Video className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
               <p className="text-gray-400 mb-4">Please sign in to access streaming features.</p>
-              <Button onClick={() => router.push('/login')} className="w-full bg-purple-600 hover:bg-purple-700">
+              <Button onClick={() => router.push('/v/login')} className="w-full bg-purple-600 hover:bg-purple-700">
                 Sign In
               </Button>
             </CardContent>

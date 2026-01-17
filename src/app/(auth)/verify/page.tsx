@@ -23,7 +23,7 @@ function VerifyEmailContent() {
                     if (res.ok) {
                         setStatus("success")
                         setTimeout(() => {
-                            router.push("/login?verified=true")
+                            router.push("/v/login?verified=true")
                         }, 3000)
                     } else {
                         const data = await res.json()

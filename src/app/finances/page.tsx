@@ -13,7 +13,7 @@ export default async function FinancesPage() {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   const _userId = (session.user as { id: string; role?: string }).id;

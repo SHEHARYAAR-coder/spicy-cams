@@ -11,7 +11,7 @@ export default async function WithdrawalsPage() {
     const session = await auth();
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/v/login");
     }
 
     const userRole = (session.user as { role?: string }).role;

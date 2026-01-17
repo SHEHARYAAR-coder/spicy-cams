@@ -11,7 +11,7 @@ export default async function UsersLayoutWrapper({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   const userId = (session.user as { id: string; role?: string }).id;
@@ -33,7 +33,7 @@ export default async function UsersLayoutWrapper({
   });
 
   if (!user) {
-    redirect("/login");
+    redirect("/v/login");
   }
 
   const layoutProps = {

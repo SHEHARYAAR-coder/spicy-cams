@@ -13,7 +13,7 @@ export default async function MyStreamsPage() {
     const session = await auth();
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/m/login");
     }
 
     const userId = (session.user as { id: string; role?: string }).id;
