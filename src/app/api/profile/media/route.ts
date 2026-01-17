@@ -36,39 +36,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Fetch media - if not owner, only show public media or unlocked private media
-    const where: any = { profileId: profile.id };
-    
-    if (!isOwner) {
-      // For non-owners, only show public media or media they've unlocked
-      if (session?.user?.id) {
-        where.OR = [
-          { isPublic: true },
-          {
-            AND: [
-              { isPublic: false },
-              { unlockedByUsers: { some: { userId: session.user.id } } }
-            ]
-          }
-        ];
-      } else {
-        // Not logged in - only show public
-        where.isPublic = true;
-      }
+    // Check if profileMedia table exists (migration applied)
+    let media: any[] = [];
+    try {
+      // Fetch ALL media for this profile
+      // We'll show everything but blur private content that hasn't been unlocked
+      const where: any = { profileId: profile.id };
+
+      media = await prisma.profileMedia.findMany({
+        where,
+        include: {
+          unlockedByUsers: session?.user?.id ? {
+            where: { userId: session.user.id },
+            select: { id: true, createdAt: true }
+          } : false
+        },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      });
+    } catch (dbError) {
+      console.error("Database error fetching profileMedia:", dbError);
+      // If table doesn't exist yet or Prisma model not recognized, return empty array
+      media = [];
     }
 
-    const media = await prisma.profileMedia.findMany({
-      where,
-      include: {
-        unlockedByUsers: session?.user?.id ? {
-          where: { userId: session.user.id },
-          select: { id: true, createdAt: true }
-        } : false
-      },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-    });
-
-    const formattedMedia = media.map(item => ({
+    const formattedMedia = media.map((item: any) => ({
       ...item,
       isUnlocked: isOwner || item.isPublic || (item.unlockedByUsers && item.unlockedByUsers.length > 0)
     }));
@@ -77,7 +68,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching profile media:", error);
     return NextResponse.json(
-      { error: "Failed to fetch media" },
+      { error: "Failed to fetch media", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

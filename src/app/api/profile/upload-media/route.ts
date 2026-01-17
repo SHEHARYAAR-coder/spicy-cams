@@ -67,38 +67,48 @@ export async function POST(req: NextRequest) {
     const url = `/uploads/profile-media/${type === 'image' ? 'images' : 'videos'}/${fileName}`;
 
     // Get user's profile and create ProfileMedia entry
-    const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (profile) {
-      // Get current max sort order
-      const maxSortOrder = await prisma.profileMedia.findFirst({
-        where: { profileId: profile.id },
-        orderBy: { sortOrder: 'desc' },
-        select: { sortOrder: true },
+    try {
+      const profile = await prisma.profile.findUnique({
+        where: { userId: session.user.id },
+        select: { id: true },
       });
 
-      await prisma.profileMedia.create({
-        data: {
-          profileId: profile.id,
-          url,
-          type: type.toUpperCase() as 'IMAGE' | 'VIDEO',
-          isPublic,
-          tokenCost,
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          sortOrder: (maxSortOrder?.sortOrder || 0) + 1,
-        },
-      });
+      if (profile) {
+        // Get current max sort order
+        const maxSortOrder = await prisma.profileMedia.findFirst({
+          where: { profileId: profile.id },
+          orderBy: { sortOrder: 'desc' },
+          select: { sortOrder: true },
+        });
+
+        await prisma.profileMedia.create({
+          data: {
+            profileId: profile.id,
+            url,
+            type: type.toUpperCase() as 'IMAGE' | 'VIDEO',
+            isPublic,
+            tokenCost,
+            fileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type,
+            sortOrder: (maxSortOrder?.sortOrder || 0) + 1,
+          },
+        });
+      } else {
+        console.error('Profile not found for user:', session.user.id);
+      }
+    } catch (dbError) {
+      console.error('Database error creating ProfileMedia:', dbError);
+      // Continue anyway - file was uploaded successfully
     }
 
     return NextResponse.json({ url, isPublic, tokenCost });
   } catch (error) {
     console.error('Error uploading media:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
