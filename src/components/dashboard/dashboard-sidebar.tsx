@@ -109,7 +109,7 @@ export function DashboardSidebar({
       },
       {
         label: "Payment Info",
-        href: "/m/payment-info",
+        href: "/payment-methods",
         icon: CreditCard,
         roles: ["MODEL"],
       },
