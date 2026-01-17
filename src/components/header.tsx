@@ -92,7 +92,7 @@ export function Header() {
   };
 
   const handleSignOut = () => {
-    void signOut({ callbackUrl: `${window.location.origin}/` });
+    void signOut({ callbackUrl: '/' });
   };
 
   const handleSearchChange = (value: string) => {
