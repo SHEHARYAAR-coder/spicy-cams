@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 // POST: Unlock private media with tokens
 export async function POST(req: NextRequest) {
@@ -77,18 +78,21 @@ export async function POST(req: NextRequest) {
 
     // Check if user has enough tokens
     const tokenCost = media.tokenCost;
-    if (wallet.balance < tokenCost) {
+    if (wallet.balance.lt(new Prisma.Decimal(tokenCost))) {
       return NextResponse.json(
         { error: "Insufficient tokens", required: tokenCost, balance: wallet.balance },
         { status: 402 }
       );
     }
 
+    // Get user ID for transaction
+    const userId = session.user!.id;
+
     // Perform the transaction
     const result = await prisma.$transaction(async (tx) => {
       // Deduct tokens from viewer
       const updatedViewerWallet = await tx.wallet.update({
-        where: { userId: session.user.id },
+        where: { userId },
         data: { balance: { decrement: tokenCost } },
       });
 
@@ -108,7 +112,7 @@ export async function POST(req: NextRequest) {
       // Create unlock record
       const unlock = await tx.mediaUnlock.create({
         data: {
-          userId: session.user.id,
+          userId,
           mediaId: media.id,
           tokensPaid: tokenCost,
         },
@@ -117,7 +121,7 @@ export async function POST(req: NextRequest) {
       // Create ledger entries
       await tx.ledgerEntry.create({
         data: {
-          userId: session.user.id,
+          userId,
           type: "DEBIT",
           amount: -tokenCost,
           currency: "USD",

@@ -34,7 +34,9 @@ export default function RootLayout({
                 <Header />
               </Suspense>
               {children}
-              <Footer />
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
               <BalanceNotificationProvider />
               <Toaster position="top-right" richColors />
             </CategoryProvider>
