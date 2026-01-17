@@ -19,6 +19,7 @@ import {
 
 interface TopModel {
     id: string;
+    username: string;
     displayName: string;
     avatarUrl?: string;
     bio?: string;
@@ -81,8 +82,8 @@ function TopModelsContent() {
         fetchTopModels();
     }, [fetchTopModels]);
 
-    const handleModelClick = (modelId: string) => {
-        router.push(`/m/${modelId}`);
+    const handleModelClick = (username: string) => {
+        router.push(`/m/${username}`);
     };
 
     const getPeriodLabel = (period: TimePeriod) => {
@@ -186,7 +187,7 @@ function TopModelsContent() {
                                     className="p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden relative"
                                     onMouseEnter={() => setHoveredCard(model.id)}
                                     onMouseLeave={() => setHoveredCard(null)}
-                                    onClick={() => handleModelClick(model.id)}
+                                    onClick={() => handleModelClick(model.username)}
                                 >
                                     {/* Rank Badge */}
                                     <div className="absolute top-2 left-2 z-20">
@@ -348,7 +349,7 @@ function TopModelsContent() {
                                                 size="sm"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleModelClick(model.id);
+                                                    handleModelClick(model.username);
                                                 }}
                                                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                                             >

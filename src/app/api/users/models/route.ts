@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         email: true,
+        username: true,
         createdAt: true,
         profile: {
           select: {
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
       success: true,
       models: models.map((model) => ({
         id: model.id,
+        username: model.username,
         email: model.email,
         displayName: model.profile?.displayName || model.email.split("@")[0],
         avatarUrl: model.profile?.avatarUrl,

@@ -89,6 +89,7 @@ export async function GET(request: NextRequest) {
 
       return {
         id: model.id,
+        username: model.username,
         displayName: model.profile?.displayName || "Anonymous",
         avatarUrl: model.profile?.avatarUrl,
         bio: model.profile?.bio,

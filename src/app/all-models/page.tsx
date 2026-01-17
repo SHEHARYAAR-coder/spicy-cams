@@ -17,6 +17,7 @@ import {
 
 interface Model {
   id: string;
+  username: string;
   displayName: string;
   avatarUrl?: string;
   bio?: string;
@@ -74,8 +75,8 @@ export default function ModelsPage() {
     fetchModels();
   }, [fetchModels]);
 
-  const handleModelClick = (modelId: string) => {
-    router.push(`/m/${modelId}`);
+  const handleModelClick = (username: string) => {
+    router.push(`/m/${username}`);
   };
 
   return (
@@ -149,7 +150,7 @@ export default function ModelsPage() {
                 className="p-0 w-full group cursor-pointer transition-all duration-200 hover:shadow-lg bg-gray-800 border border-gray-700 hover:border-purple-600 rounded-lg overflow-hidden"
                 onMouseEnter={() => setHoveredCard(creator.id)}
                 onMouseLeave={() => setHoveredCard(null)}
-                onClick={() => handleModelClick(creator.id)}
+                onClick={() => handleModelClick(creator.username)}
               >
                 {/* Avatar with fixed height */}
                 <div className="relative w-full h-48 sm:h-52 md:h-56 lg:h-60 bg-gray-700 overflow-hidden">
@@ -279,7 +280,7 @@ export default function ModelsPage() {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleModelClick(creator.id);
+                        handleModelClick(creator.username);
                       }}
                       className="bg-purple-600 hover:bg-purple-700 text-white"
                     >

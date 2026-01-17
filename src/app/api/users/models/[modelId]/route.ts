@@ -8,13 +8,18 @@ export async function GET(
   try {
     const { modelId } = await params;
 
-    const model = await prisma.user.findUnique({
+    // Try to find model by username first, then by ID
+    const model = await prisma.user.findFirst({
       where: {
-        id: modelId,
+        OR: [
+          { username: modelId },
+          { id: modelId }
+        ]
       },
       select: {
         id: true,
         email: true,
+        username: true,
         role: true,
         status: true,
         createdAt: true,
@@ -101,6 +106,7 @@ export async function GET(
       success: true,
       model: {
         id: model.id,
+        username: model.username,
         email: model.email,
         role: model.role,
         status: model.status,
