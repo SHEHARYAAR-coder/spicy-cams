@@ -192,6 +192,9 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
   // Auto-enable camera and microphone when connected (only once on initial connection)
   const [hasAutoEnabled, setHasAutoEnabled] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  
+  // Track if thumbnail has been captured (only capture once per stream)
+  const [thumbnailCaptured, setThumbnailCaptured] = useState(false);
 
   useEffect(() => {
     const enableDevices = async () => {
@@ -305,9 +308,7 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     // No cleanup here - tracks cleanup is handled in the unmount-only effect below
   }, [tracks, hasAutoEnabled]);
 
-  // Auto-capture thumbnail from video stream
-  const [thumbnailCaptured, setThumbnailCaptured] = useState(false);
-  
+  // Auto-capture thumbnail from video stream (only once per stream session)
   useEffect(() => {
     if (!streamId || !isCameraEnabled || thumbnailCaptured) return;
 
@@ -323,16 +324,6 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     // Wait a bit for the video to start playing, then capture thumbnail
     const captureTimeout = setTimeout(async () => {
       try {
-        // First check if stream already has a thumbnail
-        const checkResponse = await fetch(`/api/streams/${streamId}`);
-        if (checkResponse.ok) {
-          const streamData = await checkResponse.json();
-          if (streamData.stream?.thumbnailUrl) {
-            console.log('✅ Stream already has thumbnail, skipping auto-capture');
-            setThumbnailCaptured(true);
-            return;
-          }
-        }
         // Get the HTML video element
         const videoElements = document.querySelectorAll('video');
         let targetVideo: HTMLVideoElement | null = null;
