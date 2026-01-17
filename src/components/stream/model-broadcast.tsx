@@ -16,6 +16,7 @@ import {
   Track
 } from 'livekit-client';
 import { Button } from '@/components/ui/button';
+import { captureVideoThumbnail, uploadThumbnail } from '@/lib/video-thumbnail';
 import {
   Dialog,
   DialogContent,
@@ -303,6 +304,76 @@ function CreatorVideoView({ streamId, streamTitle: _streamTitle, selectedCameraI
     }
     // No cleanup here - tracks cleanup is handled in the unmount-only effect below
   }, [tracks, hasAutoEnabled]);
+
+  // Auto-capture thumbnail from video stream
+  const [thumbnailCaptured, setThumbnailCaptured] = useState(false);
+  
+  useEffect(() => {
+    if (!streamId || !isCameraEnabled || thumbnailCaptured) return;
+
+    // Find the camera video track
+    const cameraTrack = tracks.find(
+      (trackRef) =>
+        trackRef.publication.kind === Track.Kind.Video &&
+        trackRef.publication.source === Track.Source.Camera
+    );
+
+    if (!cameraTrack?.publication.track) return;
+
+    // Wait a bit for the video to start playing, then capture thumbnail
+    const captureTimeout = setTimeout(async () => {
+      try {
+        // First check if stream already has a thumbnail
+        const checkResponse = await fetch(`/api/streams/${streamId}`);
+        if (checkResponse.ok) {
+          const streamData = await checkResponse.json();
+          if (streamData.stream?.thumbnailUrl) {
+            console.log('✅ Stream already has thumbnail, skipping auto-capture');
+            setThumbnailCaptured(true);
+            return;
+          }
+        }
+        // Get the HTML video element
+        const videoElements = document.querySelectorAll('video');
+        let targetVideo: HTMLVideoElement | null = null;
+        
+        // Find the video element that's actually playing (camera feed)
+        for (const video of Array.from(videoElements)) {
+          if (!video.paused && video.readyState >= 2) {
+            targetVideo = video;
+            break;
+          }
+        }
+
+        if (!targetVideo) {
+          console.log('⏸️ No playing video element found for thumbnail capture');
+          return;
+        }
+
+        console.log('📸 Capturing stream thumbnail...');
+        const thumbnailDataUrl = await captureVideoThumbnail(targetVideo, {
+          maxWidth: 1280,
+          maxHeight: 720,
+          quality: 0.9
+        });
+
+        if (thumbnailDataUrl) {
+          console.log('⬆️ Uploading thumbnail...');
+          const success = await uploadThumbnail(thumbnailDataUrl, streamId);
+          if (success) {
+            console.log('✅ Stream thumbnail auto-captured and uploaded');
+            setThumbnailCaptured(true);
+          } else {
+            console.error('❌ Failed to upload thumbnail');
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error capturing stream thumbnail:', error);
+      }
+    }, 3000); // Wait 3 seconds after camera enables
+
+    return () => clearTimeout(captureTimeout);
+  }, [tracks, isCameraEnabled, streamId, thumbnailCaptured]);
 
   // Cleanup on unmount
   useEffect(() => {

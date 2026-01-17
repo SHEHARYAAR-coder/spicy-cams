@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     Clock,
@@ -134,23 +133,25 @@ export function StreamCard({
             <div className="relative w-full aspect-[4/3] bg-gray-700 overflow-hidden">
                 {/* Thumbnail Image */}
                 {stream.thumbnailUrl ? (
-                    <Image
+                    <img
                         src={stream.thumbnailUrl}
                         alt={stream.title}
-                        fill
-                        className="object-cover object-center"
+                        className="w-full h-full object-cover object-center"
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.parentElement?.querySelector('.fallback-thumbnail')?.classList.remove('hidden');
+                        }}
                     />
-                ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center">
-                        <Play className="w-12 h-12 text-gray-500 mb-2" />
-                        <div className="text-xs text-gray-500 text-center px-4">
-                            <div className="font-medium truncate">{stream.title}</div>
-                            {stream.category && (
-                                <div className="text-purple-400 mt-1">{stream.category}</div>
-                            )}
-                        </div>
+                ) : null}
+                <div className={`w-full h-full bg-gradient-to-br from-purple-900/20 to-gray-800 flex flex-col items-center justify-center fallback-thumbnail ${stream.thumbnailUrl ? 'hidden' : ''}`}>
+                    <Play className="w-12 h-12 text-gray-500 mb-2" />
+                    <div className="text-xs text-gray-500 text-center px-4">
+                        <div className="font-medium truncate">{stream.title}</div>
+                        {stream.category && (
+                            <div className="text-purple-400 mt-1">{stream.category}</div>
+                        )}
                     </div>
-                )}
+                </div>
 
                 {/* Status Badge */}
                 {getStatusBadge()}
