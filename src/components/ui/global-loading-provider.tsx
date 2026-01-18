@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageLoader } from "./page-loader";
 
-export function GlobalLoadingProvider({ children }: { children: React.ReactNode }) {
+function LoadingWatcher() {
     const [isLoading, setIsLoading] = useState(true);
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        // Show loader on initial mount
+        // Show loader on route change
         setIsLoading(true);
 
         // Hide loader after minimum display time
@@ -21,9 +21,15 @@ export function GlobalLoadingProvider({ children }: { children: React.ReactNode 
         return () => clearTimeout(timer);
     }, [pathname, searchParams]);
 
+    return isLoading ? <PageLoader /> : null;
+}
+
+export function GlobalLoadingProvider({ children }: { children: React.ReactNode }) {
     return (
         <>
-            {isLoading && <PageLoader />}
+            <Suspense fallback={<PageLoader />}>
+                <LoadingWatcher />
+            </Suspense>
             {children}
         </>
     );
