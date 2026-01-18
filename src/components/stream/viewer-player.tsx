@@ -89,7 +89,7 @@ export function ViewerPlayer({
             serverUrl,
             serverUrlValid: serverUrl?.startsWith('wss://') || serverUrl?.startsWith('ws://'),
         });
-        
+
         if (!serverUrl) {
             console.error('❌ ViewerPlayer: No serverUrl provided!');
         }
@@ -254,11 +254,11 @@ function ViewerVideoView({
         ],
         { onlySubscribed: false },
     );
-    
+
     // Force subscribe to all remote tracks when room connects
     useEffect(() => {
         if (!room) return;
-        
+
         const subscribeToTracks = () => {
             room.remoteParticipants.forEach((participant) => {
                 participant.trackPublications.forEach((publication) => {
@@ -269,19 +269,19 @@ function ViewerVideoView({
                 });
             });
         };
-        
+
         // Subscribe when connected
         subscribeToTracks();
-        
+
         // Also subscribe when new tracks are published
         const handleTrackPublished = () => {
             console.log('📡 New track published, subscribing...');
             setTimeout(subscribeToTracks, 100);
         };
-        
+
         room.on(RoomEvent.TrackPublished, handleTrackPublished);
         room.on(RoomEvent.ParticipantConnected, subscribeToTracks);
-        
+
         return () => {
             room.off(RoomEvent.TrackPublished, handleTrackPublished);
             room.off(RoomEvent.ParticipantConnected, subscribeToTracks);
@@ -292,7 +292,7 @@ function ViewerVideoView({
     const participants = useParticipants();
     const cleanupRef = useRef(false);
     const onStreamEndRef = useRef(onStreamEnd);
-    
+
     // Keep the ref updated
     useEffect(() => {
         onStreamEndRef.current = onStreamEnd;
@@ -756,23 +756,52 @@ function ViewerVideoView({
                 </div>
             )}
 
-            {/* Stream Paused Overlay */}
+            {/* Stream Paused Overlay - Shows last frame with blur */}
             {isPaused && (
-                <div className="absolute inset-0 bg-black/90 backdrop-blur-md z-25 flex items-center justify-center">
-                    <div className="text-center text-white px-4">
-                        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-600 animate-pulse">
-                            <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500" />
-                        </div>
-                        <h3 className="text-2xl sm:text-3xl font-bold mb-3">Stream Paused</h3>
-                        <p className="text-gray-300 text-sm sm:text-lg mb-4 max-w-md mx-auto">
-                            {modelName || 'The broadcaster'} has temporarily paused the stream.
-                        </p>
-                        <p className="text-yellow-500 text-sm sm:text-base font-semibold mb-6">
-                            Please wait, the stream will resume shortly...
-                        </p>
-                        <div className="flex items-center justify-center gap-2 text-gray-400 text-sm">
-                            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-                            <span>You&apos;ll continue watching when the stream resumes</span>
+                <div className="absolute inset-0 z-25">
+                    {/* Blurred background using the video element */}
+                    <div className="absolute inset-0 backdrop-blur-xl bg-black/40" />
+
+                    {/* Content overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center text-white px-4 z-30">
+                            <div className="w-24 h-24 sm:w-32 sm:h-32 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-yellow-600 animate-pulse">
+                                <Clock className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500" />
+                            </div>
+                            <h3 className="text-2xl sm:text-3xl font-bold mb-3">Stream Paused</h3>
+                            <p className="text-gray-200 text-sm sm:text-base mb-6 max-w-md mx-auto">
+                                {modelName || 'The broadcaster'} has temporarily paused the stream.
+                            </p>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col gap-3 items-center justify-center max-w-xs mx-auto">
+                                <Button
+                                    size="lg"
+                                    className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+                                    onClick={() => {
+                                        // TODO: Implement notification feature
+                                        alert('Notification feature coming soon!');
+                                    }}
+                                >
+                                    Notify when live
+                                </Button>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="w-full bg-white/10 hover:bg-white/20 text-white border-white/30 font-semibold backdrop-blur-sm transition-all duration-200 hover:scale-105"
+                                    onClick={() => {
+                                        // TODO: Implement tip feature
+                                        alert('Tip feature coming soon!');
+                                    }}
+                                >
+                                    Send Tip
+                                </Button>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-2 text-gray-300 text-xs sm:text-sm mt-6">
+                                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                                <span>You&apos;ll continue watching when the stream resumes</span>
+                            </div>
                         </div>
                     </div>
                 </div>
