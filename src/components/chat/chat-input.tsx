@@ -1,7 +1,8 @@
-import React, { useState, KeyboardEvent } from "react";
+import React, { useState, KeyboardEvent, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Smile, Loader2, AlertCircle, DollarSign } from "lucide-react";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 
 interface ChatInputProps {
     onSend: (message: string) => Promise<boolean>;
@@ -21,6 +22,26 @@ export function ChatInput({
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
     const [lastSendTime, setLastSendTime] = useState(0);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Close emoji picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        if (showEmojiPicker) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showEmojiPicker]);
 
     const handleSend = async () => {
         if (!message.trim() || sending || disabled) return;
@@ -50,6 +71,14 @@ export function ChatInput({
         }
     };
 
+    const handleEmojiClick = (emojiData: EmojiClickData) => {
+        const emoji = emojiData.emoji;
+        setMessage((prev) => prev + emoji);
+        setShowEmojiPicker(false);
+        // Focus back on input after selecting emoji
+        inputRef.current?.focus();
+    };
+
     const isApproachingLimit = remaining !== null && remaining < 3;
     const characterCount = message.length;
     const isOverLimit = characterCount > maxLength;
@@ -69,36 +98,42 @@ export function ChatInput({
             {/* Input area */}
             <div className="flex-1 px-3 sm:px-4 pb-3">
                 <div className="flex items-center gap-2 h-full">
-                    {/* Tip Menu Button */}
-                    {onOpenTipMenu && (
+
+                    {/* Emoji Button */}
+                    <div className="relative">
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 flex-shrink-0 text-gray-400 hover:text-green-400 hover:bg-gray-700/50"
+                            className={`hidden sm:flex h-9 w-9 flex-shrink-0 hover:bg-gray-700/50 ${showEmojiPicker ? "text-purple-400 bg-gray-700/50" : "text-gray-400 hover:text-purple-400"
+                                }`}
                             disabled={disabled}
-                            onClick={onOpenTipMenu}
-                            title="Send Tip"
+                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                            title="Emoji picker"
                         >
-                            <DollarSign className="h-5 w-5" />
+                            <Smile className="h-5 w-5" />
                         </Button>
-                    )}
 
-                    {/* Emoji Button */}
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="hidden sm:flex h-9 w-9 flex-shrink-0 text-gray-400 hover:text-purple-400 hover:bg-gray-700/50"
-                        disabled={disabled}
-                        title="Emoji picker (coming soon)"
-                    >
-                        <Smile className="h-5 w-5" />
-                    </Button>
+                        {/* Emoji Picker */}
+                        {showEmojiPicker && (
+                            <div
+                                ref={emojiPickerRef}
+                                className="absolute bottom-full left-0 mb-2 z-50"
+                            >
+                                <EmojiPicker
+                                    onEmojiClick={handleEmojiClick}
+                                    theme={Theme.DARK}
+                                    width={320}
+                                    height={400}
+                                />
+                            </div>
+                        )}
+                    </div>
 
                     {/* Message Input */}
                     <div className="flex-1 relative">
                         <Input
+                            ref={inputRef}
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
