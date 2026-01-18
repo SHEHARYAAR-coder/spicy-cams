@@ -22,11 +22,11 @@ export async function GET(
       );
     }
 
-    // Find the active (LIVE) stream for this user
+    // Find the active (LIVE or PAUSED) stream for this user
     const stream = await prisma.stream.findFirst({
       where: {
         modelId: user.id,
-        status: 'LIVE'
+        status: { in: ['LIVE', 'PAUSED'] }
       },
       include: {
         model: {

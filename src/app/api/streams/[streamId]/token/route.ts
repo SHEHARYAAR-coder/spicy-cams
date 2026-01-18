@@ -49,8 +49,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check if stream is live
-    if (stream.status !== "LIVE" && stream.status !== "SCHEDULED") {
+    // Check if stream is live, scheduled, or paused
+    if (stream.status !== "LIVE" && stream.status !== "SCHEDULED" && stream.status !== "PAUSED") {
       return NextResponse.json(
         {
           error: "Stream is not available for viewing",
