@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import { StreamProvider } from "@/contexts/StreamContext";
 import { CategoryProvider } from "@/contexts/CategoryContext";
 import { BalanceNotificationProvider } from "@/components/notifications/balance-notification-provider";
+import { GlobalLoadingProvider } from "@/components/ui/global-loading-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -29,16 +30,18 @@ export default function RootLayout({
         <AuthProvider>
           <StreamProvider>
             <CategoryProvider>
-              <Suspense fallback={null}>
-                <AgeVerificationDialog />
-                <Header />
-              </Suspense>
-              {children}
-              <Suspense fallback={null}>
-                <Footer />
-              </Suspense>
-              <BalanceNotificationProvider />
-              <Toaster position="top-right" richColors />
+              <GlobalLoadingProvider>
+                <Suspense fallback={null}>
+                  <AgeVerificationDialog />
+                  <Header />
+                </Suspense>
+                {children}
+                <Suspense fallback={null}>
+                  <Footer />
+                </Suspense>
+                <BalanceNotificationProvider />
+                <Toaster position="top-right" richColors />
+              </GlobalLoadingProvider>
             </CategoryProvider>
           </StreamProvider>
         </AuthProvider>

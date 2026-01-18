@@ -204,6 +204,20 @@
   animation: shimmer 3s infinite;
 }
 
+/* Reverse spin animation for loader */
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 1s linear infinite;
+}
+
 .delay-75 {
   animation-delay: 75ms;
 }
